@@ -455,9 +455,6 @@ export default function Home() {
               <span className="font-semibold text-slate-900 dark:text-zinc-100 truncate">
                 {selectedArea ? `${selectedArea} • ${t('home.city', 'Muzaffarnagar')}` : t('home.areaDefault', 'Muzaffarnagar (251001 & 251002)')}
               </span>
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-700/50 shrink-0">
-                ⚡ 30-45 mins
-              </span>
             </div>
 
             {/* Independent Filter Panel Toggle Button */}
@@ -1276,7 +1273,7 @@ export default function Home() {
 
             {/* Grid of 6 Clean Cards with Motion Micro-Interactions */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              {/* Card 1: InstaHelp (30-min Emergency Kaamgar) */}
+              {/* Card 1: InstaHelp (Emergency Kaamgar) */}
               <motion.div
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
@@ -1288,10 +1285,10 @@ export default function Home() {
                   <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                  {t('home.instaHelp', 'InstaHelp (30 Mins)')}
+                  {t('home.instaHelp', 'InstaHelp (Emergency)')}
                 </h3>
                 <span className="mt-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/25 px-2 py-0.5 rounded-full">
-                  ⚡ {t('home.fastestArrival', 'Fastest Arrival')}
+                  {t('home.fastestArrival', 'Verified Technicians')}
                 </span>
               </motion.div>
 
@@ -1367,7 +1364,7 @@ export default function Home() {
                   {t('categories.ac_repair', 'AC Repair & Service')}
                 </h3>
                 <span className="mt-1 text-[10px] font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200/60 dark:border-cyan-500/25 px-2 py-0.5 rounded-full">
-                  ⚡ {t('home.minutes', '44 mins')}
+                  {t('home.minutes', 'Repair & Service')}
                 </span>
               </motion.div>
 

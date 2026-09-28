@@ -23,6 +23,10 @@ import {
   Sparkles,
   Search,
   ExternalLink,
+  Printer,
+  Banknote,
+  Info,
+  UserCheck,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useAiAssistant } from '@/context/AiAssistantContext'
@@ -32,6 +36,13 @@ import { buildCustomerToWorkerWhatsAppMessage } from '@/utils/contact'
 import { fetchCustomerReviewedBookingIds, submitBookingReview } from '@/services/reviews'
 import { BookingChangeRequest, BookingPaymentSummary, confirmCashPaymentByCustomer, decideBookingChangeRequest, fetchBookingChangeRequests, fetchBookingPaymentSummaries, selectBookingPaymentMethod } from '@/services/changeRequests'
 import { acceptBookingQuote, BookingQuote, BookingQuoteRequest, cancelBookingQuoteRequest, fetchCustomerQuoteData } from '@/services/quotes'
+
+export interface CustomerBookingReview {
+  id: string
+  rating: number
+  comment: string
+  created_at: string
+}
 
 interface BookingRow {
   id: JobId
@@ -43,6 +54,7 @@ interface BookingRow {
   notes: string | null
   worker?: { name: string; avatar: string | null; phone?: string | null }
   hasReview?: boolean
+  review?: CustomerBookingReview
   changeRequests?: BookingChangeRequest[]
   paymentSummary?: BookingPaymentSummary
 }
@@ -125,6 +137,12 @@ export default function Bookings() {
   const [actionSuccess, setActionSuccess] = useState('')
   const [paymentActionBookingId, setPaymentActionBookingId] = useState('')
   const [paymentError, setPaymentError] = useState('')
+  const [paymentModalBooking, setPaymentModalBooking] = useState<BookingRow | null>(null)
+  const [receiptModalBooking, setReceiptModalBooking] = useState<BookingRow | null>(null)
+  const [detailsModalBooking, setDetailsModalBooking] = useState<BookingRow | null>(null)
+  const [bookAgainModalBooking, setBookAgainModalBooking] = useState<BookingRow | null>(null)
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
+  const [paymentModalError, setPaymentModalError] = useState('')
   const [decidingRequestId, setDecidingRequestId] = useState('')
   const [changeRequestError, setChangeRequestError] = useState('')
   const [quoteRequests, setQuoteRequests] = useState<BookingQuoteRequest[]>([])
@@ -245,7 +263,24 @@ export default function Bookings() {
         }
       }
 
-      const reviewedIds = await fetchCustomerReviewedBookingIds(customerId)
+      const [reviewedIds, reviewsRes] = await Promise.all([
+        fetchCustomerReviewedBookingIds(customerId),
+        (supabase.from('reviews') as any)
+          .select('id, booking_id, rating, comment, created_at')
+          .eq('customer_id', customerId),
+      ])
+      const reviewsByBooking = new Map<string, CustomerBookingReview>(
+        ((reviewsRes.data ?? []) as any[]).map(r => [
+          r.booking_id,
+          {
+            id: r.id,
+            rating: Number(r.rating),
+            comment: r.comment || '',
+            created_at: r.created_at,
+          },
+        ])
+      )
+
       const changeRequests = await fetchBookingChangeRequests(bookings.map(booking => booking.id))
       let paymentSummaries: BookingPaymentSummary[] = []
       try {
@@ -265,7 +300,8 @@ export default function Bookings() {
         bookings.map(booking => ({
           ...booking,
           worker: workerById.get(booking.worker_id),
-          hasReview: reviewedIds.has(booking.id),
+          hasReview: reviewedIds.has(booking.id) || reviewsByBooking.has(booking.id),
+          review: reviewsByBooking.get(booking.id),
           changeRequests: requestsByBooking.get(booking.id) ?? [],
           paymentSummary: summaryByBooking.get(booking.id),
         }))
@@ -309,6 +345,72 @@ export default function Bookings() {
     }
   }
 
+  const handleOpenPaymentModal = (booking: BookingRow) => {
+    setPaymentModalBooking(booking)
+    setPaymentModalError('')
+  }
+
+  const handleOpenReceiptModal = (booking: BookingRow) => {
+    setReceiptModalBooking(booking)
+  }
+
+  const handleOpenDetailsModal = (booking: BookingRow) => {
+    setDetailsModalBooking(booking)
+  }
+
+  const handleOpenBookAgainModal = (booking: BookingRow) => {
+    setBookAgainModalBooking(booking)
+  }
+
+  const handleRehireWorker = (booking: BookingRow) => {
+    const pincodeMatch = (booking.address || '').match(/\b251\d{3}\b/)
+    const pincode = pincodeMatch ? pincodeMatch[0] : ''
+    navigate(`/booking/${booking.worker_id}`, {
+      state: {
+        serviceId: booking.category_id,
+        bookingDraft: {
+          address: booking.address,
+          pincode,
+          notes: booking.notes || '',
+        },
+      },
+    })
+    setBookAgainModalBooking(null)
+  }
+
+  const handleBrowseAllWorkers = (booking: BookingRow) => {
+    navigate(`/search?category=${booking.category_id}`)
+    setBookAgainModalBooking(null)
+  }
+
+  const handleConfirmCustomerCashPayment = async (booking: BookingRow) => {
+    if (isSubmittingPayment) return
+    setIsSubmittingPayment(true)
+    setPaymentModalError('')
+    try {
+      if (booking.paymentSummary?.payment_method !== 'cash') {
+        await selectBookingPaymentMethod(booking.id, 'cash')
+      }
+      await confirmCashPaymentByCustomer(booking.id)
+      await loadBookings()
+      setPaymentModalBooking(null)
+      setActionSuccess(t('bookings.cashPaymentSubmittedMsg', 'Cash payment submitted. Waiting for worker confirmation.'))
+      setTimeout(() => setActionSuccess(''), 5000)
+    } catch (error) {
+      await loadBookings()
+      const msg = error instanceof Error ? error.message : ''
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('paid')) {
+        setPaymentModalBooking(null)
+        setActionSuccess(t('bookings.paymentSuccessful', 'Payment Successful'))
+        setTimeout(() => setActionSuccess(''), 4000)
+      } else {
+        setPaymentModalError(t('bookings.paymentActionFailed', 'Unable to update the payment. Please try again.'))
+      }
+    } finally {
+      setIsSubmittingPayment(false)
+    }
+  }
+
   const handleCashPaymentMethod = async (booking: BookingRow) => {
     setPaymentActionBookingId(booking.id)
     setPaymentError('')
@@ -326,10 +428,14 @@ export default function Bookings() {
     setPaymentActionBookingId(booking.id)
     setPaymentError('')
     try {
+      if (booking.paymentSummary?.payment_method !== 'cash') {
+        await selectBookingPaymentMethod(booking.id, 'cash')
+      }
       await confirmCashPaymentByCustomer(booking.id)
-      setActionSuccess(t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation'))
+      setActionSuccess(t('bookings.cashPaymentSubmittedMsg', 'Cash payment submitted. Waiting for worker confirmation.'))
       await loadBookings()
     } catch (error) {
+      await loadBookings()
       setPaymentError(error instanceof Error ? error.message : t('bookings.paymentActionFailed', 'Unable to update the payment. Please try again.'))
     } finally {
       setPaymentActionBookingId('')
@@ -365,7 +471,7 @@ export default function Bookings() {
     void loadBookings()
   }, [loadBookings])
 
-  // Real-time subscription for customer's bookings
+  // Real-time subscription for customer's bookings and quote requests
   useEffect(() => {
     const customerId = user?.id
     if (!customerId) return
@@ -379,6 +485,18 @@ export default function Bookings() {
           event: '*',
           schema: 'public',
           table: 'bookings',
+          filter: `customer_id=eq.${customerId}`,
+        },
+        () => {
+          void loadBookings()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'booking_quote_requests',
           filter: `customer_id=eq.${customerId}`,
         },
         () => {
@@ -425,9 +543,19 @@ export default function Bookings() {
         comment: reviewComment,
       })
 
+      const newReview: CustomerBookingReview = {
+        id: '',
+        rating: reviewRating,
+        comment: reviewComment,
+        created_at: new Date().toISOString(),
+      }
+
       setAllBookings(current =>
-        current.map(b => (b.id === selectedBooking.id ? { ...b, hasReview: true } : b))
+        current.map(b => (b.id === selectedBooking.id ? { ...b, hasReview: true, review: newReview } : b))
       )
+      if (detailsModalBooking?.id === selectedBooking.id) {
+        setDetailsModalBooking(prev => prev ? { ...prev, hasReview: true, review: newReview } : null)
+      }
 
       setShowReviewModal(false)
       setSelectedBooking(null)
@@ -695,56 +823,87 @@ export default function Bookings() {
             {!booking.paymentSummary.is_final && booking.paymentSummary.pending_additional_count === 0 && booking.status !== 'completed' && booking.status !== 'payment_pending' && (
               <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400">{t('bookings.finalAmountAfterCompletion', 'The final amount will be shown after the service is completed.')}</p>
             )}
-            {booking.status === 'payment_pending' && booking.paymentSummary.is_frozen && booking.paymentSummary.payment_status !== 'paid' && (
-              <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{t('bookings.paymentRequired', 'Payment Required')}</p>
-                <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.amountToPay', 'Amount to Pay')}: ₹{booking.paymentSummary.final_payable_amount.toFixed(2)}</p>
-                {!booking.paymentSummary.payment_method && (
-                  <>
-                    <p className="mt-3 text-xs font-semibold text-slate-700 dark:text-zinc-300">{t('bookings.paymentMethod', 'Payment Method')}</p>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="mt-2"
-                      disabled={Boolean(paymentActionBookingId)}
-                      onClick={() => void handleCashPaymentMethod(booking)}
-                    >
-                      {t('bookings.paymentMethodCash', 'Cash')}
-                    </Button>
-                  </>
-                )}
-                {booking.paymentSummary.payment_method === 'cash' && booking.paymentSummary.payment_status === 'unpaid' && (
-                  <>
-                    <p className="mt-3 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.cashPaymentInstructions', 'Pay this amount directly to the worker.')}</p>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="mt-3"
-                      loading={paymentActionBookingId === booking.id}
-                      disabled={Boolean(paymentActionBookingId)}
-                      onClick={() => void handleCashConfirmation(booking)}
-                    >
-                      {t('bookings.iHavePaidCash', 'I Have Paid Cash')}
-                    </Button>
-                  </>
-                )}
-                {booking.paymentSummary.payment_method === 'cash' && booking.paymentSummary.payment_status === 'pending' && (
-                  <div className="mt-3">
-                    <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">{t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation')}</p>
-                    <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.workerConfirmationRequired', 'The worker needs to confirm that the cash was received.')}</p>
+            {/* State A: Service Finished, Payment Required */}
+            {booking.status === 'payment_pending' && booking.paymentSummary.is_frozen && booking.paymentSummary.payment_status !== 'paid' && booking.paymentSummary.payment_status !== 'pending' && (
+              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{t('bookings.serviceCompleted', 'Service Completed')}</p>
                   </div>
-                )}
+                  <Badge variant="warning" size="sm">
+                    {t('bookings.paymentRequired', 'Payment Required')}
+                  </Badge>
+                </div>
+                <div className="mt-2 flex items-baseline justify-between">
+                  <span className="text-xs text-slate-600 dark:text-zinc-400">{t('bookings.amountToPay', 'Amount to Pay')}:</span>
+                  <span className="text-base font-bold text-slate-900 dark:text-white">₹{booking.paymentSummary.final_payable_amount.toFixed(2)}</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.payWorkerInCash', 'Pay the worker the amount shown above in cash.')}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center gap-1.5"
+                    onClick={() => handleOpenPaymentModal(booking)}
+                  >
+                    <Banknote className="w-4 h-4" />
+                    {t('bookings.payWithCash', 'Pay with Cash')}
+                  </Button>
+                </div>
               </div>
             )}
+
+            {/* State B: Cash Confirmation Submitted, Waiting for Worker */}
+            {booking.status === 'payment_pending' && booking.paymentSummary.payment_status === 'pending' && (
+              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-500 animate-spin" />
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">{t('bookings.cashPaymentSubmitted', 'Cash Payment Submitted')}</p>
+                  </div>
+                  <Badge variant="warning" size="sm">
+                    {t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation')}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-xs text-slate-700 dark:text-zinc-300">
+                  {t('bookings.waitingForWorkerConfirmationDesc', 'Waiting for worker confirmation. Your receipt will appear once the payment is confirmed.')}
+                </p>
+                <div className="mt-2 text-xs font-semibold text-slate-600 dark:text-zinc-400 flex items-center justify-between pt-2 border-t border-amber-500/20">
+                  <span>{t('bookings.amountToPay', 'Amount to Pay')}</span>
+                  <span className="text-slate-900 dark:text-white font-bold">₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}</span>
+                </div>
+              </div>
+            )}
+
+            {/* State C: Paid & Authoritative Receipt Exists */}
             {booking.status === 'completed' && booking.paymentSummary.payment_status === 'paid' && booking.paymentSummary.receipt_number && (
-              <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 text-sm">
-                <p className="font-bold text-emerald-700 dark:text-emerald-300">{t('bookings.paymentPaid', 'Payment Paid')}</p>
-                <p className="mt-1">₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}</p>
-                <p className="mt-2 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.serviceCategory', 'Service')}: {getCategoryName(getCategoryById(booking.category_id), i18n.language === 'hi' ? 'hi' : 'en')}</p>
-                <p className="text-xs text-slate-600 dark:text-zinc-400">{t('bookings.worker', 'Worker')}: {booking.worker?.name || '—'}</p>
-                <p className="text-xs text-slate-600 dark:text-zinc-400">{t('bookings.paidAt', 'Paid at')}: {booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at ? new Date(booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN') : '—'}</p>
-                <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{t('bookings.receiptNumber', 'Receipt')}: {booking.paymentSummary.receipt_number}</p>
-                <p className="text-xs text-slate-600 dark:text-zinc-400">{t('bookings.jobId', 'Job ID')}: {formatJobReference(booking.id)}</p>
+              <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="font-bold text-emerald-800 dark:text-emerald-300">{t('bookings.paymentSuccessful', 'Payment Successful')}</span>
+                  </div>
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                    {booking.paymentSummary.receipt_number}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-baseline justify-between">
+                  <span className="text-xs text-slate-600 dark:text-zinc-400">{t('bookings.totalPaid', 'Total Paid')}:</span>
+                  <span className="text-base font-bold text-emerald-700 dark:text-emerald-300">₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
+                  {t('bookings.paidAt', 'Paid at')}: {booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at ? new Date(booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 text-xs font-bold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20"
+                  onClick={() => handleOpenReceiptModal(booking)}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  {t('bookings.viewReceipt', 'View Receipt')}
+                </Button>
               </div>
             )}
             {paymentError && paymentActionBookingId === '' && booking.status === 'payment_pending' && (
@@ -794,24 +953,59 @@ export default function Bookings() {
               </Button>
             )}
 
+            {booking.status === 'payment_pending' && booking.paymentSummary?.payment_status !== 'pending' && booking.paymentSummary?.payment_status !== 'paid' && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleOpenPaymentModal(booking)}
+                className="text-xs font-bold flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950"
+              >
+                <Banknote className="w-3.5 h-3.5" />
+                {t('bookings.payWithCash', 'Pay with Cash')}
+              </Button>
+            )}
+
+            {booking.status === 'completed' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenDetailsModal(booking)}
+                className="text-xs font-semibold flex items-center gap-1.5 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800"
+              >
+                <Info className="w-3.5 h-3.5 text-amber-500" />
+                {t('bookings.viewDetails', 'View Details')}
+              </Button>
+            )}
+
+            {booking.status === 'completed' && booking.paymentSummary?.receipt_number && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenReceiptModal(booking)}
+                className="text-xs font-semibold flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                {t('bookings.viewReceipt', 'View Receipt')}
+              </Button>
+            )}
+
             {booking.status === 'completed' && booking.hasReview && (
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                {t('bookings.reviewSubmitted', 'Review Submitted')}
+                {booking.review ? `★ ${booking.review.rating}/5 ${t('bookings.reviewed', 'Reviewed')}` : t('bookings.reviewSubmitted', 'Review Submitted')}
               </span>
             )}
 
             {isPast && (
-              <Link to={`/search?category=${booking.category_id}`}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs font-medium flex items-center gap-1 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  {t('bookings.bookAgain', 'Book Again')}
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenBookAgainModal(booking)}
+                className="text-xs font-medium flex items-center gap-1 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800"
+              >
+                <RefreshCw className="w-3 h-3 text-amber-500" />
+                {t('bookings.bookAgain', 'Book Again')}
+              </Button>
             )}
           </div>
 
@@ -988,7 +1182,7 @@ export default function Bookings() {
                       </div>
                   )}
                   {(request.status === 'cancelled' || request.status === 'expired' || request.status === 'rejected') && service && (
-                    <Link to="/search" state={{ quoteServiceRequestId: request.service_request_id }} className="inline-block mt-3">
+                    <Link to={`/search?category=${encodeURIComponent(service.category_id)}`} className="inline-block mt-3">
                       <Button variant="secondary" size="sm">Choose Another Provider</Button>
                     </Link>
                   )}
@@ -1297,6 +1491,637 @@ export default function Bookings() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Customer Payment Modal */}
+      <Modal
+        isOpen={Boolean(paymentModalBooking)}
+        onClose={() => {
+          if (!isSubmittingPayment) {
+            setPaymentModalBooking(null)
+            setPaymentModalError('')
+          }
+        }}
+        title={t('bookings.serviceCompleted', 'Service Completed')}
+        description={paymentModalBooking ? `Job ${formatJobReference(paymentModalBooking.id)}` : undefined}
+        size="md"
+      >
+        {paymentModalBooking && (() => {
+          const { serviceName } = resolveServiceAndCategory(paymentModalBooking.category_id)
+          const summary = paymentModalBooking.paymentSummary
+          const quoteAmount = summary?.initial_quote_amount ?? 0
+          const additionalAmount = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (quoteAmount + additionalAmount)
+
+          return (
+            <div className="space-y-4">
+              {paymentModalError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-500 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{paymentModalError}</span>
+                </div>
+              )}
+
+              {/* Service & Worker Summary */}
+              <div className="p-3.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 rounded-2xl flex items-center gap-3">
+                <Avatar
+                  name={paymentModalBooking.worker?.name || t('bookings.artisan', 'Artisan')}
+                  size="md"
+                  src={paymentModalBooking.worker?.avatar || undefined}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                    {serviceName}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 truncate">
+                    {paymentModalBooking.worker?.name || t('bookings.artisan', 'Artisan')}
+                  </p>
+                </div>
+                <Badge variant="warning" size="sm">
+                  {t('bookings.paymentRequired', 'Payment Required')}
+                </Badge>
+              </div>
+
+              {/* Payment Summary Breakdown */}
+              <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3">
+                  {t('bookings.paymentSummary', 'Payment Summary')}
+                </p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+                    <span>{t('bookings.workerQuote', 'Worker Quote')}</span>
+                    <span className="font-semibold text-slate-900 dark:text-zinc-200">₹{quoteAmount.toFixed(2)}</span>
+                  </div>
+                  {additionalAmount > 0 && (
+                    <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span className="font-semibold text-slate-900 dark:text-zinc-200">+₹{additionalAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800 pt-2.5 text-sm font-bold text-slate-900 dark:text-white">
+                    <span>{t('bookings.finalPayableAmount', 'Total Amount')}</span>
+                    <span className="text-base text-amber-600 dark:text-amber-400">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Selection - Preselected Cash */}
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 text-xs font-black">
+                      ✓
+                    </div>
+                    <span className="font-bold text-sm text-slate-900 dark:text-white">
+                      {t('bookings.paymentMethodCash', 'Cash')}
+                    </span>
+                  </div>
+                  <Badge variant="primary" size="sm">
+                    {t('common.required', 'Default')}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-xs text-slate-600 dark:text-zinc-400">
+                  {t('bookings.payWorkerInCash', 'Pay the worker the amount shown above in cash.')}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-zinc-500 italic">
+                  {t('bookings.onlinePaymentComingSoon', 'Online payment (UPI / Cards) coming soon')}
+                </p>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex gap-2.5 pt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={isSubmittingPayment}
+                  onClick={() => {
+                    setPaymentModalBooking(null)
+                    setPaymentModalError('')
+                  }}
+                  className="flex-1 text-xs"
+                >
+                  {t('common.close', 'Close')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  disabled={isSubmittingPayment}
+                  loading={isSubmittingPayment}
+                  onClick={() => void handleConfirmCustomerCashPayment(paymentModalBooking)}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  <Banknote className="w-3.5 h-3.5 mr-1" />
+                  {t('bookings.ivePaidCash', "I've Paid Cash")}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Official Receipt Modal */}
+      <Modal
+        isOpen={Boolean(receiptModalBooking)}
+        onClose={() => setReceiptModalBooking(null)}
+        title={t('bookings.paymentReceipt', 'Payment Receipt')}
+        size="md"
+      >
+        {receiptModalBooking && (() => {
+          const { serviceName } = resolveServiceAndCategory(receiptModalBooking.category_id)
+          const summary = receiptModalBooking.paymentSummary
+          const jobReference = formatJobReference(receiptModalBooking.id)
+          const receiptNumber = summary?.receipt_number || '—'
+          const paidDate = summary?.receipt_paid_at || summary?.paid_at
+            ? new Date(summary.receipt_paid_at || summary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })
+            : formatDate(receiptModalBooking.scheduled_at)
+          const quoteAmount = summary?.initial_quote_amount ?? 0
+          const additionalAmount = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (quoteAmount + additionalAmount)
+
+          return (
+            <div className="space-y-4">
+              <style>{`
+                @media print {
+                  body * {
+                    visibility: hidden !important;
+                  }
+                  #printable-receipt, #printable-receipt * {
+                    visibility: visible !important;
+                  }
+                  #printable-receipt {
+                    position: fixed !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 24px !important;
+                    background: white !important;
+                    color: black !important;
+                    border: 1px solid #e2e8f0 !important;
+                    box-shadow: none !important;
+                    z-index: 99999 !important;
+                  }
+                  .no-print {
+                    display: none !important;
+                  }
+                }
+              `}</style>
+
+              {/* Printable Receipt Paper Container */}
+              <div
+                id="printable-receipt"
+                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4 text-slate-900 dark:text-white"
+              >
+                {/* Header Branding */}
+                <div className="text-center pb-4 border-b border-slate-200 dark:border-zinc-800">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>JUGNU</span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                    Ghar Ke Har Kaam Ka Jugnu
+                  </p>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mt-1">
+                    {t('bookings.officialReceipt', 'Official Cash Payment Receipt')}
+                  </h3>
+                </div>
+
+                {/* Receipt Metadata Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs py-2 border-b border-slate-100 dark:border-zinc-800">
+                  <div>
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.receiptNumber', 'Receipt')}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{receiptNumber}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.jobId', 'Job')}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{jobReference}</span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.paidAt', 'Paid at')}</span>
+                    <span className="font-semibold text-slate-700 dark:text-zinc-300">{paidDate}</span>
+                  </div>
+                  <div className="text-right mt-1">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.paymentMethod', 'Payment Method')}</span>
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      {t('bookings.paymentMethodCash', 'Cash')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Service & Worker Details */}
+                <div className="space-y-1.5 text-xs py-2 border-b border-slate-100 dark:border-zinc-800">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('bookings.serviceCategory', 'Service')}:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{serviceName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('bookings.worker', 'Worker')}:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{receiptModalBooking.worker?.name || 'Verified Artisan'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('common.address', 'Address')}:</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300 text-right max-w-[200px] truncate">{receiptModalBooking.address}</span>
+                  </div>
+                </div>
+
+                {/* Amount Breakdown */}
+                <div className="space-y-1.5 text-xs py-2">
+                  <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+                    <span>{t('bookings.workerQuote', 'Worker Quote')}</span>
+                    <span>₹{quoteAmount.toFixed(2)}</span>
+                  </div>
+                  {additionalAmount > 0 && (
+                    <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span>+₹{additionalAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-zinc-800 font-bold">
+                    <span className="text-slate-900 dark:text-white text-sm">{t('bookings.totalPaid', 'Total Paid')}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 text-base">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Verified Footer Notice */}
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>{t('bookings.receiptFooterNote', 'This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by Jugnu.')}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons (Excluded from Print) */}
+              <div className="flex gap-2.5 pt-2 no-print">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  {t('bookings.printReceipt', 'Print / Save Receipt')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setReceiptModalBooking(null)}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  {t('common.close', 'Close')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Completed Job Details Modal */}
+      <Modal
+        isOpen={Boolean(detailsModalBooking)}
+        onClose={() => setDetailsModalBooking(null)}
+        title={t('bookings.completedJobDetails', 'Completed Service Details')}
+        size="md"
+      >
+        {detailsModalBooking && (() => {
+          const { serviceName, categoryName } = resolveServiceAndCategory(detailsModalBooking.category_id)
+          const summary = detailsModalBooking.paymentSummary
+          const jobReference = formatJobReference(detailsModalBooking.id)
+          const quoteAmount = summary?.initial_quote_amount ?? 0
+          const additionalAmount = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (quoteAmount + additionalAmount)
+          const paidDate = summary?.receipt_paid_at || summary?.paid_at
+            ? new Date(summary.receipt_paid_at || summary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })
+            : formatDate(detailsModalBooking.scheduled_at)
+          const review = detailsModalBooking.review
+
+          return (
+            <div className="space-y-4 text-xs">
+              {/* Job Identity & Status */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60">
+                <div>
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-400 block">{t('bookings.jobId', 'Job ID')}</span>
+                  <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">{jobReference}</span>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-400 mt-0.5">{serviceName} {categoryName && `• ${categoryName}`}</p>
+                </div>
+                <div className="text-right">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {t('booking.status.completed', 'Completed')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Worker Information & Recognition Badge */}
+              <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 block mb-2">{t('bookings.worker', 'Artisan')}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={detailsModalBooking.worker?.name || t('bookings.artisan', 'Artisan')}
+                      size="md"
+                      src={detailsModalBooking.worker?.avatar || undefined}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          {detailsModalBooking.worker?.name || t('bookings.artisan', 'Artisan')}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                          <UserCheck className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                          {t('bookings.previouslyHired', 'Previously Hired')}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                        {t('bookings.verifiedArtisan', 'Verified Jugnu Artisan')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenContactModal(detailsModalBooking)}
+                      className="text-xs p-1.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                      title={t('bookings.callWorker', 'Call')}
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenContactModal(detailsModalBooking)}
+                      className="text-xs p-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                      title={t('bookings.chatWorker', 'WhatsApp')}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Schedule & Location */}
+              <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 block">{t('bookings.serviceLocation', 'Schedule & Location')}</span>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>{formatDate(detailsModalBooking.scheduled_at)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>{formatTime(detailsModalBooking.scheduled_at)}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 pt-1">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-slate-700 dark:text-zinc-300 font-medium">{detailsModalBooking.address}</span>
+                </div>
+                {detailsModalBooking.notes && (
+                  <div className="flex items-start gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800 text-[11px] text-slate-600 dark:text-zinc-400">
+                    <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-semibold text-slate-700 dark:text-zinc-300">{t('bookings.serviceNotes', 'Customer Request Notes')}: </span>
+                      {detailsModalBooking.notes}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Authoritative Financial Breakdown */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    {t('bookings.paymentSummary', 'Payment Summary')}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                    {t('bookings.paymentMethodCash', 'Cash')}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 pt-1 text-slate-600 dark:text-zinc-400">
+                  <div className="flex justify-between">
+                    <span>{t('bookings.initialQuote', 'Initial Worker Quote')}</span>
+                    <span>₹{quoteAmount.toFixed(2)}</span>
+                  </div>
+                  {additionalAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span>+₹{additionalAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-1.5 border-t border-slate-200 dark:border-zinc-700 font-bold">
+                    <span className="text-slate-900 dark:text-white text-xs">{t('bookings.totalPaid', 'Final Total Paid')}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 text-sm">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-500 dark:text-zinc-400 pt-0.5">
+                    <span>{t('bookings.paidAt', 'Paid at')}</span>
+                    <span>{paidDate}</span>
+                  </div>
+                </div>
+
+                {summary?.receipt_number && (
+                  <div className="pt-2 border-t border-slate-200 dark:border-zinc-700 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const target = detailsModalBooking
+                        setDetailsModalBooking(null)
+                        handleOpenReceiptModal(target)
+                      }}
+                      className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 flex items-center gap-1.5"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      {t('bookings.viewReceipt', 'View Receipt')} ({summary.receipt_number})
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Review History / Rating */}
+              <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 block mb-1.5">
+                  {t('bookings.yourReview', 'Your Rating & Feedback')}
+                </span>
+                {detailsModalBooking.hasReview && review ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center text-amber-500">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star
+                            key={idx}
+                            className={`w-3.5 h-3.5 ${idx < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-zinc-700'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">{review.rating} / 5</span>
+                      {review.created_at && (
+                        <span className="text-[11px] text-slate-400 dark:text-zinc-500">
+                          • {new Date(review.created_at).toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-700 dark:text-zinc-300 mt-1 italic">
+                      "{review.comment || t('bookings.noComment', 'Rated without comment')}"
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {t('bookings.notReviewedYet', 'Not reviewed yet')}
+                    </p>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        const target = detailsModalBooking
+                        setDetailsModalBooking(null)
+                        setSelectedBooking(target)
+                        setShowReviewModal(true)
+                      }}
+                      className="text-xs font-bold flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950"
+                    >
+                      <Star className="w-3.5 h-3.5" />
+                      {t('bookings.rateWorker', 'Rate Artisan')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2.5 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDetailsModalBooking(null)}
+                  className="flex-1 text-xs"
+                >
+                  {t('common.close', 'Close')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    const target = detailsModalBooking
+                    setDetailsModalBooking(null)
+                    handleOpenBookAgainModal(target)
+                  }}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  {t('bookings.bookAgain', 'Book Again')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Book Again Selection Modal */}
+      <Modal
+        isOpen={Boolean(bookAgainModalBooking)}
+        onClose={() => setBookAgainModalBooking(null)}
+        title={t('bookings.bookAgainTitle', 'Book This Service Again')}
+        size="md"
+      >
+        {bookAgainModalBooking && (() => {
+          const { serviceName, categoryName } = resolveServiceAndCategory(bookAgainModalBooking.category_id)
+          const jobReference = formatJobReference(bookAgainModalBooking.id)
+          const workerName = bookAgainModalBooking.worker?.name || t('bookings.artisan', 'Artisan')
+
+          return (
+            <div className="space-y-4 text-xs">
+              {/* Previous Service Context Card */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">{t('bookings.serviceCategory', 'Service')}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{serviceName} {categoryName && `(${categoryName})`}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">{t('bookings.previousArtisan', 'Previous Artisan')}</span>
+                  <span className="font-semibold text-slate-800 dark:text-zinc-200">{workerName}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">{t('bookings.jobId', 'Previous Job ID')}</span>
+                  <span className="font-mono text-slate-600 dark:text-zinc-400">{jobReference}</span>
+                </div>
+              </div>
+
+              <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                {t(
+                  'bookings.bookAgainPrompt',
+                  'How would you like to book this service? You can request a quote from the same artisan or browse other verified artisans in Muzaffarnagar.'
+                )}
+              </p>
+
+              {/* Selection Options */}
+              <div className="space-y-3 pt-1">
+                {/* Option A: Re-hire Previous Artisan */}
+                <button
+                  type="button"
+                  onClick={() => handleRehireWorker(bookAgainModalBooking)}
+                  className="w-full text-left p-3.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/15 dark:bg-amber-500/5 dark:hover:bg-amber-500/10 transition-colors flex items-start gap-3 group cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 mt-0.5">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                        {t('bookings.rehireWorker', 'Re-hire {{name}}', { name: workerName })}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-amber-500 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-zinc-400 mt-1">
+                      {t('bookings.rehireWorkerDesc', 'Book directly with your previous artisan. Address and service are prefilled.')}
+                    </p>
+                  </div>
+                </button>
+
+                {/* Option B: Browse All Artisans */}
+                <button
+                  type="button"
+                  onClick={() => handleBrowseAllWorkers(bookAgainModalBooking)}
+                  className="w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors flex items-start gap-3 group cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 flex items-center justify-center shrink-0 mt-0.5">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-zinc-200 transition-colors">
+                        {t('bookings.browseAllArtisans', 'Browse All Artisans')}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-zinc-400 mt-1">
+                      {t('bookings.browseAllArtisansDesc', 'Explore and compare all available verified artisans for this service category.')}
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Close Button */}
+              <div className="pt-2 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBookAgainModalBooking(null)}
+                  className="text-xs"
+                >
+                  {t('common.cancel', 'Cancel')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
       </Modal>
 
       {/* Contact Actions Modal */}

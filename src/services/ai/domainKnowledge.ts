@@ -45,7 +45,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'cb_pincode',
         labelEn: '📍 Coverage in New Mandi & Civil Lines',
         labelHi: '📍 नई मंडी व सिविल लाइन्स में उपलब्धता',
-        query: 'Are artisans available in New Mandi (251001) and Civil Lines (251002)? How fast can they arrive?',
+        query: 'Are artisans available in New Mandi (251001) and Civil Lines (251002)? When can they come?',
         icon: 'MapPin',
       },
       {
@@ -131,7 +131,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'ws_wa_arrival',
         labelEn: '💬 WhatsApp Message: "I am On My Way"',
         labelHi: '💬 व्हाट्सऐप मैसेज: "मैं रास्ते में हूँ"',
-        query: 'Give me a polite Hindi WhatsApp message to tell the customer that I am leaving and will reach in 20 minutes.',
+        query: 'Give me a polite Hindi WhatsApp message to tell the customer that I am leaving and on my way.',
         icon: 'MessageSquare',
       },
       {

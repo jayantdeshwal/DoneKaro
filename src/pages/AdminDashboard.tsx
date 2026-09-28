@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -2454,7 +2454,7 @@ export default function AdminDashboard() {
                     {t('admin.noNotifications', 'No notifications found')}
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mt-1">
-                    System alerts, worker registration requests, ID document uploads, and booking dispatches will appear here.
+                    {t('admin.noNotificationsDesc', 'System alerts, worker registration requests, and ID document uploads will appear here.')}
                   </p>
                 </div>
               ) : (

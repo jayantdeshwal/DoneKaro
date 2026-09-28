@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { fetchApprovedWorker } from '@/services/workers'
 import { getSupabaseClient } from '@/lib/supabase'
-import { createBookingQuoteRequest, createServiceRequest } from '@/services/quotes'
+import { cancelServiceRequest, createBookingQuoteRequest, createServiceRequest } from '@/services/quotes'
 import { attachProblemImage, removeProblemImage, uploadProblemImage, validateFile } from '@/services/storage'
 import { sanitizeErrorMessage } from '@/utils/errors'
 
@@ -18,19 +18,19 @@ export default function Booking() {
   const navigate = useNavigate()
   const location = useLocation()
   const existingServiceRequestId = location.state?.serviceRequestId as string | undefined
-  const selectedServiceId = location.state?.serviceId as string | undefined
+  const initialServiceId = location.state?.serviceId as string | undefined
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(initialServiceId || '')
   const { user, isAuthenticated } = useAuth()
   const [worker, setWorker] = useState<any>(null)
   const [loadingWorker, setLoadingWorker] = useState(true)
   const cat = CATEGORIES.find(c => c.id === worker?.category)
   
-  const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(() => ({
     date: location.state?.bookingDraft?.date || '',
     time: location.state?.bookingDraft?.time || '',
-    address: '',
+    address: location.state?.bookingDraft?.address || '',
     pincode: location.state?.bookingDraft?.pincode || '',
-    notes: '',
+    notes: location.state?.bookingDraft?.notes || '',
   }))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showConfirm, setShowConfirm] = useState(false)
@@ -57,16 +57,27 @@ export default function Booking() {
   }, [workerId])
 
   useEffect(() => {
+    if (worker && !selectedServiceId) {
+      if (worker.categories?.length === 1) {
+        setSelectedServiceId(worker.categories[0])
+      }
+    }
+  }, [worker, selectedServiceId])
+
+  useEffect(() => {
     if (!existingServiceRequestId) return
     let isMounted = true
     ;(getSupabaseClient() as any)
       .from('service_requests')
-      .select('scheduled_for, pincode, address, notes')
+      .select('scheduled_for, pincode, address, notes, category_id')
       .eq('id', existingServiceRequestId)
       .maybeSingle()
       .then(({ data, error }: { data: any; error: any }) => {
         if (!isMounted || error || !data) return
         const scheduled = new Date(data.scheduled_for)
+        if (data.category_id && !selectedServiceId) {
+          setSelectedServiceId(data.category_id)
+        }
         setFormData(prev => ({
           ...prev,
           date: scheduled.toISOString().slice(0, 10),
@@ -82,6 +93,17 @@ export default function Booking() {
   useEffect(() => () => {
     if (problemImagePreview) URL.revokeObjectURL(problemImagePreview)
   }, [problemImagePreview])
+
+  const getServiceLabel = (id: string) => {
+    const svc = getServiceById(id)
+    if (svc) return getCategoryName(svc, i18n.language === 'hi' ? 'hi' : 'en')
+    const catObj = CATEGORIES.find(c => c.id === id)
+    if (catObj) return getCategoryName(catObj, i18n.language === 'hi' ? 'hi' : 'en')
+    return id
+  }
+
+  const effectiveServiceId = selectedServiceId || (worker?.categories?.length === 1 ? worker.categories[0] : '')
+  const selectedServiceName = effectiveServiceId ? getServiceLabel(effectiveServiceId) : ''
 
   const handleProblemImage = (file: File | undefined) => {
     if (!file) return
@@ -108,20 +130,25 @@ export default function Booking() {
   const validateStep = () => {
     const newErrors: Record<string, string> = {}
     
-    if (step === 1) {
-      if (!formData.date) newErrors.date = t('errors.required')
-      if (!formData.time) newErrors.time = t('errors.required')
+    if (!effectiveServiceId) {
+      newErrors.service = t('booking.selectServiceRequired', 'Please select a specific service to continue booking.')
     }
-    
-    if (step === 2) {
-      if (!formData.address.trim()) newErrors.address = t('errors.required')
-      if (!formData.pincode.trim()) newErrors.pincode = t('errors.required')
-      else if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Enter valid 6-digit pincode'
-      else if (worker && worker.areas?.length > 0 && !worker.areas.includes(formData.pincode)) {
-        newErrors.pincode = t('booking.workerDoesNotCoverPincode', 'This worker does not serve the selected pincode.')
+
+    if (!formData.date) newErrors.date = t('errors.required')
+    if (!formData.time) newErrors.time = t('errors.required')
+    if (formData.date && formData.time) {
+      const scheduledAt = new Date(`${formData.date}T${formData.time.padStart(5, '0')}:00`)
+      if (Number.isNaN(scheduledAt.getTime())) {
+        newErrors.time = 'Please select a valid date and time'
+      } else if (scheduledAt.getTime() <= Date.now()) {
+        newErrors.time = 'Scheduled time must be in the future'
       }
     }
     
+    if (!formData.address.trim()) newErrors.address = t('errors.required')
+    if (!formData.pincode.trim()) newErrors.pincode = t('errors.required')
+    else if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Enter valid 6-digit pincode'
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -139,9 +166,17 @@ export default function Booking() {
       return
     }
 
+    if (!effectiveServiceId) {
+      const msg = t('booking.selectServiceRequired', 'Please select a specific service to continue booking.')
+      setBookingError(msg)
+      setErrors(prev => ({ ...prev, service: msg }))
+      return
+    }
+
     setIsSubmitting(true)
     setBookingError('')
     setErrors({})
+    let newlyCreatedRequestId: string | null = null
 
     try {
       const normalizedTime = formData.time.padStart(5, '0')
@@ -150,20 +185,22 @@ export default function Booking() {
       if (Number.isNaN(scheduledAt.getTime())) {
         throw new Error('Please select a valid date and time')
       }
-
-      if (worker.areas?.length > 0 && !worker.areas.includes(formData.pincode)) {
-        throw new Error(t('booking.workerDoesNotCoverPincode', 'This worker does not serve the selected pincode.'))
+      if (scheduledAt.getTime() <= Date.now()) {
+        throw new Error('Scheduled time must be in the future')
       }
 
-      const canonicalServiceId = selectedServiceId && getServiceById(selectedServiceId)?.id
+      const canonicalServiceId = getServiceById(effectiveServiceId)?.id || effectiveServiceId
       const serviceRequestId = existingServiceRequestId || createdServiceRequestId || await createServiceRequest({
-        categoryId: canonicalServiceId || worker.categories[0],
+        categoryId: canonicalServiceId,
         pincode: formData.pincode,
         scheduledFor: scheduledAt.toISOString(),
         address: formData.address,
         notes: formData.notes,
       })
-      if (!existingServiceRequestId && !createdServiceRequestId) setCreatedServiceRequestId(serviceRequestId)
+      if (!existingServiceRequestId && !createdServiceRequestId) {
+        newlyCreatedRequestId = serviceRequestId
+        setCreatedServiceRequestId(serviceRequestId)
+      }
 
       if (problemImage && !problemImagePath) {
         const storagePath = await uploadProblemImage(problemImage, user.id, serviceRequestId)
@@ -190,13 +227,26 @@ export default function Booking() {
 
       setQuoteRequested(true)
       setShowConfirm(false)
-    } catch (bookingError) {
-      const rawMessage = bookingError && typeof bookingError === 'object' && 'message' in bookingError
-        ? String((bookingError as { message?: unknown }).message || '')
+    } catch (bookingErr) {
+      if (newlyCreatedRequestId) {
+        try {
+          await cancelServiceRequest(newlyCreatedRequestId)
+          setCreatedServiceRequestId(null)
+        } catch (cancelErr) {
+          console.error('Failed to cancel orphaned service request:', cancelErr)
+        }
+      }
+      console.error('Booking creation failure:', {
+        error: bookingErr instanceof Error ? bookingErr.message : String(bookingErr),
+        workerId: worker?.id,
+        serviceId: effectiveServiceId,
+      })
+      const rawMessage = bookingErr && typeof bookingErr === 'object' && 'message' in bookingErr
+        ? String((bookingErr as { message?: unknown }).message || '')
         : ''
       const message = rawMessage.includes('ACTIVE_SERVICE_REQUEST_EXISTS')
         ? t('booking.activeServiceRequestExists', 'You already have an active request for this service. Please complete or cancel it before creating another one.')
-        : sanitizeErrorMessage(bookingError, 'Unable to create booking. Please try again.')
+        : sanitizeErrorMessage(bookingErr, 'Unable to create booking. Please try again.')
       setBookingError(message)
       setShowConfirm(false)
       setErrors(prev => ({ ...prev, form: message }))
@@ -295,6 +345,35 @@ export default function Booking() {
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-semantic-text-primary mb-4">{t('booking.title')}</h2>
                 
+                {worker.categories && worker.categories.length > 1 ? (
+                  <div className="mb-4">
+                    <label className="label text-semantic-text-secondary">
+                      {t('booking.selectService', 'Select Service')}
+                    </label>
+                    <select
+                      value={selectedServiceId}
+                      onChange={e => {
+                        setSelectedServiceId(e.target.value)
+                        setErrors(prev => ({ ...prev, service: '' }))
+                      }}
+                      className="input w-full bg-surface-200 border-semantic-border-light text-semantic-text-primary"
+                    >
+                      <option value="">{t('booking.chooseServicePlaceholder', '-- Choose a service --')}</option>
+                      {worker.categories.map((cId: string) => (
+                        <option key={cId} value={cId}>
+                          {getServiceLabel(cId)}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.service && <p className="mt-1 text-xs text-red-400">{errors.service}</p>}
+                  </div>
+                ) : selectedServiceName ? (
+                  <div className="mb-4 p-3 bg-surface-200/50 border border-semantic-border-light rounded-lg flex items-center justify-between">
+                    <span className="text-xs text-semantic-text-secondary">{t('booking.service', 'Service')}</span>
+                    <span className="text-sm font-semibold text-semantic-text-primary">{selectedServiceName}</span>
+                  </div>
+                ) : null}
+
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="label text-semantic-text-secondary">{t('booking.selectDate')}</label>
@@ -442,6 +521,10 @@ export default function Booking() {
           </div>
           
           <div className="grid grid-cols-2 gap-4 text-sm bg-surface-200/40 p-4 rounded-lg border border-semantic-border-light">
+            <div className="col-span-2">
+              <p className="text-xs text-semantic-text-secondary">{t('booking.service', 'Service')}</p>
+              <p className="font-medium text-semantic-text-primary mt-0.5">{selectedServiceName}</p>
+            </div>
             <div>
               <p className="text-xs text-semantic-text-secondary">{t('booking.selectDate')}</p>
               <p className="font-medium text-semantic-text-primary mt-0.5">{formData.date}</p>

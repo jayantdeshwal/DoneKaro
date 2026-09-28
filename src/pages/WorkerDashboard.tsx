@@ -32,6 +32,10 @@ import {
   Zap,
   FileText,
   ExternalLink,
+  Printer,
+  Banknote,
+  CheckCircle2,
+  Info,
 } from 'lucide-react'
 import { Badge, Button, Card, Skeleton, Avatar, Modal } from '@/ui'
 import { useAuth } from '@/context/AuthContext'
@@ -41,6 +45,7 @@ import ContactModal from '@/components/ContactModal'
 import { formatPhoneDisplay, buildWorkerToCustomerWhatsAppMessage } from '@/utils/contact'
 import { BookingChangeRequest, BookingPaymentSummary, confirmCashReceivedByWorker, createBookingChangeRequest, fetchBookingChangeRequests, fetchBookingPaymentSummaries } from '@/services/changeRequests'
 import { BookingQuoteRequest, fetchWorkerQuoteData, respondToBookingQuoteRequest, ServiceRequest } from '@/services/quotes'
+import { fetchWorkerReviews, ReviewItem } from '@/services/reviews'
 import { buildGoogleMapsDirectionsUrl } from '@/utils/maps'
 
 interface WorkerProfileRow {
@@ -70,6 +75,7 @@ interface WorkerBookingRow {
   }
   changeRequests?: BookingChangeRequest[]
   paymentSummary?: BookingPaymentSummary
+  review?: ReviewItem
 }
 
 type TabFilter = 'all' | 'pending' | 'active' | 'completed'
@@ -103,6 +109,12 @@ export default function WorkerDashboard() {
   const [isSubmittingQuote, setIsSubmittingQuote] = useState(false)
   const [paymentActionBookingId, setPaymentActionBookingId] = useState('')
   const [paymentError, setPaymentError] = useState('')
+  const [confirmModalBooking, setConfirmModalBooking] = useState<WorkerBookingRow | null>(null)
+  const [receiptModalBooking, setReceiptModalBooking] = useState<WorkerBookingRow | null>(null)
+  const [detailsModalBooking, setDetailsModalBooking] = useState<WorkerBookingRow | null>(null)
+  const [isSubmittingConfirm, setIsSubmittingConfirm] = useState(false)
+  const [confirmModalError, setConfirmModalError] = useState('')
+  const [paymentSuccessMsg, setPaymentSuccessMsg] = useState('')
 
   useEffect(() => {
     const target = window.location.hash.slice(1)
@@ -272,16 +284,27 @@ export default function WorkerDashboard() {
         }
       }
 
+      const [quoteData, workerReviews] = await Promise.all([
+        fetchWorkerQuoteData(workerId),
+        fetchWorkerReviews(workerId).catch(err => {
+          console.warn('Worker reviews load warning:', err)
+          return [] as ReviewItem[]
+        }),
+      ])
+      const reviewsByBooking = new Map<string, ReviewItem>(
+        workerReviews.map(r => [r.booking_id, r])
+      )
+
       const completeBookings: WorkerBookingRow[] = rawBookings.map(b => ({
         ...b,
         customer: customerById.get(b.customer_id) || { name: t('bookings.customer', 'Customer') },
         changeRequests: requestsByBooking.get(b.id) ?? [],
         paymentSummary: summaryByBooking.get(b.id),
+        review: reviewsByBooking.get(b.id),
       }))
 
       setBookings(completeBookings)
 
-      const quoteData = await fetchWorkerQuoteData(workerId)
       setQuoteRequests(quoteData.requests)
       setQuoteServices(new Map(quoteData.services.map(service => [service.id, service])))
     } catch (err) {
@@ -292,6 +315,10 @@ export default function WorkerDashboard() {
       setIsLoading(false)
     }
   }, [t, user?.id])
+
+  const handleOpenDetailsModal = (booking: WorkerBookingRow) => {
+    setDetailsModalBooking(booking)
+  }
 
   const handleCreateChangeRequest = async () => {
     if (!changeRequestBooking) return
@@ -383,6 +410,18 @@ export default function WorkerDashboard() {
           void loadDashboardData()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'booking_payments',
+          filter: `worker_id=eq.${workerId}`,
+        },
+        () => {
+          void loadDashboardData()
+        }
+      )
       .subscribe()
 
     return () => {
@@ -412,17 +451,42 @@ export default function WorkerDashboard() {
     }
   }
 
-  const handleConfirmCashReceived = async (booking: WorkerBookingRow) => {
-    setPaymentActionBookingId(booking.id)
-    setPaymentError('')
+  const handleOpenConfirmModal = (booking: WorkerBookingRow) => {
+    setConfirmModalBooking(booking)
+    setConfirmModalError('')
+  }
+
+  const handleOpenReceiptModal = (booking: WorkerBookingRow) => {
+    setReceiptModalBooking(booking)
+  }
+
+  const handleExecuteConfirmCash = async () => {
+    if (!confirmModalBooking || isSubmittingConfirm) return
+    setIsSubmittingConfirm(true)
+    setConfirmModalError('')
     try {
-      await confirmCashReceivedByWorker(booking.id)
+      await confirmCashReceivedByWorker(confirmModalBooking.id)
       await loadDashboardData()
-    } catch (error) {
-      setPaymentError(error instanceof Error ? error.message : t('bookings.paymentActionFailed', 'Unable to update the payment. Please try again.'))
+      setConfirmModalBooking(null)
+      setPaymentSuccessMsg(t('workerDashboard.paymentReceivedSuccess', 'Cash payment confirmed and job completed successfully!'))
+      setTimeout(() => setPaymentSuccessMsg(''), 5000)
+    } catch (err) {
+      await loadDashboardData()
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('paid')) {
+        setConfirmModalBooking(null)
+        setPaymentSuccessMsg(t('workerDashboard.paymentAlreadyPaid', 'Payment is already confirmed.'))
+        setTimeout(() => setPaymentSuccessMsg(''), 4000)
+      } else {
+        setConfirmModalError(err instanceof Error ? err.message : t('bookings.paymentActionFailed', 'Unable to update the payment. Please try again.'))
+      }
     } finally {
-      setPaymentActionBookingId('')
+      setIsSubmittingConfirm(false)
     }
+  }
+
+  const handleConfirmCashReceived = (booking: WorkerBookingRow) => {
+    handleOpenConfirmModal(booking)
   }
 
   const handleToggleAvailability = async () => {
@@ -480,7 +544,38 @@ export default function WorkerDashboard() {
   const isLeadsTab = searchParams.get('tab') === 'leads'
   const pendingCount = bookings.filter(b => b.status === 'pending').length
   const activeCount = bookings.filter(b => b.status === 'accepted' || b.status === 'in_progress' || b.status === 'payment_pending').length
-  const completedCount = bookings.filter(b => b.status === 'completed').length
+  const completedBookings = bookings.filter(b => b.status === 'completed')
+  const completedCount = completedBookings.length
+
+  // Phase 9: Authoritative completed business metrics
+  const completedPaidBookings = completedBookings.filter(b => b.paymentSummary?.payment_status === 'paid')
+  const completedJobsCount = completedBookings.length
+  const totalPaymentsReceived = completedPaidBookings.reduce(
+    (sum, b) => sum + (b.paymentSummary?.final_payable_amount ?? 0),
+    0
+  )
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth()
+  const thisMonthPayments = completedPaidBookings.reduce((sum, b) => {
+    const paidDateStr = b.paymentSummary?.receipt_paid_at || b.paymentSummary?.paid_at
+    if (!paidDateStr) return sum
+    const paidDate = new Date(paidDateStr)
+    if (paidDate.getFullYear() === currentYear && paidDate.getMonth() === currentMonth) {
+      return sum + (b.paymentSummary?.final_payable_amount ?? 0)
+    }
+    return sum
+  }, 0)
+  const averageJobPayment = completedPaidBookings.length > 0
+    ? totalPaymentsReceived / completedPaidBookings.length
+    : 0
+
+  // Repeat customer detection computed in memory strictly from worker's own completed bookings
+  const completedCountsByCustomer = new Map<string, number>()
+  completedBookings.forEach(b => {
+    if (!b.customer_id) return
+    completedCountsByCustomer.set(b.customer_id, (completedCountsByCustomer.get(b.customer_id) ?? 0) + 1)
+  })
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'pending') return b.status === 'pending'
@@ -524,6 +619,12 @@ export default function WorkerDashboard() {
         </div>
 
         {/* Notifications & Alerts */}
+        {paymentSuccessMsg && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 animate-fadeIn">
+            <CheckCircle className="w-4 h-4 shrink-0" />
+            <span>{paymentSuccessMsg}</span>
+          </div>
+        )}
         {availabilitySuccessMsg && (
           <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 animate-fadeIn">
             <CheckCircle className="w-4 h-4 shrink-0" />
@@ -687,10 +788,14 @@ export default function WorkerDashboard() {
         {/* 4. WORKER METRICS STRIP                                               */}
         {/* ===================================================================== */}
         <div className={`grid-cols-4 gap-2 mb-6 p-3 rounded-2xl bg-surface-100 border border-semantic-border-light text-center ${isLeadsTab ? 'hidden md:grid' : 'grid'}`}>
-          <div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('completed')}
+            className="p-1 rounded-xl hover:bg-surface-200/60 transition-colors text-center cursor-pointer"
+          >
             <p className="text-base font-extrabold text-emerald-400">{completedCount}</p>
             <p className="text-[10px] text-semantic-text-secondary mt-0.5">{t('workerDashboard.completed', 'Completed')}</p>
-          </div>
+          </button>
           <div>
             <div className="flex items-center justify-center gap-0.5">
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
@@ -700,10 +805,18 @@ export default function WorkerDashboard() {
             </div>
             <p className="text-[10px] text-semantic-text-secondary mt-0.5">{t('workerDashboard.rating', 'Rating')}</p>
           </div>
-          <div>
-            <p className="text-base font-extrabold text-brand-400">{profile?.review_count ?? 0}</p>
-            <p className="text-[10px] text-semantic-text-secondary mt-0.5">{t('workerDashboard.reviews', 'Reviews')}</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/worker/reviews')}
+            className="p-1 rounded-xl hover:bg-surface-200/60 transition-colors text-center group cursor-pointer"
+            title={t('workerDashboard.viewAllReviews', 'View All Reviews')}
+          >
+            <p className="text-base font-extrabold text-brand-400 group-hover:underline">{profile?.review_count ?? 0}</p>
+            <p className="text-[10px] text-semantic-text-secondary mt-0.5 flex items-center justify-center gap-0.5 group-hover:text-brand-400">
+              <span>{t('workerDashboard.reviews', 'Reviews')}</span>
+              <ChevronRight className="w-2.5 h-2.5 opacity-70" />
+            </p>
+          </button>
           <div>
             <p className="text-xs font-bold text-slate-900 dark:text-white truncate mt-1">
               {profile?.service_areas?.length ? profile.service_areas.join(', ') : t('workerDashboard.noAreas', 'No areas listed')}
@@ -872,6 +985,75 @@ export default function WorkerDashboard() {
           </div>
         </div>
 
+        {/* Phase 9: Worker Business Summary (When Viewing Completed Jobs) */}
+        {activeTab === 'completed' && (
+          <div className="mb-4 p-4 rounded-2xl bg-surface-100 border border-semantic-border-light shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+                  <Banknote className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {t('workerDashboard.businessSummary', 'Business Summary')}
+                  </h3>
+                  <p className="text-[10px] text-semantic-text-secondary">
+                    {t('workerDashboard.zeroCommissionNotice', '0% platform commission — 100% of cash earnings are yours')}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/worker/reviews')}
+                className="px-2.5 py-1 rounded-xl bg-surface-200 hover:bg-surface-300 text-brand-400 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Star className="w-3 h-3 fill-brand-400" />
+                <span>{t('workerDashboard.customerReviews', 'Customer Reviews')}</span>
+                <ChevronRight className="w-3 h-3 opacity-70" />
+              </button>
+            </div>
+
+            {/* Metrics 4-tile grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="p-3 rounded-xl bg-surface-200/50 border border-semantic-border-light/60">
+                <span className="text-[10px] font-semibold text-semantic-text-tertiary block">
+                  {t('workerDashboard.completedJobs', 'Completed Jobs')}
+                </span>
+                <span className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5 block">
+                  {completedJobsCount}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-surface-200/50 border border-semantic-border-light/60">
+                <span className="text-[10px] font-semibold text-semantic-text-tertiary block">
+                  {t('workerDashboard.paymentsReceived', 'Payments Received')}
+                </span>
+                <span className="text-base font-extrabold text-emerald-500 mt-0.5 block">
+                  ₹{totalPaymentsReceived.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-surface-200/50 border border-semantic-border-light/60">
+                <span className="text-[10px] font-semibold text-semantic-text-tertiary block">
+                  {t('workerDashboard.thisMonthPayments', 'This Month')}
+                </span>
+                <span className="text-base font-extrabold text-blue-500 dark:text-blue-400 mt-0.5 block">
+                  ₹{thisMonthPayments.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-surface-200/50 border border-semantic-border-light/60">
+                <span className="text-[10px] font-semibold text-semantic-text-tertiary block">
+                  {t('workerDashboard.averagePayment', 'Avg. per Job')}
+                </span>
+                <span className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5 block">
+                  {completedPaidBookings.length > 0 ? `₹${averageJobPayment.toFixed(2)}` : '—'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Job Cards Feed */}
         <div className="space-y-3">
           {filteredBookings.length === 0 ? (
@@ -916,9 +1098,17 @@ export default function WorkerDashboard() {
                         {booking.customer?.name ? booking.customer.name.charAt(0) : 'C'}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">
-                          {booking.customer?.name || t('bookings.customer', 'Customer')}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                            {booking.customer?.name || t('bookings.customer', 'Customer')}
+                          </p>
+                          {(completedCountsByCustomer.get(booking.customer_id) ?? 0) > 1 && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-600 dark:text-brand-400 text-[9px] font-bold border border-brand-500/20">
+                              <Sparkles className="w-2.5 h-2.5" />
+                              {t('workerDashboard.repeatCustomer', 'Repeat Customer')}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] text-semantic-text-tertiary capitalize">
                           {catName} {t('workerDashboard.service', 'Service')}
                         </p>
@@ -1029,43 +1219,106 @@ export default function WorkerDashboard() {
                       {booking.paymentSummary.pending_additional_count > 0 && (
                         <p className="mt-2 text-amber-700 dark:text-amber-300">{t('bookings.pendingAdditionalCharges', 'Additional charges are awaiting approval.')}</p>
                       )}
-                      {booking.status === 'payment_pending' && booking.paymentSummary.pending_additional_count === 0 && (
-                        <>
-                          <p className="mt-2 text-amber-700 dark:text-amber-300">{t('bookings.paymentPendingMsg', 'Service is finished. Payment is pending.')}</p>
-                          {booking.paymentSummary.payment_method === 'cash' && booking.paymentSummary.payment_status === 'pending' && (
-                            <div className="mt-3 rounded-lg border border-amber-500/25 bg-amber-500/5 p-2.5">
-                              <p className="text-amber-700 dark:text-amber-300">{t('bookings.customerCashConfirmed', 'Customer says the cash was paid.')}</p>
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                className="mt-2"
-                                loading={paymentActionBookingId === booking.id}
-                                disabled={Boolean(paymentActionBookingId)}
-                                onClick={() => void handleConfirmCashReceived(booking)}
-                              >
-                                {t('bookings.confirmCashReceived', 'Confirm Cash Received')}
-                              </Button>
+                      {/* State A: Service Finished, Payment Required from Customer */}
+                      {booking.status === 'payment_pending' && booking.paymentSummary.payment_status !== 'paid' && booking.paymentSummary.payment_status !== 'pending' && (
+                        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                              <p className="font-bold text-slate-900 dark:text-white">
+                                {t('workerDashboard.paymentRequiredFromCustomer', 'Payment Required from Customer')}
+                              </p>
                             </div>
-                          )}
-                          {paymentError && paymentActionBookingId === '' && (
-                            <p className="mt-2 text-rose-600 dark:text-rose-400">{paymentError}</p>
-                          )}
-                        </>
+                            <Badge variant="warning" size="sm">
+                              {t('bookings.paymentRequired', 'Payment Required')}
+                            </Badge>
+                          </div>
+                          <div className="mt-2 flex items-baseline justify-between">
+                            <span className="text-semantic-text-secondary">
+                              {t('bookings.amountToPay', 'Amount Due')}:
+                            </span>
+                            <span className="text-base font-bold text-slate-900 dark:text-white">
+                              ₹{booking.paymentSummary.final_payable_amount.toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+                            {t('workerDashboard.waitingForCustomerPaymentConfirmation', 'Waiting for customer payment confirmation. The customer needs to confirm the cash handover.')}
+                          </p>
+                        </div>
                       )}
-                      {booking.paymentSummary.is_frozen && (
-                        <p className="mt-1 font-semibold text-slate-600 dark:text-zinc-300">
-                          {t('bookings.paymentStatus', 'Payment status')}: {t(`bookings.paymentStatuses.${booking.paymentSummary.payment_status ?? 'unpaid'}`, 'Unpaid')}
-                        </p>
+
+                      {/* State B: Customer Confirmed Cash, Awaiting Worker Confirmation */}
+                      {booking.status === 'payment_pending' && booking.paymentSummary.payment_status === 'pending' && (
+                        <div className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-4 h-4 text-amber-500 animate-spin" />
+                              <p className="font-bold text-amber-900 dark:text-amber-200">
+                                {t('workerDashboard.cashPaymentAwaitingConfirmation', 'Cash Payment Awaiting Confirmation')}
+                              </p>
+                            </div>
+                            <Badge variant="warning" size="sm">
+                              {t('workerDashboard.pendingConfirmation', 'Confirmation Pending')}
+                            </Badge>
+                          </div>
+                          <p className="mt-2 text-[11px] text-slate-700 dark:text-zinc-300">
+                            {t('workerDashboard.customerCashConfirmedDesc', 'Customer has confirmed cash payment handover.')}
+                          </p>
+                          {booking.paymentSummary.customer_confirmed_at && (
+                            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-zinc-400">
+                              {t('booking.jobDetails.customerConfirmed', 'Customer confirmed')}: {new Date(booking.paymentSummary.customer_confirmed_at).toLocaleTimeString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          )}
+                          <div className="mt-2.5 flex items-baseline justify-between border-t border-amber-500/20 pt-2 font-bold text-slate-900 dark:text-white">
+                            <span>{t('bookings.amountToPay', 'Amount Due')}:</span>
+                            <span className="text-base text-amber-600 dark:text-amber-400">
+                              ₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}
+                            </span>
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="mt-3 w-full font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center gap-1.5 shadow-sm"
+                            onClick={() => handleOpenConfirmModal(booking)}
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            {t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}
+                          </Button>
+                        </div>
                       )}
+
+                      {/* State C: Paid & Authoritative Receipt Exists */}
                       {booking.status === 'completed' && booking.paymentSummary.payment_status === 'paid' && booking.paymentSummary.receipt_number && (
-                        <div className="mt-3 rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-2.5 text-sm">
-                          <p className="font-bold text-emerald-700 dark:text-emerald-300">{t('bookings.paymentPaid', 'Payment Paid')}</p>
-                          <p className="mt-1">₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}</p>
-                          <p className="mt-2 text-xs text-semantic-text-secondary">{t('bookings.serviceCategory', 'Service')}: {getCategoryName(CATEGORIES.find(c => c.id === booking.category_id), i18n.language === 'hi' ? 'hi' : 'en')}</p>
-                          <p className="text-xs text-semantic-text-secondary">{t('bookings.customer', 'Customer')}: {booking.customer?.name || '—'}</p>
-                          <p className="text-xs text-semantic-text-secondary">{t('bookings.paidAt', 'Paid at')}: {booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at ? new Date(booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN') : '—'}</p>
-                          <p className="mt-1 text-xs text-semantic-text-secondary">{t('bookings.receiptNumber', 'Receipt')}: {booking.paymentSummary.receipt_number}</p>
-                          <p className="text-xs text-semantic-text-secondary">{t('bookings.jobId', 'Job ID')}: {formatJobReference(booking.id)}</p>
+                        <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                              <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                                {t('workerDashboard.paymentReceivedJobCompleted', 'Payment Received — Job Completed')}
+                              </span>
+                            </div>
+                            <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                              {booking.paymentSummary.receipt_number}
+                            </span>
+                          </div>
+                          <div className="mt-2 flex items-baseline justify-between">
+                            <span className="text-semantic-text-secondary">{t('bookings.totalPaid', 'Total Paid')}:</span>
+                            <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                              ₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-400">
+                            {t('bookings.paidAt', 'Paid at')}: {booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at ? new Date(booking.paymentSummary.receipt_paid_at || booking.paymentSummary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-3 w-full text-xs font-bold flex items-center justify-center gap-1.5 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20"
+                            onClick={() => handleOpenReceiptModal(booking)}
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            {t('workerDashboard.viewReceipt', 'View Receipt')}
+                          </Button>
                         </div>
                       )}
                       {!booking.paymentSummary.is_final && booking.paymentSummary.pending_additional_count === 0 && booking.status !== 'completed' && booking.status !== 'payment_pending' && (
@@ -1156,6 +1409,78 @@ export default function WorkerDashboard() {
                       </Button>
                     </div>
                   )}
+
+                  {booking.status === 'payment_pending' && booking.paymentSummary?.payment_status === 'pending' && (
+                    <div className="pt-1 border-t border-semantic-border-light/40">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleOpenConfirmModal(booking)}
+                        className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-1.5 shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}</span>
+                      </Button>
+                    </div>
+                  )}
+
+                  {booking.status === 'completed' && (
+                    <div className="space-y-2 pt-1 border-t border-semantic-border-light/40">
+                      {/* Customer Review snippet */}
+                      <div className="rounded-xl border border-semantic-border-light bg-surface-200/40 p-2.5 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            {t('workerDashboard.customerReview', 'Customer Feedback')}
+                          </span>
+                          {booking.review ? (
+                            <div className="flex items-center gap-1">
+                              <span className="font-extrabold text-amber-500">{booking.review.rating.toFixed(1)}</span>
+                              <span className="text-[10px] text-semantic-text-tertiary">/ 5.0</span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-semantic-text-tertiary italic">
+                              {t('workerDashboard.noReviewYet', 'No review yet')}
+                            </span>
+                          )}
+                        </div>
+                        {booking.review?.comment ? (
+                          <p className="text-xs text-semantic-text-secondary italic line-clamp-2">
+                            "{booking.review.comment}"
+                          </p>
+                        ) : booking.review ? (
+                          <p className="text-[11px] text-semantic-text-tertiary italic">
+                            {t('bookings.noComment', 'Rated without comment')}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      {/* Action buttons: View Details & View Receipt */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenDetailsModal(booking)}
+                          className="flex-1 text-xs font-semibold border-semantic-border-medium hover:border-brand-500 text-semantic-text-primary py-1.5 flex items-center justify-center gap-1.5"
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                          <span>{t('workerDashboard.viewDetails', 'View Details')}</span>
+                        </Button>
+
+                        {booking.paymentSummary?.receipt_number && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenReceiptModal(booking)}
+                            className="flex-1 text-xs font-semibold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 py-1.5 flex items-center justify-center gap-1.5"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>{t('workerDashboard.viewReceipt', 'View Receipt')}</span>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })
@@ -1240,6 +1565,455 @@ export default function WorkerDashboard() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Worker Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(confirmModalBooking)}
+        onClose={() => {
+          if (!isSubmittingConfirm) {
+            setConfirmModalBooking(null)
+            setConfirmModalError('')
+          }
+        }}
+        title={t('workerDashboard.confirmCashReceivedTitle', 'Confirm Cash Received')}
+        description={confirmModalBooking ? `Job ${formatJobReference(confirmModalBooking.id)}` : undefined}
+        size="md"
+      >
+        {confirmModalBooking && (() => {
+          const cat = CATEGORIES.find(c => c.id === confirmModalBooking.category_id)
+          const categoryName = cat ? getCategoryName(cat, i18n.language === 'hi' ? 'hi' : 'en') : confirmModalBooking.category_id
+          const summary = confirmModalBooking.paymentSummary
+          const quoteAmount = summary?.initial_quote_amount ?? 0
+          const additionalAmount = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (quoteAmount + additionalAmount)
+
+          return (
+            <div className="space-y-4">
+              {confirmModalError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-500 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{confirmModalError}</span>
+                </div>
+              )}
+
+              {/* Customer and Service Info */}
+              <div className="p-3.5 bg-surface-200/60 border border-semantic-border-light rounded-2xl flex items-center gap-3">
+                <Avatar
+                  name={confirmModalBooking.customer?.name || t('bookings.customer', 'Customer')}
+                  size="md"
+                  src={confirmModalBooking.customer?.avatar || undefined}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                    {confirmModalBooking.customer?.name || t('bookings.customer', 'Customer')}
+                  </p>
+                  <p className="text-xs text-semantic-text-secondary truncate">
+                    {categoryName}
+                  </p>
+                </div>
+                <Badge variant="warning" size="sm">
+                  {t('workerDashboard.pendingConfirmation', 'Confirmation Pending')}
+                </Badge>
+              </div>
+
+              {/* Payment Summary */}
+              <div className="rounded-2xl border border-semantic-border-light bg-surface-100 p-4 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-semantic-text-tertiary mb-3">
+                  {t('bookings.paymentSummary', 'Payment Summary')}
+                </p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-semantic-text-secondary">
+                    <span>{t('bookings.workerQuote', 'Worker Quote')}</span>
+                    <span className="font-semibold text-slate-900 dark:text-zinc-200">₹{quoteAmount.toFixed(2)}</span>
+                  </div>
+                  {additionalAmount > 0 && (
+                    <div className="flex items-center justify-between text-semantic-text-secondary">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span className="font-semibold text-slate-900 dark:text-zinc-200">+₹{additionalAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between border-t border-semantic-border-light pt-2.5 text-sm font-bold text-slate-900 dark:text-white">
+                    <span>{t('bookings.amountToPay', 'Total Cash to Receive')}</span>
+                    <span className="text-base text-amber-500 font-black">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Notice */}
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3.5 text-xs">
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white mb-1">
+                  <Banknote className="w-4 h-4 text-amber-500" />
+                  <span>{t('bookings.paymentMethodCash', 'Cash Payment')}</span>
+                </div>
+                <p className="text-semantic-text-secondary">
+                  {t('workerDashboard.confirmCashReceivedNotice', 'By confirming, you verify that you have received this exact cash amount from the customer. The job will be marked as completed and an official receipt will be generated.')}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2.5 pt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={isSubmittingConfirm}
+                  onClick={() => {
+                    setConfirmModalBooking(null)
+                    setConfirmModalError('')
+                  }}
+                  className="flex-1 text-xs"
+                >
+                  {t('common.cancel', 'Cancel')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  disabled={isSubmittingConfirm}
+                  loading={isSubmittingConfirm}
+                  onClick={() => void handleExecuteConfirmCash()}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                  {t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Completed Job Details Modal */}
+      <Modal
+        isOpen={Boolean(detailsModalBooking)}
+        onClose={() => setDetailsModalBooking(null)}
+        title={t('workerDashboard.completedJobDetails', 'Completed Job Details')}
+        description={detailsModalBooking ? `${formatJobReference(detailsModalBooking.id)} · ${t('workerDashboard.completed', 'Completed')}` : ''}
+      >
+        {detailsModalBooking && (() => {
+          const isRepeat = (completedCountsByCustomer.get(detailsModalBooking.customer_id) ?? 0) > 1
+          const catObj = CATEGORIES.find(c => c.id === detailsModalBooking.category_id)
+          const catName = catObj ? getCategoryName(catObj, i18n.language === 'hi' ? 'hi' : 'en') : detailsModalBooking.category_id
+          const scheduledDate = new Date(detailsModalBooking.scheduled_at).toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+          const scheduledTime = new Date(detailsModalBooking.scheduled_at).toLocaleTimeString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+          const summary = detailsModalBooking.paymentSummary
+          const initialQuote = summary?.initial_quote_amount ?? 0
+          const approvedAdditional = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (initialQuote + approvedAdditional)
+          const paidAtStr = summary?.receipt_paid_at || summary?.paid_at
+          const paidDate = paidAtStr ? new Date(paidAtStr).toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+
+          return (
+            <div className="space-y-4 pt-1 text-slate-900 dark:text-white">
+              {/* Customer Header */}
+              <div className="p-3.5 rounded-2xl bg-surface-100 border border-semantic-border-light flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-brand-500/20 border border-brand-500/40 flex items-center justify-center font-bold text-brand-400 text-sm">
+                    {detailsModalBooking.customer?.name ? detailsModalBooking.customer.name.charAt(0) : 'C'}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold">{detailsModalBooking.customer?.name || t('bookings.customer', 'Customer')}</p>
+                      {isRepeat && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-500/15 text-brand-600 dark:text-brand-400 text-[10px] font-bold border border-brand-500/30">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          {t('workerDashboard.repeatCustomer', 'Repeat Customer')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-semantic-text-secondary">{catName} {t('workerDashboard.service', 'Service')}</p>
+                  </div>
+                </div>
+                {detailsModalBooking.customer?.phone && (
+                  <a
+                    href={`tel:${detailsModalBooking.customer.phone}`}
+                    className="p-2 rounded-xl bg-surface-200 hover:bg-surface-300 text-semantic-text-primary border border-semantic-border-light transition-colors"
+                    title={t('workerDashboard.call', 'Call')}
+                  >
+                    <Phone className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+
+              {/* Schedule & Location */}
+              <div className="p-3 rounded-xl bg-surface-100 border border-semantic-border-light text-xs space-y-2">
+                <div className="flex items-center gap-2 text-semantic-text-secondary">
+                  <Calendar className="w-4 h-4 text-brand-400 shrink-0" />
+                  <span>{scheduledDate} · {scheduledTime}</span>
+                </div>
+                <div className="flex items-start gap-2 text-semantic-text-secondary">
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{detailsModalBooking.address || t('workerDashboard.muzaffarnagar', 'Muzaffarnagar')}</span>
+                </div>
+                {detailsModalBooking.notes && (
+                  <div className="pt-2 border-t border-semantic-border-light/60">
+                    <span className="text-[10px] font-semibold text-semantic-text-tertiary uppercase tracking-wider block mb-0.5">
+                      {t('bookings.serviceNotes', 'Customer Request Notes')}
+                    </span>
+                    <p className="text-xs italic text-semantic-text-secondary">
+                      "{detailsModalBooking.notes}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Payment Summary */}
+              <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-2">
+                <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                  <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Banknote className="w-4 h-4 text-emerald-500" />
+                    {t('bookings.paymentSummary', 'Payment Summary')}
+                  </span>
+                  <Badge variant="success" size="sm">
+                    {t('bookings.status.paid', 'Paid')}
+                  </Badge>
+                </div>
+                <div className="space-y-1.5 text-semantic-text-secondary">
+                  <div className="flex justify-between">
+                    <span>{t('bookings.workerQuote', 'Worker Quote')}</span>
+                    <span className="font-semibold text-slate-900 dark:text-zinc-200">₹{initialQuote.toFixed(2)}</span>
+                  </div>
+                  {approvedAdditional > 0 && (
+                    <div className="flex justify-between">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span className="font-semibold text-slate-900 dark:text-zinc-200">+₹{approvedAdditional.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t border-emerald-500/20 font-bold text-slate-900 dark:text-white">
+                    <span>{t('bookings.totalPaid', 'Total Paid')}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 text-sm">₹{finalAmount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}</span>
+                  </div>
+                </div>
+                <div className="pt-1.5 text-[11px] text-semantic-text-tertiary flex items-center justify-between">
+                  <span>{t('bookings.paidAt', 'Paid at')}: {paidDate}</span>
+                  {summary?.receipt_number && (
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      {summary.receipt_number}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Review Section */}
+              <div className="p-3 rounded-xl bg-surface-100 border border-semantic-border-light text-xs space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                    {t('workerDashboard.customerReview', 'Customer Feedback')}
+                  </span>
+                  {detailsModalBooking.review ? (
+                    <span className="font-extrabold text-amber-500">{detailsModalBooking.review.rating.toFixed(1)} / 5.0</span>
+                  ) : (
+                    <span className="text-[10px] text-semantic-text-tertiary italic">{t('workerDashboard.noReviewYet', 'No review yet')}</span>
+                  )}
+                </div>
+                {detailsModalBooking.review?.comment ? (
+                  <p className="text-xs text-semantic-text-secondary italic">"{detailsModalBooking.review.comment}"</p>
+                ) : detailsModalBooking.review ? (
+                  <p className="text-[11px] text-semantic-text-tertiary italic">{t('bookings.noComment', 'Rated without comment')}</p>
+                ) : null}
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex gap-2.5 pt-2">
+                {summary?.receipt_number && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const b = detailsModalBooking
+                      setDetailsModalBooking(null)
+                      handleOpenReceiptModal(b)
+                    }}
+                    className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>{t('workerDashboard.viewReceipt', 'View Receipt')}</span>
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setDetailsModalBooking(null)}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  {t('common.close', 'Close')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
+      </Modal>
+
+      {/* Worker Official Receipt Modal */}
+      <Modal
+        isOpen={Boolean(receiptModalBooking)}
+        onClose={() => setReceiptModalBooking(null)}
+        title={t('bookings.paymentReceipt', 'Payment Receipt')}
+        size="md"
+      >
+        {receiptModalBooking && (() => {
+          const cat = CATEGORIES.find(c => c.id === receiptModalBooking.category_id)
+          const categoryName = cat ? getCategoryName(cat, i18n.language === 'hi' ? 'hi' : 'en') : receiptModalBooking.category_id
+          const summary = receiptModalBooking.paymentSummary
+          const jobReference = formatJobReference(receiptModalBooking.id)
+          const receiptNumber = summary?.receipt_number || '—'
+          const paidDate = summary?.receipt_paid_at || summary?.paid_at
+            ? new Date(summary.receipt_paid_at || summary.paid_at || '').toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })
+            : new Date(receiptModalBooking.scheduled_at).toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')
+          const quoteAmount = summary?.initial_quote_amount ?? 0
+          const additionalAmount = summary?.approved_additional_amount ?? 0
+          const finalAmount = summary?.final_payable_amount ?? (quoteAmount + additionalAmount)
+
+          return (
+            <div className="space-y-4">
+              <style>{`
+                @media print {
+                  body * {
+                    visibility: hidden !important;
+                  }
+                  #printable-worker-receipt, #printable-worker-receipt * {
+                    visibility: visible !important;
+                  }
+                  #printable-worker-receipt {
+                    position: fixed !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 24px !important;
+                    background: white !important;
+                    color: black !important;
+                    border: 1px solid #e2e8f0 !important;
+                    box-shadow: none !important;
+                    z-index: 99999 !important;
+                  }
+                  .no-print {
+                    display: none !important;
+                  }
+                }
+              `}</style>
+
+              {/* Printable Receipt Container */}
+              <div
+                id="printable-worker-receipt"
+                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4 text-slate-900 dark:text-white"
+              >
+                {/* Header Branding */}
+                <div className="text-center pb-4 border-b border-slate-200 dark:border-zinc-800">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>JUGNU</span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                    Ghar Ke Har Kaam Ka Jugnu
+                  </p>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mt-1">
+                    {t('bookings.officialReceipt', 'Official Cash Payment Receipt')}
+                  </h3>
+                </div>
+
+                {/* Receipt Metadata Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs py-2 border-b border-slate-100 dark:border-zinc-800">
+                  <div>
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.receiptNumber', 'Receipt')}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{receiptNumber}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.jobId', 'Job')}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{jobReference}</span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.paidAt', 'Paid at')}</span>
+                    <span className="font-semibold text-slate-700 dark:text-zinc-300">{paidDate}</span>
+                  </div>
+                  <div className="text-right mt-1">
+                    <span className="text-slate-400 dark:text-zinc-500 block">{t('bookings.paymentMethod', 'Payment Method')}</span>
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      {t('bookings.paymentMethodCash', 'Cash')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Service, Customer & Worker Details */}
+                <div className="space-y-1.5 text-xs py-2 border-b border-slate-100 dark:border-zinc-800">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('bookings.serviceCategory', 'Service')}:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{categoryName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('bookings.customer', 'Customer')}:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{receiptModalBooking.customer?.name || 'Customer'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('bookings.worker', 'Artisan')}:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{user?.name || 'Verified Artisan'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-zinc-400">{t('common.address', 'Address')}:</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300 text-right max-w-[200px] truncate">{receiptModalBooking.address}</span>
+                  </div>
+                </div>
+
+                {/* Amount Breakdown */}
+                <div className="space-y-1.5 text-xs py-2">
+                  <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+                    <span>{t('bookings.workerQuote', 'Worker Quote')}</span>
+                    <span>₹{quoteAmount.toFixed(2)}</span>
+                  </div>
+                  {additionalAmount > 0 && (
+                    <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+                      <span>{t('bookings.approvedAdditionalCharges', 'Approved Additional Charges')}</span>
+                      <span>+₹{additionalAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-zinc-800 font-bold">
+                    <span className="text-slate-900 dark:text-white text-sm">{t('bookings.totalPaid', 'Total Paid')}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 text-base">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Verified Footer Notice */}
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>{t('bookings.receiptFooterNote', 'This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by Jugnu.')}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons (Excluded from Print) */}
+              <div className="flex gap-2.5 pt-2 no-print">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  {t('bookings.printReceipt', 'Print / Save Receipt')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setReceiptModalBooking(null)}
+                  className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  {t('common.close', 'Close')}
+                </Button>
+              </div>
+            </div>
+          )
+        })()}
       </Modal>
 
       {/* Artisan Helpline Modal */}

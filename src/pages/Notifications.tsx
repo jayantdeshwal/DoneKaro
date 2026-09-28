@@ -52,6 +52,11 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
     color: 'text-purple-400',
     bg: 'bg-purple-950/60 border border-purple-800/40',
   },
+  payment_received: {
+    icon: CheckCircle,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-950/60 border border-emerald-800/40',
+  },
   review_received: {
     icon: Star,
     color: 'text-amber-400',
@@ -172,8 +177,10 @@ export default function Notifications() {
     }
     if (item.booking_id) {
       return {
-        label: t('notifications.viewBooking', 'My Bookings'),
-        url: `/bookings#booking-${encodeURIComponent(item.booking_id!)}`,
+        label: isWorker ? t('notifications.viewDashboard', 'Worker Dashboard') : t('notifications.viewBooking', 'My Bookings'),
+        url: isWorker
+          ? `/worker/dashboard#booking-${encodeURIComponent(item.booking_id!)}`
+          : `/bookings#booking-${encodeURIComponent(item.booking_id!)}`,
       }
     }
     if (item.notification_type === 'profile_approved' || item.notification_type === 'profile_rejected') {

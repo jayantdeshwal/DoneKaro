@@ -94,7 +94,7 @@
   },
   "home": {
     "heroTitle": "Ghar Ke Har Kaam Ka Jugnu",
-    "heroSubtitle": "Connect directly with verified electricians, plumbers, AC technicians & salon experts in Muzaffarnagar. Transparent rates, zero middleman commission, same-day arrival.",
+    "heroSubtitle": "Connect directly with verified electricians, plumbers, AC technicians & salon experts in Muzaffarnagar. Transparent rates, zero middleman commission, scheduled local service.",
     "searchPlaceholder": "What service do you need?",
     "searchButton": "Find Workers",
     "popularCategories": "Popular Trade Services",
@@ -186,7 +186,7 @@
     "stickyCategoriesTitle": "All Service Categories",
     "stickyAreasTitle": "Select Local Area",
     "stickyPopularSearches": "Popular Searches",
-    "instaHelp": "InstaHelp (30 Mins)",
+    "instaHelp": "InstaHelp (Emergency)",
     "allServicesGrid": "All services",
     "nativeServices": "Verified Muzaffarnagar Services",
     "spotlightTitle": "In the spotlight",
@@ -218,11 +218,11 @@
     "noApprovedMatch": "No approved artisans match the selected category or area filters.",
     "tryCategories": "Try one of our active categories:",
     "servicesSubtitle": "Book verified local technicians with 0% commission",
-    "fastestArrival": "Fastest Arrival",
+    "fastestArrival": "Verified Technicians",
     "personalCare": "Personal Care",
     "furnitureFix": "Furniture Fix",
     "homeHelp": "Home Help",
-    "minutes": "44 mins",
+    "minutes": "Repair & Service",
     "moreServices": "Electrician, Plumber +",
     "city": "Muzaffarnagar",
     "areaDefault": "Muzaffarnagar (251001 & 251002)",
@@ -344,7 +344,7 @@
     "confirmDesc": "Please review your booking details before submitting.",
     "bookingConfirmDesc": "Your booking request has been submitted. The worker will review and confirm shortly.",
     "bookingSent": "Booking Request Sent!",
-    "bookingSentDesc": "{{name}} has been notified. You'll hear back within 30 minutes.",
+    "bookingSentDesc": "{{name}} has been notified. The provider will review your request and send a quote.",
     "trackBooking": "Track Booking",
     "status": {
       "pending": "Pending",
@@ -642,6 +642,48 @@
     ,"paymentActionFailed": "Unable to update the payment. Please try again."
     ,"openInGoogleMaps": "Open in Google Maps"
     ,"customerLocationUnavailable": "Customer location is not available for this booking."
+    ,"serviceCompleted": "Service Completed"
+    ,"paymentSuccessful": "Payment Successful"
+    ,"payWithCash": "Pay with Cash"
+    ,"payWorkerInCash": "Pay the worker the amount shown above in cash."
+    ,"ivePaidCash": "I've Paid Cash"
+    ,"cashPaymentSubmitted": "Cash Payment Submitted"
+    ,"cashPaymentSubmittedMsg": "Cash payment submitted. Waiting for worker confirmation."
+    ,"waitingForWorkerConfirmationDesc": "Waiting for worker confirmation. Your receipt will appear once the payment is confirmed."
+    ,"viewReceipt": "View Receipt"
+    ,"paymentReceipt": "Payment Receipt"
+    ,"officialReceipt": "Official Cash Payment Receipt"
+    ,"workerQuote": "Worker Quote"
+    ,"initialQuote": "Initial Quote"
+    ,"totalPaid": "Total Paid"
+    ,"printReceipt": "Print / Save Receipt"
+    ,"verifiedCashPayment": "Verified Cash Payment"
+    ,"receiptFooterNote": "This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by Jugnu."
+    ,"onlinePaymentComingSoon": "Online payment (UPI / Cards) coming soon"
+    ,"receiptNotAvailableYet": "Receipt is being generated. Please refresh in a moment."
+    ,"viewDetails": "View Details"
+    ,"completedJobDetails": "Completed Service Details"
+    ,"previouslyHired": "Previously Hired"
+    ,"previouslyHiredByYou": "Previously Hired by You"
+    ,"serviceNotes": "Customer Request Notes"
+    ,"yourReview": "Your Rating & Feedback"
+    ,"notReviewedYet": "Not reviewed yet"
+    ,"noComment": "Rated without comment"
+    ,"reviewed": "Reviewed"
+    ,"bookAgainTitle": "Book This Service Again"
+    ,"previousArtisan": "Previous Artisan"
+    ,"bookAgainPrompt": "How would you like to book this service? You can request a quote from the same artisan or browse other verified artisans in Muzaffarnagar."
+    ,"rehireWorker": "Re-hire {{name}}"
+    ,"rehireWorkerDesc": "Book directly with your previous artisan. Address and service are prefilled."
+    ,"browseAllArtisans": "Browse All Artisans"
+    ,"browseAllArtisansDesc": "Explore and compare all available verified artisans for this service category."
+  },
+  "search": {
+    "previouslyHired": "Previously Hired"
+  },
+  "workerProfile": {
+    "previouslyHired": "Previously Hired",
+    "previouslyHiredByYou": "Previously Hired by You"
   },
   "workerDashboard": {
     "title": "Worker Dashboard",
@@ -765,6 +807,33 @@
     "supportDescription": "Connect with our administrator team for verification, payment queries, or assistance.",
     "whatsappDesk": "WhatsApp Artisan Desk",
     "directSupport": "Direct support for Muzaffarnagar artisans"
+    ,"paymentRequiredFromCustomer": "Payment Required from Customer"
+    ,"waitingForCustomerPaymentConfirmation": "Waiting for customer payment confirmation. The customer needs to confirm the cash handover."
+    ,"cashPaymentAwaitingConfirmation": "Cash Payment Awaiting Confirmation"
+    ,"pendingConfirmation": "Confirmation Pending"
+    ,"customerCashConfirmedDesc": "Customer has confirmed cash payment handover."
+    ,"confirmCashReceived": "Confirm Cash Received"
+    ,"confirmCashReceivedTitle": "Confirm Cash Received"
+    ,"confirmCashReceivedNotice": "By confirming, you verify that you have received this exact cash amount from the customer. The job will be marked as completed and an official receipt will be generated."
+    ,"paymentReceivedJobCompleted": "Payment Received — Job Completed"
+    ,"paymentReceivedSuccess": "Cash payment confirmed and job completed successfully!"
+    ,"paymentAlreadyPaid": "Payment is already confirmed."
+    ,"viewReceipt": "View Receipt"
+    ,"businessSummary": "Business Summary"
+    ,"completedJobs": "Completed Jobs"
+    ,"paymentsReceived": "Payments Received"
+    ,"paymentsReceivedDesc": "Total cash collected from completed jobs (0% commission)"
+    ,"thisMonthPayments": "This Month"
+    ,"averagePayment": "Avg. per Job"
+    ,"repeatCustomer": "Repeat Customer"
+    ,"viewDetails": "View Details"
+    ,"completedJobDetails": "Completed Job Details"
+    ,"customerReview": "Customer Feedback"
+    ,"noReviewYet": "No review yet"
+    ,"customerReviews": "Customer Reviews"
+    ,"viewAllReviews": "View All Reviews"
+    ,"zeroCommissionNotice": "0% platform commission — 100% of cash earnings are yours"
+    ,"ratedOn": "Rated on {{date}}"
   },
   "review": {
     "title": "Rate Your Experience",

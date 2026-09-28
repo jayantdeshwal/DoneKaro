@@ -1318,7 +1318,7 @@ export default function Profile() {
         isOpen={showAddressModal}
         onClose={() => setShowAddressModal(false)}
         title="Muzaffarnagar Service Localities"
-        description="Jugnu currently provides rapid same-day artisan service in the following pincodes."
+        description="Jugnu operates across verified service localities in Muzaffarnagar."
       >
         <div className="space-y-2.5 pt-2">
           {MUZAFFARNAGAR_PINCODES.map(pincode => (

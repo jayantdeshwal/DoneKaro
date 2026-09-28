@@ -43,6 +43,16 @@ const KNOWN_SAFE_SUBSTRINGS = [
   'assigned worker cannot be changed',
   'completed, cancelled, or rejected bookings cannot be modified',
   'you do not have permission',
+  'this service area is not supported',
+  'scheduled time must be in the future',
+  'selected provider is not eligible',
+  'selected service is invalid',
+  'only customers can',
+  'active service request',
+  'an active provider quote request already exists',
+  'please select a specific service',
+  'address is required',
+  'response deadline must be in the future',
 ]
 
 /**

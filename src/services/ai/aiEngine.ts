@@ -158,7 +158,7 @@ function extractContextualActions(query: string, persona: AssistantPersona): Cha
     })
   } else if (persona === 'worker_sarathi') {
     if (q.includes('way') || q.includes('message') || q.includes('whatsapp') || q.includes('रास्ते') || q.includes('मैसेज')) {
-      const templateText = `नमस्ते! मैं जुगनू से आपका कारीगर हूँ। मैं आपकी बताई लोकेशन के लिए निकल चुका हूँ और 20 मिनट में पहुँच रहा हूँ।`
+      const templateText = `नमस्ते! मैं जुगनू से आपका कारीगर हूँ। मैं आपकी बताई लोकेशन के लिए निकल चुका हूँ और जल्द पहुँच रहा हूँ।`
       actions.push({
         id: 'act_copy_arrival_msg',
         labelEn: 'Copy Arrival Message',
@@ -223,8 +223,8 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
         sender: 'assistant',
         persona,
         timestamp: new Date(),
-        textEn: `⚡ **Recommended Service: Electrician (इलेक्ट्रीशियन)**\n\n- **Safety Tip**: Please turn off the main switch / MCB immediately if you notice sparking or burning smell.\n- **Pricing**: Jugnu does not set a fixed price. Request and review the provider's quote before accepting.\n- **Typical Scope**: Switchboard repairs, MCB replacement, fan regulator fixing, ceiling fan installation, inverter connection.\n- **Arrival Time**: Verified local electricians arrive within 30-45 minutes in New Mandi, Civil Lines, and Roorkee Road.`,
-        textHi: `⚡ **सुझाई गई सेवा: इलेक्ट्रीशियन (बिजली मिस्त्री)**\n\n- **सुरक्षा सलाह**: अगर स्पार्किंग या जलने की गंध आ रही हो, तो तुरंत मुख्य MCB / मेन स्विच बंद कर दें।\n- **कीमत**: जुगनू कोई निश्चित कीमत तय नहीं करता। प्रदाता का कोट मंगाकर स्वीकार करने से पहले देखें।\n- **प्रमुख कार्य**: स्विचबोर्ड मरम्मत, MCB बदलना, पंखा लगाना, इन्वर्टर वायरिंग।\n- **पहुँचने का समय**: नई मंडी, सिविल लाइन्स और रुड़की रोड में 30-45 मिनट में उपलब्ध।`,
+        textEn: `⚡ **Recommended Service: Electrician (इलेक्ट्रीशियन)**\n\n- **Safety Tip**: Please turn off the main switch / MCB immediately if you notice sparking or burning smell.\n- **Pricing**: Jugnu does not set a fixed price. Request and review the provider's quote before accepting.\n- **Typical Scope**: Switchboard repairs, MCB replacement, fan regulator fixing, ceiling fan installation, inverter connection.\n- **Scheduling**: Request a quote from verified local electricians in New Mandi, Civil Lines, and Roorkee Road for your preferred appointment time.`,
+        textHi: `⚡ **सुझाई गई सेवा: इलेक्ट्रीशियन (बिजली मिस्त्री)**\n\n- **सुरक्षा सलाह**: अगर स्पार्किंग या जलने की गंध आ रही हो, तो तुरंत मुख्य MCB / मेन स्विच बंद कर दें।\n- **कीमत**: जुगनू कोई निश्चित कीमत तय नहीं करता। प्रदाता का कोट मंगाकर स्वीकार करने से पहले देखें।\n- **प्रमुख कार्य**: स्विचबोर्ड मरम्मत, MCB बदलना, पंखा लगाना, इन्वर्टर वायरिंग।\n- **बुकिंग**: नई मंडी, सिविल लाइन्स और रुड़की रोड में सत्यापित स्थानीय बिजली मिस्त्री से अपनी सुविधा अनुसार समय चुनकर कोटेशन मंगाएँ।`,
         actions,
       }
     }
@@ -343,8 +343,8 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
         sender: 'assistant',
         persona,
         timestamp: new Date(),
-        textEn: `📍 **Muzaffarnagar Locality Coverage**:\n\n- **PIN 251001**: New Mandi, Shiv Chowk, Gandhi Colony, Roorkee Road, Bharthal, Patel Nagar.\n- **PIN 251002**: Civil Lines, Cantt, Jansath Road, Circular Road, South Civil Lines, Rampuram.\n\nOver 100+ Aadhaar-verified local electricians, plumbers, AC mechanics, carpenters, and painters are active across both zones with average 30-45 minute arrival times.`,
-        textHi: `📍 **मुज़फ़्फ़रनगर कार्यक्षेत्र कवरेज**:\n\n- **पिन 251001**: नई मंडी, शिव चौक, गांधी कॉलोनी, रुड़की रोड, भरथल, पटेल नगर।\n- **पिन 251002**: सिविल लाइन्स, कैंट, जानसठ रोड, सर्कुलर रोड, साउथ सिविल लाइन्स, रामपुरम।\n\nदोनों क्षेत्रों में 100+ आधार-सत्यापित इलेक्ट्रीशियन, प्लंबर, कारपेंटर और पेंटर औसतन 30-45 मिनट में उपलब्ध रहते हैं।`,
+        textEn: `📍 **Muzaffarnagar Locality Coverage**:\n\n- **PIN 251001**: New Mandi, Shiv Chowk, Gandhi Colony, Roorkee Road, Bharthal, Patel Nagar.\n- **PIN 251002**: Civil Lines, Cantt, Jansath Road, Circular Road, South Civil Lines, Rampuram.\n\nOver 100+ Aadhaar-verified local electricians, plumbers, AC mechanics, carpenters, and painters are active across both zones for direct quote requests and scheduled service.`,
+        textHi: `📍 **मुज़फ़्फ़रनगर कार्यक्षेत्र कवरेज**:\n\n- **पिन 251001**: नई मंडी, शिव चौक, गांधी कॉलोनी, रुड़की रोड, भरथल, पटेल नगर।\n- **पिन 251002**: सिविल लाइन्स, कैंट, जानसठ रोड, सर्कुलर रोड, साउथ सिविल लाइन्स, रामपुरम।\n\nदोनों क्षेत्रों में 100+ आधार-सत्यापित इलेक्ट्रीशियन, प्लंबर, कारपेंटर और पेंटर सीधे कोटेशन अनुरोध और निर्धारित सेवा के लिए उपलब्ध हैं।`,
         actions,
       }
     }
@@ -410,8 +410,8 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
         sender: 'assistant',
         persona,
         timestamp: new Date(),
-        textEn: `⏱️ **Handling Artisan Delays**:\n\n1. Check your **My Bookings** page and use the **WhatsApp / Call** button to ping the artisan directly.\n2. Local traffic (e.g. Shiv Chowk or Roorkee Road railway crossing) can occasionally cause a 10-15 minute delay.\n3. If the artisan does not answer within 10 minutes, click the button below to alert our **Jugnu Admin Desk**—we will immediately dispatch an alternate verified artisan to your location!`,
-        textHi: `⏱️ **कारीगर के लेट होने पर क्या करें**:\n\n1. **My Bookings** पेज पर जाकर कारीगर के नंबर पर सीधे व्हाट्सऐप या कॉल करें।\n2. कई बार शहर में जाम (जैसे शिव चौक या रेलवे फाटक) के कारण 10-15 मिनट की देरी हो जाती है।\n3. अगर कारीगर 10 मिनट तक फोन न उठाए, तो नीचे दिए बटन से हमारे **एडमिन डेस्क** को बताएं—हम तुरंत दूसरा कारीगर भेजेंगे!`,
+        textEn: `⏱️ **Handling Artisan Delays**:\n\n1. Check your **My Bookings** page and use the **WhatsApp / Call** button to contact the artisan directly.\n2. Local traffic (such as Shiv Chowk or railway crossing) can occasionally cause transit delays.\n3. If the artisan is unreachable or unable to attend, you may cancel the request directly from your bookings page or reach out to our **Jugnu Admin Desk** for support.`,
+        textHi: `⏱️ **कारीगर के लेट होने पर क्या करें**:\n\n1. **My Bookings** पेज पर जाकर कारीगर से सीधे व्हाट्सऐप या कॉल पर संपर्क करें।\n2. शहर में जाम (जैसे शिव चौक या रेलवे फाटक) के कारण कभी-कभी देरी हो सकती है।\n3. यदि कारीगर से संपर्क न हो पाए, तो आप बुकिंग पेज से अनुरोध रद्द कर सकते हैं या सहायता के लिए हमारे **एडमिन डेस्क** से संपर्क कर सकते हैं।`,
         actions,
       }
     }
@@ -490,8 +490,8 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
         sender: 'assistant',
         persona,
         timestamp: new Date(),
-        textEn: `📞 **Jugnu Customer Desk**\n\nOur administrative support team is available from 8:00 AM to 9:00 PM every day.\n\n- **Helpline Phone**: ${MUZAFFARNAGAR_KNOWLEDGE.adminPhone}\n- **Direct WhatsApp**: Fast resolution within 10 minutes.\n\nClick below to connect immediately:`,
-        textHi: `📞 **जुगनू ग्राहक सहायता**\n\nहमारी एडमिन टीम प्रतिदिन सुबह 8:00 बजे से रात 9:00 बजे तक उपलब्ध है।\n\n- **हेल्पलाइन नंबर**: ${MUZAFFARNAGAR_KNOWLEDGE.adminPhone}\n- **व्हाट्सऐप सहायता**: 10 मिनट में समाधान।\n\nतुरंत संपर्क के लिए नीचे क्लिक करें:`,
+        textEn: `📞 **Jugnu Customer Desk**\n\nOur administrative support team is available from 8:00 AM to 9:00 PM every day.\n\n- **Helpline Phone**: ${MUZAFFARNAGAR_KNOWLEDGE.adminPhone}\n- **Direct WhatsApp**: Support available during operating hours.\n\nClick below to connect:`,
+        textHi: `📞 **जुगनू ग्राहक सहायता**\n\nहमारी एडमिन टीम प्रतिदिन सुबह 8:00 बजे से रात 9:00 बजे तक उपलब्ध है।\n\n- **हेल्पलाइन नंबर**: ${MUZAFFARNAGAR_KNOWLEDGE.adminPhone}\n- **व्हाट्सऐप सहायता**: कार्य समय के दौरान सीधी सहायता उपलब्ध।\n\nसंपर्क के लिए नीचे क्लिक करें:`,
         actions,
       }
     }
@@ -533,7 +533,7 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
   if (persona === 'worker_sarathi') {
     // 1. WhatsApp Template generator: On my way
     if (query.includes('way') || query.includes('message') || query.includes('whatsapp') || query.includes('रास्ते') || query.includes('पहुँच') || query.includes('मैसेज')) {
-      const templateText = `नमस्ते! मैं जुगनू से आपका इलेक्ट्रीशियन/कारीगर हूँ। मैं आपकी बताई लोकेशन के लिए निकल चुका हूँ और लगभग 20 मिनट में पहुँच रहा हूँ। अगर कोई विशेष दिशा-निर्देश हों तो कृपया बताएँ।`
+      const templateText = `नमस्ते! मैं जुगनू से आपका इलेक्ट्रीशियन/कारीगर हूँ। मैं आपकी बताई लोकेशन के लिए निकल चुका हूँ और जल्द पहुँच रहा हूँ। अगर कोई विशेष दिशा-निर्देश हों तो कृपया बताएँ।`
       const actions: ChatAction[] = [
         {
           id: 'act_copy_arrival_msg',
@@ -574,8 +574,8 @@ function resolveLocalQuery(query: string, persona: AssistantPersona): ChatMessag
         sender: 'assistant',
         persona,
         timestamp: new Date(),
-        textEn: `🔔 **4 Golden Rules to Get Maximum Jobs in Muzaffarnagar**:\n\n1. **Keep Duty Status 'ONLINE'**: Customers only see and call active artisans on the homepage.\n2. **Respond in Under 5 Minutes**: Fast acceptance doubles your ranking in New Mandi and Civil Lines.\n3. **Maintain 5-Star Ratings**: Polite communication and clean workmanship prompt customers to leave top reviews.\n4. **Get the Gold Verified Badge**: Verified profiles receive 3x more direct booking calls!`,
-        textHi: `🔔 **मुज़फ़्फ़रनगर में सबसे ज्यादा काम पाने के 4 नियम**:\n\n1. **ड्यूटी स्टेटस 'ONLINE' रखें**: ग्राहक केवल उन्हीं कारीगरों को कॉल करते हैं जो ऑनलाइन दिखाई देते हैं।\n2. **5 मिनट के अंदर स्वीकार करें**: तेजी से जवाब देने से आपकी प्रोफाइल सर्च में ऊपर आती है।\n3. **5-स्टार रेटिंग बनाए रखें**: विनम्र व्यवहार और साफ-सुथरे काम से ग्राहक अच्छी रेटिंग देते हैं।\n4. **गोल्ड वेरिफाइड बैज लगवाएं**: वेरिफाइड कारीगरों को 3 गुना ज्यादा काम मिलता है!`,
+        textEn: `🔔 **4 Golden Rules to Get Maximum Jobs in Muzaffarnagar**:\n\n1. **Keep Duty Status 'ONLINE'**: Customers only see and contact active artisans on the platform.\n2. **Respond Promptly**: Prompt responses help build customer trust and improve booking completion rates.\n3. **Maintain 5-Star Ratings**: Polite communication and clean workmanship prompt customers to leave top reviews.\n4. **Get the Gold Verified Badge**: Verified profiles receive greater customer confidence and direct quote requests!`,
+        textHi: `🔔 **मुज़फ़्फ़रनगर में सबसे ज्यादा काम पाने के 4 नियम**:\n\n1. **ड्यूटी स्टेटस 'ONLINE' रखें**: ग्राहक केवल उन्हीं कारीगरों को संपर्क करते हैं जो ऑनलाइन दिखाई देते हैं।\n2. **समय पर जवाब दें**: ग्राहकों को तुरंत जवाब देने से उनका भरोसा बढ़ता है और काम पूरा होने की संभावना बढ़ती है।\n3. **5-स्टार रेटिंग बनाए रखें**: विनम्र व्यवहार और साफ-सुथरे काम से ग्राहक अच्छी रेटिंग देते हैं।\n4. **गोल्ड वेरिफाइड बैज लगवाएं**: वेरिफाइड कारीगरों पर ग्राहकों का विश्वास अधिक रहता है!`,
         actions,
       }
     }

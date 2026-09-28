@@ -73,6 +73,13 @@ export async function createServiceRequest(params: {
   return data as string
 }
 
+export async function cancelServiceRequest(serviceRequestId: string): Promise<void> {
+  const { error } = await (getSupabaseClient() as any).rpc('cancel_service_request', {
+    target_service_request_id: serviceRequestId,
+  })
+  if (error) throw error
+}
+
 export async function createBookingQuoteRequest(params: {
   serviceRequestId: string
   workerId: string

@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button, Card, Avatar, Badge, RatingStars, Chip, Input, Tabs, TabList, Tab, TabPanel, Modal } from '@/ui'
 import { CATEGORIES, getCategoryName, getServiceById } from '@kaamgar/shared'
-import { Star, MapPin, Clock, CheckCircle, Truck, ArrowLeft, Phone, MessageCircle, Zap, Wrench, Hammer, Snowflake, Brush, Calendar, Shield, AlertCircle, Power } from 'lucide-react'
+import { Star, MapPin, Clock, CheckCircle, CheckCircle2, Truck, ArrowLeft, Phone, MessageCircle, Zap, Wrench, Hammer, Snowflake, Brush, Calendar, Shield, AlertCircle, Power } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { fetchApprovedWorker } from '@/services/workers'
 import { fetchWorkerReviews, ReviewItem } from '@/services/reviews'
+import { useAuth } from '@/context/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase'
 
 const iconComponents = {
   zap: Zap,
@@ -22,6 +24,8 @@ export default function WorkerProfile() {
   const navigate = useNavigate()
   const location = useLocation()
   const existingServiceRequestId = location.state?.serviceRequestId as string | undefined
+  const initialServiceId = location.state?.serviceId as string | undefined
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(() => initialServiceId || '')
   const [worker, setWorker] = useState<any>(null)
   const [reviewsList, setReviewsList] = useState<ReviewItem[]>([])
   const [isLoadingReviews, setIsLoadingReviews] = useState(true)
@@ -29,6 +33,31 @@ export default function WorkerProfile() {
   const [error, setError] = useState('')
   const [bookingDraft, setBookingDraft] = useState({ date: '', time: '', pincode: '' })
   const [showContactNotice, setShowContactNotice] = useState(false)
+  const { user, isAuthenticated } = useAuth()
+  const [isPreviouslyHired, setIsPreviouslyHired] = useState(false)
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || !id) {
+      setIsPreviouslyHired(false)
+      return
+    }
+    let isMounted = true
+    const supabase = getSupabaseClient()
+    supabase
+      .from('bookings')
+      .select('id')
+      .eq('customer_id', user.id)
+      .eq('worker_id', id)
+      .eq('status', 'completed')
+      .limit(1)
+      .then(({ data, error }) => {
+        if (!isMounted || error || !data) return
+        setIsPreviouslyHired(data.length > 0)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [isAuthenticated, user?.id, id])
 
   useEffect(() => {
     let isMounted = true
@@ -50,7 +79,14 @@ export default function WorkerProfile() {
           setError('Worker profile not found')
           return
         }
-        const registeredServices = nextWorker.categories
+        const validCategories = nextWorker.categories || []
+        if (initialServiceId && validCategories.includes(initialServiceId)) {
+          setSelectedServiceId(initialServiceId)
+        } else if (validCategories.length === 1) {
+          setSelectedServiceId(validCategories[0])
+        }
+
+        const registeredServices = validCategories
           .map(serviceId => {
             const service = getServiceById(serviceId)
             return service ? (i18n.language === 'hi' ? service.name_hi : service.name_en) : ''
@@ -59,7 +95,7 @@ export default function WorkerProfile() {
 
         setWorker({
           ...nextWorker,
-          category: nextWorker.categories[0] || '',
+          category: validCategories[0] || '',
           phone: null,
           services: registeredServices,
         })
@@ -95,8 +131,19 @@ export default function WorkerProfile() {
     )
   }
 
-  const cat = CATEGORIES.find(c => c.id === worker.category)
-  const Icon = iconComponents[worker.category as keyof typeof iconComponents] || Truck
+  const navigateToBooking = (draft?: { date: string; time: string; pincode: string }) => {
+    const effectiveServiceId = selectedServiceId || (worker?.categories?.length === 1 ? worker.categories[0] : '')
+    navigate(`/booking/${worker.id}`, {
+      state: {
+        bookingDraft: draft || bookingDraft,
+        serviceRequestId: existingServiceRequestId,
+        serviceId: effectiveServiceId,
+      },
+    })
+  }
+
+  const cat = CATEGORIES.find(c => c.id === (selectedServiceId || worker.category))
+  const Icon = iconComponents[(selectedServiceId || worker.category) as keyof typeof iconComponents] || Truck
 
   return (
     <div className="min-h-screen bg-semantic-bg-secondary">
@@ -136,7 +183,15 @@ export default function WorkerProfile() {
                   )}
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-semantic-text-primary">{worker.name}</h1>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-semantic-text-primary">{worker.name}</h1>
+                    {isPreviouslyHired && (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        {t('workerProfile.previouslyHiredByYou', 'Previously Hired by You')}
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-semantic-text-secondary">
                     <span className="flex items-center gap-1">
                       <Icon className="w-4 h-4" />
@@ -170,7 +225,7 @@ export default function WorkerProfile() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="flex-1 sm:flex-none group" onClick={() => navigate(`/booking/${worker.id}`, { state: { serviceRequestId: existingServiceRequestId } })}>
+                  <Button variant="primary" size="lg" className="flex-1 sm:flex-none group" onClick={() => navigateToBooking()}>
                     <Truck className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform" />
                     {t('workerProfile.bookNow')}
                   </Button>
@@ -203,9 +258,21 @@ export default function WorkerProfile() {
                     <Badge variant="brand">{t('workerProfile.servicesCount', { count: worker.services.length })}</Badge>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {worker.services.length > 0 ? worker.services.map((service: string) => (
-                      <Chip key={service} variant="outline">{service}</Chip>
-                    )) : (
+                    {worker.categories?.length > 0 ? worker.categories.map((cId: string) => {
+                      const svc = getServiceById(cId)
+                      const serviceName = svc ? (i18n.language === 'hi' ? svc.name_hi : svc.name_en) : cId
+                      const isSelected = selectedServiceId === cId
+                      return (
+                        <Chip
+                          key={cId}
+                          selected={isSelected}
+                          variant={isSelected ? 'default' : 'outline'}
+                          onClick={() => setSelectedServiceId(cId)}
+                        >
+                          {serviceName} {isSelected && '✓'}
+                        </Chip>
+                      )
+                    }) : (
                       <p className="text-sm text-semantic-text-secondary">No registered services available.</p>
                     )}
                   </div>
@@ -323,6 +390,28 @@ export default function WorkerProfile() {
                       </select>
                     </div>
                   </div>
+                  {worker.categories?.length > 1 && (
+                    <div>
+                      <label className="label">{t('booking.selectService', 'Select Service')}</label>
+                      <select
+                        disabled={!worker.available}
+                        value={selectedServiceId}
+                        onChange={e => setSelectedServiceId(e.target.value)}
+                        className="input disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        <option value="">{t('booking.chooseService', 'Choose a service...')}</option>
+                        {worker.categories.map((cId: string) => {
+                          const svc = getServiceById(cId)
+                          const name = svc ? (i18n.language === 'hi' ? svc.name_hi : svc.name_en) : cId
+                          return (
+                            <option key={cId} value={cId}>
+                              {name}
+                            </option>
+                          )
+                        })}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="label">{t('booking.pincode')}</label>
                     <Input 
@@ -341,7 +430,7 @@ export default function WorkerProfile() {
                     className="w-full" 
                     size="lg" 
                     disabled={!worker.available}
-                    onClick={() => navigate(`/booking/${worker.id}`, { state: { bookingDraft, serviceRequestId: existingServiceRequestId } })}
+                    onClick={() => navigateToBooking(bookingDraft)}
                   >
                     {worker.available ? t('booking.confirmBooking') : t('workerProfile.unavailable', 'Currently Unavailable')}
                   </Button>
@@ -398,7 +487,7 @@ export default function WorkerProfile() {
               className="w-full flex items-center justify-center gap-2"
               onClick={() => {
                 setShowContactNotice(false)
-                navigate(`/booking/${worker.id}`, { state: { serviceRequestId: existingServiceRequestId } })
+                navigateToBooking()
               }}
             >
               <Truck className="w-4 h-4" />

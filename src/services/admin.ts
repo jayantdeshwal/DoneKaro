@@ -273,10 +273,19 @@ export interface AdminNotificationItem {
   created_at: string
 }
 
+export const ADMIN_NOTIFICATION_TYPES = [
+  'worker_registration_submitted',
+  'worker_document_uploaded',
+] as const
+
 /**
- * Fetches all notifications relevant to administrators:
+ * Fetches all notifications strictly relevant to administrators:
  * - Worker registrations pending review
  * - ID proof uploads
+ * - Operational & system alerts
+ *
+ * Enforces audience isolation so participant-facing booking notifications
+ * (belonging to customers or workers) are never returned in the admin feed.
  */
 export async function fetchAdminNotifications(): Promise<AdminNotificationItem[]> {
   const supabase = getSupabaseClient()
@@ -287,12 +296,16 @@ export async function fetchAdminNotifications(): Promise<AdminNotificationItem[]
   })
 
   if (!rpcError && Array.isArray(rpcData)) {
-    return rpcData as AdminNotificationItem[]
+    // Structural isolation: Ensure only admin-targeted types are returned
+    return (rpcData as AdminNotificationItem[]).filter(item =>
+      ADMIN_NOTIFICATION_TYPES.includes(item.notification_type as any)
+    )
   }
 
-  // 2. Fallback to direct notifications query (fetches registrations, documents, bookings & system alerts)
+  // 2. Fallback to direct notifications query with explicit admin audience boundary
   const { data, error } = await (supabase.from('notifications') as any)
     .select('id, user_id, booking_id, notification_type, title, body, read_at, created_at')
+    .in('notification_type', ADMIN_NOTIFICATION_TYPES)
     .order('created_at', { ascending: false })
     .limit(100)
 

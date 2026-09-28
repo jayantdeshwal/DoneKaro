@@ -5,10 +5,12 @@ import { useSearchParams, useLocation } from 'react-router-dom'
 import { Button, Card, Avatar, Badge, RatingStars, Chip, Input } from '@/ui'
 import { CATEGORIES, getCategoryName, getServicesByCategoryId, getServiceById, getCategoryById } from '@kaamgar/shared'
 import { usePublicCatalog } from '@/hooks/usePublicCatalog'
-import { Search as SearchIcon, Filter, MapPin, Star, Clock, CheckCircle, Truck, X, ChevronDown, ArrowRight, ArrowLeft, Power } from 'lucide-react'
+import { Search as SearchIcon, Filter, MapPin, Star, Clock, CheckCircle, CheckCircle2, Truck, X, ChevronDown, ArrowRight, ArrowLeft, Power } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fetchApprovedWorkers } from '@/services/workers'
+import { useAuth } from '@/context/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase'
 
 interface SearchWorker {
   id: string
@@ -118,7 +120,7 @@ function EmptyState({ t, clearFilters }: any) {
   )
 }
 
-function WorkerGrid({ filteredWorkers, t, iconComponents, CATEGORIES, getCategoryName, i18n, quoteServiceRequestId, selectedServiceId }: any) {
+function WorkerGrid({ filteredWorkers, t, iconComponents, CATEGORIES, getCategoryName, i18n, quoteServiceRequestId, selectedServiceId, previouslyHiredWorkerIds }: any) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.08 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {filteredWorkers.map((worker: any, index: number) => {
@@ -144,11 +146,19 @@ function WorkerGrid({ filteredWorkers, t, iconComponents, CATEGORIES, getCategor
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-semantic-text-primary truncate">{worker.name}</h3>
-                      {worker.verified && (
-                        <Badge variant="brand" dot className="ml-2">
-                          {t('workerCard.verified', 'Verified')}
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                        {previouslyHiredWorkerIds?.has(worker.id) && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                            <CheckCircle2 className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                            {t('search.previouslyHired', 'Previously Hired')}
+                          </span>
+                        )}
+                        {worker.verified && (
+                          <Badge variant="brand" dot>
+                            {t('workerCard.verified', 'Verified')}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-semantic-text-secondary">
                       <span className="flex items-center gap-1" title={catLabel}>
@@ -205,7 +215,7 @@ function WorkerGrid({ filteredWorkers, t, iconComponents, CATEGORIES, getCategor
   )
 }
 
-function SearchResults({ filteredWorkers, selectedCategory, isLoadingWorkers, t, getCategoryName, CATEGORIES, iconComponents, EmptyState, WorkerGrid, i18n, quoteServiceRequestId, serviceDiscovery }: any) {
+function SearchResults({ filteredWorkers, selectedCategory, isLoadingWorkers, t, getCategoryName, CATEGORIES, iconComponents, EmptyState, WorkerGrid, i18n, quoteServiceRequestId, serviceDiscovery, previouslyHiredWorkerIds }: any) {
   const selectedServiceId = serviceDiscovery && getServiceById(selectedCategory)?.id
   return (
     <>
@@ -218,7 +228,7 @@ function SearchResults({ filteredWorkers, selectedCategory, isLoadingWorkers, t,
       ) : filteredWorkers.length === 0 ? (
         <EmptyState t={t} clearFilters={() => {}} />
       ) : (
-        <WorkerGrid filteredWorkers={filteredWorkers} t={t} iconComponents={iconComponents} CATEGORIES={CATEGORIES} getCategoryName={getCategoryName} i18n={i18n} quoteServiceRequestId={quoteServiceRequestId} selectedServiceId={selectedServiceId} />
+        <WorkerGrid filteredWorkers={filteredWorkers} t={t} iconComponents={iconComponents} CATEGORIES={CATEGORIES} getCategoryName={getCategoryName} i18n={i18n} quoteServiceRequestId={quoteServiceRequestId} selectedServiceId={selectedServiceId} previouslyHiredWorkerIds={previouslyHiredWorkerIds} />
       )}
     </>
   )
@@ -227,6 +237,7 @@ function SearchResults({ filteredWorkers, selectedCategory, isLoadingWorkers, t,
 export default function Search() {
   const { t, i18n } = useTranslation()
   const { categories, serviceAreas } = usePublicCatalog()
+  const { user, isAuthenticated } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const serviceDiscovery = searchParams.get('source') === 'category'
@@ -238,7 +249,30 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const [workerData, setWorkerData] = useState<SearchWorker[]>([])
   const [isLoadingWorkers, setIsLoadingWorkers] = useState(true)
+  const [previouslyHiredWorkerIds, setPreviouslyHiredWorkerIds] = useState<Set<string>>(new Set())
   const quoteServiceRequestId = location.state?.quoteServiceRequestId as string | undefined
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      setPreviouslyHiredWorkerIds(new Set())
+      return
+    }
+    let isMounted = true
+    const supabase = getSupabaseClient()
+    supabase
+      .from('bookings')
+      .select('worker_id')
+      .eq('customer_id', user.id)
+      .eq('status', 'completed')
+      .then(({ data, error }) => {
+        if (!isMounted || error || !data) return
+        const ids = new Set<string>((data as any[]).map(b => b.worker_id).filter(Boolean))
+        setPreviouslyHiredWorkerIds(ids)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [isAuthenticated, user?.id])
 
   useEffect(() => {
     const cat = searchParams.get('category')
@@ -374,7 +408,7 @@ export default function Search() {
       </motion.div>
 
       <div className="container-app py-8">
-          <SearchResults filteredWorkers={filteredWorkers} selectedCategory={selectedCategory} isLoadingWorkers={isLoadingWorkers} t={t} getCategoryName={getCategoryName} CATEGORIES={categories} iconComponents={iconComponents} EmptyState={EmptyState} WorkerGrid={WorkerGrid} i18n={i18n} quoteServiceRequestId={quoteServiceRequestId} serviceDiscovery={serviceDiscovery} />
+          <SearchResults filteredWorkers={filteredWorkers} selectedCategory={selectedCategory} isLoadingWorkers={isLoadingWorkers} t={t} getCategoryName={getCategoryName} CATEGORIES={categories} iconComponents={iconComponents} EmptyState={EmptyState} WorkerGrid={WorkerGrid} i18n={i18n} quoteServiceRequestId={quoteServiceRequestId} serviceDiscovery={serviceDiscovery} previouslyHiredWorkerIds={previouslyHiredWorkerIds} />
       </div>
     </div>
   )

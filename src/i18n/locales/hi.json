@@ -186,7 +186,7 @@
     "stickyCategoriesTitle": "सभी सेवा श्रेणियां",
     "stickyAreasTitle": "मुजफ्फरनगर का क्षेत्र चुनें",
     "stickyPopularSearches": "लोकप्रिय खोजें",
-    "instaHelp": "इंस्टाहेल्प (30 मिनट में)",
+    "instaHelp": "त्वरित सहायता",
     "allServicesGrid": "सभी सेवाएं",
     "nativeServices": "सत्यापित मुजफ्फरनगर सेवाएं",
     "spotlightTitle": "विशेष आकर्षण",
@@ -218,11 +218,11 @@
     "noApprovedMatch": "चुनी गई श्रेणी या क्षेत्र में कोई स्वीकृत कारीगर नहीं मिला।",
     "tryCategories": "इन सक्रिय श्रेणियों में देखें:",
     "servicesSubtitle": "0% कमीशन पर सत्यापित स्थानीय तकनीशियन बुक करें",
-    "fastestArrival": "सबसे जल्दी पहुंच",
+    "fastestArrival": "सत्यापित कारीगर",
     "personalCare": "व्यक्तिगत देखभाल",
     "furnitureFix": "फर्नीचर मरम्मत",
     "homeHelp": "घर की मदद",
-    "minutes": "44 मिनट",
+    "minutes": "मरम्मत व सर्विस",
     "moreServices": "इलेक्ट्रीशियन, प्लंबर +",
     "city": "मुजफ्फरनगर",
     "areaDefault": "मुजफ्फरनगर (251001 और 251002)",
@@ -344,7 +344,7 @@
     "confirmDesc": "कृपया सबमिट करने से पहले अपनी बुकिंग विवरण की जांच करें।",
     "bookingConfirmDesc": "आपका बुकिंग अनुरोध दर्ज कर दिया गया है। कारीगर जल्द ही पुष्टि करेंगे।",
     "bookingSent": "बुकिंग रिक्वेस्ट भेज दी गई!",
-    "bookingSentDesc": "{{name}} को सूचना दे दी गई है। 30 मिनट में जवाब मिल जाएगा।",
+    "bookingSentDesc": "{{name}} को सूचना दे दी गई है। कारीगर आपके अनुरोध की समीक्षा कर कोटेशन भेजेंगे।",
     "trackBooking": "बुकिंग ट्रैक करें",
     "status": {
       "pending": "लंबित",
@@ -548,6 +548,48 @@
     ,"paymentActionFailed": "भुगतान अपडेट नहीं हो सका। कृपया फिर कोशिश करें।"
     ,"openInGoogleMaps": "Google Maps में खोलें"
     ,"customerLocationUnavailable": "इस बुकिंग के लिए ग्राहक का पता उपलब्ध नहीं है।"
+    ,"serviceCompleted": "सेवा पूरी हो गई"
+    ,"paymentSuccessful": "भुगतान सफल रहा"
+    ,"payWithCash": "कैश से भुगतान करें"
+    ,"payWorkerInCash": "ऊपर दिखाई गई राशि कारीगर को नकद (कैश) में दें।"
+    ,"ivePaidCash": "मैंने कैश दे दिया है"
+    ,"cashPaymentSubmitted": "कैश भुगतान दर्ज हुआ"
+    ,"cashPaymentSubmittedMsg": "कैश भुगतान दर्ज हो गया। कारीगर की पुष्टि का इंतजार है।"
+    ,"waitingForWorkerConfirmationDesc": "कारीगर की पुष्टि का इंतजार है। भुगतान की पुष्टि होते ही आपकी रसीद दिखाई देगी।"
+    ,"viewReceipt": "रसीद देखें"
+    ,"paymentReceipt": "भुगतान रसीद"
+    ,"officialReceipt": "आधिकारिक कैश भुगतान रसीद"
+    ,"workerQuote": "कारीगर का कोटेशन"
+    ,"initialQuote": "शुरुआती कोटेशन"
+    ,"totalPaid": "कुल भुगतान"
+    ,"printReceipt": "रसीद प्रिंट / सेव करें"
+    ,"verifiedCashPayment": "सत्यापित कैश भुगतान"
+    ,"receiptFooterNote": "यह रसीद मुजफ्फरनगर में सेवा के लिए कारीगर द्वारा सीधे कैश भुगतान प्राप्त होने की पुष्टि करती है। जुगनू द्वारा सत्यापित।"
+    ,"onlinePaymentComingSoon": "ऑनलाइन भुगतान (UPI / कार्ड) जल्द आ रहा है"
+    ,"receiptNotAvailableYet": "रसीद तैयार हो रही है। कृपया कुछ ही पलों में रीफ्रेश करें।"
+    ,"viewDetails": "विवरण देखें"
+    ,"completedJobDetails": "पूर्ण सेवा विवरण"
+    ,"previouslyHired": "पहले सेवा ली गई"
+    ,"previouslyHiredByYou": "आपने पहले इनसे सेवा ली है"
+    ,"serviceNotes": "ग्राहक अनुरोध विवरण"
+    ,"yourReview": "आपकी रेटिंग और समीक्षा"
+    ,"notReviewedYet": "अभी समीक्षा नहीं की गई"
+    ,"noComment": "बिना टिप्पणी के रेटिंग दी गई"
+    ,"reviewed": "समीक्षा दी"
+    ,"bookAgainTitle": "यह सेवा दोबारा बुक करें"
+    ,"previousArtisan": "पिछले कारीगर"
+    ,"bookAgainPrompt": "आप यह सेवा कैसे बुक करना चाहते हैं? आप उसी कारीगर से कोटेशन मांग सकते हैं या मुजफ्फरनगर के अन्य सत्यापित कारीगरों को देख सकते हैं।"
+    ,"rehireWorker": "{{name}} को दोबारा बुक करें"
+    ,"rehireWorkerDesc": "अपने पिछले कारीगर से सीधे बुक करें। पता और सेवा पहले से भरी होगी।"
+    ,"browseAllArtisans": "अन्य कारीगर देखें"
+    ,"browseAllArtisansDesc": "इस सेवा श्रेणी के सभी उपलब्ध सत्यापित कारीगरों को देखें और तुलना करें।"
+  },
+  "search": {
+    "previouslyHired": "पहले सेवा ली गई"
+  },
+  "workerProfile": {
+    "previouslyHired": "पहले सेवा ली गई",
+    "previouslyHiredByYou": "आपने पहले इनसे सेवा ली है"
   },
   "workerDashboard": {
     "title": "कारीगर डैशबोर्ड",
@@ -671,6 +713,33 @@
     "supportDescription": "सत्यापन, भुगतान या किसी मदद के लिए हमारी प्रशासन टीम से संपर्क करें।",
     "whatsappDesk": "व्हाट्सऐप कारीगर सहायता",
     "directSupport": "मुजफ्फरनगर के कारीगरों के लिए सीधी सहायता"
+    ,"paymentRequiredFromCustomer": "ग्राहक से भुगतान बाकी है"
+    ,"waitingForCustomerPaymentConfirmation": "ग्राहक की भुगतान पुष्टि का इंतजार है। ग्राहक को कैश देने की पुष्टि करनी होगी।"
+    ,"cashPaymentAwaitingConfirmation": "कैश भुगतान की पुष्टि प्रतीक्षित"
+    ,"pendingConfirmation": "पुष्टि लंबित"
+    ,"customerCashConfirmedDesc": "ग्राहक ने कैश देने की पुष्टि कर दी है।"
+    ,"confirmCashReceived": "कैश मिलने की पुष्टि करें"
+    ,"confirmCashReceivedTitle": "कैश मिलने की पुष्टि करें"
+    ,"confirmCashReceivedNotice": "पुष्टि करके, आप प्रमाणित करते हैं कि आपने ग्राहक से यह सटीक कैश राशि प्राप्त कर ली है। काम पूरा दर्ज हो जाएगा और आधिकारिक रसीद बन जाएगी।"
+    ,"paymentReceivedJobCompleted": "भुगतान प्राप्त हुआ — कार्य पूर्ण"
+    ,"paymentReceivedSuccess": "कैश भुगतान की पुष्टि हो गई और काम सफलतापूर्वक पूरा हो गया!"
+    ,"paymentAlreadyPaid": "भुगतान पहले ही पुष्ट हो चुका है।"
+    ,"viewReceipt": "रसीद देखें"
+    ,"businessSummary": "व्यापार सारांश"
+    ,"completedJobs": "पूरे हुए काम"
+    ,"paymentsReceived": "प्राप्त भुगतान"
+    ,"paymentsReceivedDesc": "पूरे हुए कामों से प्राप्त कुल कैश भुगतान (0% कमीशन)"
+    ,"thisMonthPayments": "इस महीने"
+    ,"averagePayment": "औसत प्रति काम"
+    ,"repeatCustomer": "पुराने ग्राहक"
+    ,"viewDetails": "विवरण देखें"
+    ,"completedJobDetails": "पूर्ण कार्य विवरण"
+    ,"customerReview": "ग्राहक समीक्षा"
+    ,"noReviewYet": "अभी कोई समीक्षा नहीं"
+    ,"customerReviews": "ग्राहक समीक्षाएँ"
+    ,"viewAllReviews": "सभी समीक्षाएँ देखें"
+    ,"zeroCommissionNotice": "0% प्लेटफ़ॉर्म कमीशन — 100% कैश कमाई आपकी है"
+    ,"ratedOn": "{{date}} को समीक्षा दी गई"
   },
   "review": {
     "title": "अपना अनुभव रेट करें",
