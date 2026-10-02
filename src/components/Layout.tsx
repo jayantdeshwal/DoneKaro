@@ -17,7 +17,6 @@ import { useTheme } from '../context/ThemeContext'
 import NetworkStatus from './NetworkStatus'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import AiAssistantModal from './ai/AiAssistantModal'
-import AiFloatingTrigger from './ai/AiFloatingTrigger'
 import JugnuLogo from './common/JugnuLogo'
 
 export default function Layout() {
@@ -262,7 +261,7 @@ export default function Layout() {
             {/* Top Right: AI Support Button */}
             <button
               type="button"
-              onClick={() => openAssistant('customer_booking')}
+              onClick={() => openAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-extrabold text-xs shadow-md shadow-amber-500/25 hover:brightness-105 active:scale-95 transition-all border border-amber-400/40 cursor-pointer shrink-0"
               aria-label="AI Support"
               title="AI Support Assistant"
@@ -698,15 +697,8 @@ export default function Layout() {
                 </li>
               </ul>
 
-              {/* Helpline direct links */}
+              {/* Help & Support direct links */}
               <div className="pt-3 border-t border-slate-200 dark:border-zinc-800 space-y-1.5">
-                <a
-                  href="tel:+919876543210"
-                  className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 font-semibold transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5 shrink-0" />
-                  <span>{t('footer.emergencyCall')}</span>
-                </a>
                 <a
                   href="mailto:support@jugnu.in"
                   className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors"
@@ -1020,27 +1012,18 @@ export default function Layout() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       setMobileMenuOpen(false)
-                      openAssistant('customer_booking')
+                      openAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')
                     }}
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-xs hover:bg-amber-400 active:scale-95 transition-all cursor-pointer text-center"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-xs hover:bg-amber-400 active:scale-95 transition-all cursor-pointer text-center"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>AI Support</span>
                   </button>
-
-                  <a
-                    href="tel:+919876543210"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-bold text-xs hover:bg-slate-50 dark:hover:bg-zinc-700 active:scale-95 transition-all text-center"
-                  >
-                    <Phone className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>कॉल हेल्पलाइन</span>
-                  </a>
                 </div>
               </div>
             </div>
@@ -1083,7 +1066,6 @@ export default function Layout() {
       />
       
       <PWAInstallPrompt />
-      <AiFloatingTrigger />
       <AiAssistantModal />
     </div>
   )

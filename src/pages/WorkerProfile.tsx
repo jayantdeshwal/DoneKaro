@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { fetchApprovedWorker } from '@/services/workers'
 import { fetchWorkerReviews, ReviewItem } from '@/services/reviews'
 import { useAuth } from '@/context/AuthContext'
+import { useAiAssistant } from '@/context/AiAssistantContext'
 import { getSupabaseClient } from '@/lib/supabase'
 
 const iconComponents = {
@@ -20,6 +21,7 @@ const iconComponents = {
 
 export default function WorkerProfile() {
   const { t, i18n } = useTranslation()
+  const { openAssistant } = useAiAssistant()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -446,16 +448,20 @@ export default function WorkerProfile() {
               <Card className="p-6 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-brand-600" />
+                    <Shield className="w-5 h-5 text-brand-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-semantic-text-primary">{t('workerProfile.needHelp', 'Need Help?')}</h3>
-                    <p className="text-sm text-semantic-text-secondary">{t('workerProfile.helpSubtitle', 'Call us for assistance')}</p>
+                    <p className="text-sm text-semantic-text-secondary">{t('workerProfile.helpSubtitleAi', 'Get guided assistance with your booking')}</p>
                   </div>
                 </div>
-                <Button variant="primary" className="w-full">
-                  <Phone className="w-5 h-5 mr-2" />
-                  {t('workerProfile.callSupport', 'Call Support')}
+                <Button
+                  variant="primary"
+                  className="w-full flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={() => openAssistant('customer_booking')}
+                >
+                  <Zap className="w-4 h-4 mr-1" />
+                  {t('workerProfile.askBookingHelp', 'Ask Booking Help')}
                 </Button>
               </Card>
             </motion.div>

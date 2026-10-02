@@ -71,7 +71,6 @@ export default function Profile() {
 
   const [editMode, setEditMode] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  const [showSupportModal, setShowSupportModal] = useState(false)
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('')
@@ -1247,66 +1246,6 @@ export default function Profile() {
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ===================================================================== */}
-      {/* 7. HELP & SUPPORT MODAL                                               */}
-      {/* ===================================================================== */}
-      <Modal
-        isOpen={showSupportModal}
-        onClose={() => setShowSupportModal(false)}
-        title="Jugnu Helpline"
-        description="Connect with our local support team for booking assistance, issues, or enquiries."
-      >
-        <div className="space-y-3 pt-2">
-          {/* WhatsApp Direct Chat */}
-          <a
-            href="https://api.whatsapp.com/send?phone=918077362606&text=Hello%2C%20I%20need%20assistance%20with%20Jugnu%20services"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300">
-                  WhatsApp Support Chat
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  Instant replies (8:00 AM - 9:00 PM)
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-          </a>
-
-          {/* Emergency Phone Helpline */}
-          <a
-            href="tel:+918077362606"
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-750 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-brand-400">
-                <PhoneCall className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-brand-300">
-                  Call Support Line
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  +91 8077362606
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
-          </a>
-
-          <div className="pt-2 text-center text-xs text-slate-500 dark:text-zinc-400">
-            <p>Official City Initiative for Muzaffarnagar, Uttar Pradesh</p>
           </div>
         </div>
       </Modal>

@@ -146,7 +146,6 @@ export default function WorkerDashboard() {
       setActiveTab('all')
     }
   }, [searchParams])
-  const [showSupportModal, setShowSupportModal] = useState(false)
 
   // Contact modal state
   const [contactModalData, setContactModalData] = useState<{
@@ -734,17 +733,20 @@ export default function WorkerDashboard() {
             </span>
           </button>
 
-          {/* Tile 3: Artisan Helpline */}
+          {/* Tile 3: Work Advice */}
           <button
             type="button"
-            onClick={() => setShowSupportModal(true)}
-            className="p-3 sm:p-4 rounded-2xl bg-surface-100 border border-semantic-border-light hover:border-blue-500/40 hover:bg-surface-200/80 transition-all flex flex-col items-center justify-center text-center group shadow-sm active:scale-95"
+            onClick={() => {
+              const activeJob = bookings.find(b => b.status === 'accepted' || b.status === 'in_progress' || b.status === 'payment_pending')
+              openAssistant('worker_sarathi', undefined, activeJob?.id)
+            }}
+            className="p-3 sm:p-4 rounded-2xl bg-surface-100 border border-semantic-border-light hover:border-blue-500/40 hover:bg-surface-200/80 transition-all flex flex-col items-center justify-center text-center group shadow-sm active:scale-95 cursor-pointer"
           >
             <div className="w-10 h-10 rounded-xl bg-surface-200 group-hover:bg-blue-500/15 flex items-center justify-center text-blue-400 mb-2 transition-colors">
               <Headphones className="w-5 h-5" />
             </div>
             <span className="text-xs font-bold text-slate-900 dark:text-zinc-200 group-hover:text-blue-500 dark:group-hover:text-blue-400 leading-tight">
-              {t('workerDashboard.artisanHelpline', 'Artisan Helpline')}
+              {i18n.language === 'hi' ? 'काम व सेवा सलाह' : 'Work Advice'}
             </span>
           </button>
         </div>
@@ -760,7 +762,7 @@ export default function WorkerDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
-                  {i18n.language === 'hi' ? 'जुगनू सारथी AI (कारीगर साथी)' : 'Jugnu Sarathi AI (Artisan Coach)'}
+                  {i18n.language === 'hi' ? 'जुगनू सारथी AI (काम व सेवा सलाह)' : 'Jugnu Sarathi AI (Work Advice)'}
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
                   24x7 AI
@@ -768,15 +770,18 @@ export default function WorkerDashboard() {
               </div>
               <p className="text-[11px] text-semantic-text-secondary">
                 {i18n.language === 'hi'
-                  ? 'ग्राहक को व्हाट्सऐप मैसेज, अधिक काम पाने के तरीके और 0% कमीशन नियम जानें'
-                  : 'WhatsApp reply templates, earning tips & zero-commission policy guide'}
+                  ? 'ग्राहक को व्हाट्सऐप मैसेज, अधिक काम पाने के तरीके और सेवा नियम जानें'
+                  : 'WhatsApp reply templates, earning tips & service policy guide'}
               </p>
             </div>
           </div>
 
           <button
             type="button"
-            onClick={() => openAssistant('worker_sarathi')}
+            onClick={() => {
+              const activeJob = bookings.find(b => b.status === 'accepted' || b.status === 'in_progress' || b.status === 'payment_pending')
+              openAssistant('worker_sarathi', undefined, activeJob?.id)
+            }}
             className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -1822,7 +1827,20 @@ export default function WorkerDashboard() {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex gap-2.5 pt-2">
+              <div className="flex flex-wrap gap-2.5 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const bId = detailsModalBooking.id
+                    setDetailsModalBooking(null)
+                    openAssistant('worker_sarathi', undefined, bId)
+                  }}
+                  className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                >
+                  <Briefcase className="w-3.5 h-3.5" />
+                  <span>{i18n.language === 'hi' ? 'सारथी सलाह' : 'Sarathi Advice'}</span>
+                </Button>
                 {summary?.receipt_number && (
                   <Button
                     variant="outline"
@@ -2014,58 +2032,6 @@ export default function WorkerDashboard() {
             </div>
           )
         })()}
-      </Modal>
-
-      {/* Artisan Helpline Modal */}
-      <Modal
-        isOpen={showSupportModal}
-        onClose={() => setShowSupportModal(false)}
-        title={t('workerDashboard.supportTitle', 'Artisan Support & Coordination')}
-        description={t('workerDashboard.supportDescription', 'Connect with our administrator team for verification, payment queries, or assistance.')}
-      >
-        <div className="space-y-3 pt-2">
-          <a
-            href="https://api.whatsapp.com/send?phone=918077362606&text=Hello%20Admin%2C%20I%20am%20a%20registered%20Jugnu%20artisan%20and%20need%20assistance"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-300">
-                  {t('workerDashboard.whatsappDesk', 'WhatsApp Artisan Desk')}
-                </p>
-                <p className="text-[11px] text-semantic-text-secondary">
-                  {t('workerDashboard.directSupport', 'Direct support for Muzaffarnagar artisans')}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-emerald-400" />
-          </a>
-
-          <a
-            href="tel:+918077362606"
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-200 border border-semantic-border-light hover:bg-surface-300 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-400">
-                <PhoneCall className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-brand-300">
-                  Call Helpline
-                </p>
-                <p className="text-[11px] text-semantic-text-secondary">
-                  +91 8077362606
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-semantic-text-tertiary" />
-          </a>
-        </div>
       </Modal>
     </div>
   )

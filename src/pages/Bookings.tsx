@@ -1007,6 +1007,18 @@ export default function Bookings() {
                 {t('bookings.bookAgain', 'Book Again')}
               </Button>
             )}
+
+            {!isPast && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openAssistant('customer_care', undefined, booking.id)}
+                className="text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>{t('bookings.askAi', 'AI Help')}</span>
+              </Button>
+            )}
           </div>
 
           {canCancel && (
@@ -1103,7 +1115,7 @@ export default function Bookings() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-slate-900 dark:text-white">
-                {i18n.language === 'hi' ? 'जुगनू AI सहायता (24x7)' : 'Jugnu AI Helpdesk (24x7)'}
+                {i18n.language === 'hi' ? 'जुगनू AI सहायता (24x7)' : 'Jugnu AI Support (24x7)'}
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                 {i18n.language === 'hi'
@@ -1114,11 +1126,11 @@ export default function Bookings() {
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
-              onClick={() => openAssistant('customer_care')}
-              className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              onClick={() => openAssistant('customer_care', undefined, upcomingBookings[0]?.id)}
+              className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
               <Shield className="w-3.5 h-3.5" />
-              <span>{i18n.language === 'hi' ? 'जुगनू समाधान' : 'Jugnu Care'}</span>
+              <span>{i18n.language === 'hi' ? 'सहायता एवं सहयोग' : 'Help & Support'}</span>
             </button>
           </div>
         </div>

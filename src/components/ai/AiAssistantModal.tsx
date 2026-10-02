@@ -20,12 +20,14 @@ import {
   Briefcase,
   Search,
   MessageCircle,
-  PhoneCall,
   Calendar,
   Clock,
   MapPin,
   ArrowRight,
+  FileText,
+  AlertCircle,
 } from 'lucide-react'
+import { SupportRequestModal, SupportHistoryModal } from '@/features/support'
 
 export default function AiAssistantModal() {
   const { t } = useTranslation()
@@ -45,12 +47,29 @@ export default function AiAssistantModal() {
 
   const [input, setInput] = useState('')
   const [copiedActionId, setCopiedActionId] = useState<string | null>(null)
+  const [supportModalOpen, setSupportModalOpen] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [supportBookingId, setSupportBookingId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isHindi = language === 'hi'
-  const currentConfig = ASSISTANT_CONFIGS[activePersona]
+  const currentConfig = ASSISTANT_CONFIGS[activePersona] || ASSISTANT_CONFIGS.customer_booking
   const currentMessages = messages[activePersona] || []
+
+  // Enforce role-aware mode access: workers only see worker_sarathi, customers see booking and care
+  useEffect(() => {
+    if (!isOpen) return
+    if (isWorker && !isAdmin) {
+      if (activePersona !== 'worker_sarathi') {
+        switchPersona('worker_sarathi')
+      }
+    } else if (!isAdmin) {
+      if (activePersona === 'worker_sarathi') {
+        switchPersona('customer_booking')
+      }
+    }
+  }, [isOpen, isWorker, isAdmin, activePersona, switchPersona])
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -95,6 +114,13 @@ export default function AiAssistantModal() {
       setTimeout(() => setCopiedActionId(null), 2500)
     } else if (action.type === 'quick_reply') {
       sendMessage(action.payload)
+    } else if (action.type === 'create_support_request') {
+      if (action.payload === 'history') {
+        setHistoryModalOpen(true)
+      } else {
+        setSupportBookingId(action.payload || null)
+        setSupportModalOpen(true)
+      }
     }
   }
 
@@ -102,8 +128,10 @@ export default function AiAssistantModal() {
     if (action.icon === 'Zap') return <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
     if (action.icon === 'Search') return <Search className="w-3.5 h-3.5 text-blue-400 shrink-0" />
     if (action.icon === 'MessageCircle') return <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-    if (action.icon === 'PhoneCall') return <PhoneCall className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
     if (action.icon === 'Calendar') return <Calendar className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+    if (action.icon === 'Briefcase') return <Briefcase className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+    if (action.icon === 'FileText') return <FileText className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+    if (action.icon === 'AlertCircle') return <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
     if (action.icon === 'Copy') {
       return copiedActionId === action.id ? (
         <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -115,14 +143,15 @@ export default function AiAssistantModal() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+    <>
+      <div
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
       onClick={e => {
         if (e.target === e.currentTarget) closeAssistant()
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Jugnu AI Assistant"
+      aria-label="Jugnu AI Support"
     >
       <div className="w-full sm:max-w-lg h-[92vh] sm:h-[650px] max-h-[92vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-zinc-100">
         {/* Top Handle for mobile drag visual */}
@@ -168,46 +197,52 @@ export default function AiAssistantModal() {
           </div>
         </div>
 
-        {/* Persona Switcher Tabs */}
+        {/* Persona Switcher Tabs (Role-Aware) */}
         <div className="px-3 py-2 bg-slate-50/80 dark:bg-zinc-850/80 border-b border-slate-200 dark:border-zinc-800 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {/* Persona 1: Customer Booking Mitra */}
-          <button
-            onClick={() => switchPersona('customer_booking')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activePersona === 'customer_booking'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <span>🛠️</span>
-            <span>{isHindi ? 'बुकिंग मित्र' : 'Booking Guide'}</span>
-          </button>
+          {/* Mode 1: Customer Booking Help (Visible to customers and admin) */}
+          {(!isWorker || isAdmin) && (
+            <button
+              onClick={() => switchPersona('customer_booking')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activePersona === 'customer_booking'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700'
+              }`}
+            >
+              <span>🛠️</span>
+              <span>{isHindi ? 'बुकिंग सहायता' : 'Booking Help'}</span>
+            </button>
+          )}
 
-          {/* Persona 2: Customer Support & Resolution */}
-          <button
-            onClick={() => switchPersona('customer_care')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activePersona === 'customer_care'
-                ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>{isHindi ? 'समाधान व सहायता' : 'Care & Support'}</span>
-          </button>
+          {/* Mode 2: Customer Help & Support (Visible to customers and admin) */}
+          {(!isWorker || isAdmin) && (
+            <button
+              onClick={() => switchPersona('customer_care')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activePersona === 'customer_care'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>{isHindi ? 'सहायता एवं सहयोग' : 'Help & Support'}</span>
+            </button>
+          )}
 
-          {/* Persona 3: Worker Sarathi Coach */}
-          <button
-            onClick={() => switchPersona('worker_sarathi')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activePersona === 'worker_sarathi'
-                ? 'bg-amber-600 text-white font-bold shadow-xs'
-                : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
-            }`}
-          >
-            <Briefcase className="w-3.5 h-3.5" />
-            <span>{isHindi ? 'कारीगर सारथी' : 'Artisan Coach'}</span>
-          </button>
+          {/* Mode 3: Worker Work Advice (Visible to workers and admin) */}
+          {(isWorker || isAdmin) && (
+            <button
+              onClick={() => switchPersona('worker_sarathi')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                activePersona === 'worker_sarathi'
+                  ? 'bg-amber-600 text-white font-bold shadow-xs'
+                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>{isHindi ? 'काम व सेवा सलाह' : 'Work Advice'}</span>
+            </button>
+          )}
         </div>
 
         {/* Quick Suggestion Chips Carousel */}
@@ -350,5 +385,27 @@ export default function AiAssistantModal() {
         </form>
       </div>
     </div>
+
+    {/* Support Request Confirmation Modal (Phase 10C) */}
+    {supportModalOpen && (
+      <SupportRequestModal
+        isOpen={supportModalOpen}
+        onClose={() => setSupportModalOpen(false)}
+        bookingId={supportBookingId}
+        onViewHistory={() => {
+          setSupportModalOpen(false)
+          setHistoryModalOpen(true)
+        }}
+      />
+    )}
+
+    {/* Support History Modal (Phase 10C) */}
+    {historyModalOpen && (
+      <SupportHistoryModal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+      />
+    )}
+  </>
   )
 }

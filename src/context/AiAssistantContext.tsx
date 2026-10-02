@@ -6,13 +6,15 @@ import { processAiQuery } from '../services/ai/aiEngine'
 interface AiAssistantContextType {
   isOpen: boolean
   activePersona: AssistantPersona
+  activeBookingId: string | null
   messages: Record<AssistantPersona, ChatMessage[]>
   isTyping: boolean
-  openAssistant: (persona?: AssistantPersona, initialQuery?: string) => void
+  openAssistant: (persona?: AssistantPersona, initialQuery?: string, bookingHintId?: string) => void
   closeAssistant: () => void
   switchPersona: (persona: AssistantPersona) => void
-  sendMessage: (query: string) => Promise<void>
+  sendMessage: (query: string, bookingHintId?: string) => Promise<void>
   clearHistory: (persona?: AssistantPersona) => void
+  setActiveBookingId: (bookingId: string | null) => void
 }
 
 const AiAssistantContext = createContext<AiAssistantContextType | undefined>(undefined)
@@ -53,11 +55,12 @@ const INITIAL_MESSAGES: Record<AssistantPersona, ChatMessage[]> = {
 export function AiAssistantProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [activePersona, setActivePersona] = useState<AssistantPersona>('customer_booking')
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Record<AssistantPersona, ChatMessage[]>>(INITIAL_MESSAGES)
   const [isTyping, setIsTyping] = useState(false)
 
   const sendMessage = useCallback(
-    async (query: string) => {
+    async (query: string, hintId?: string) => {
       const trimmed = query.trim()
       if (!trimmed) return
 
@@ -81,6 +84,7 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
           query: trimmed,
           persona: activePersona,
           conversationHistory: messages[activePersona],
+          bookingHintId: hintId || activeBookingId || undefined,
         })
 
         setMessages(prev => ({
@@ -93,18 +97,21 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
         setIsTyping(false)
       }
     },
-    [activePersona, messages]
+    [activePersona, activeBookingId, messages]
   )
 
   const openAssistant = useCallback(
-    (persona?: AssistantPersona, initialQuery?: string) => {
+    (persona?: AssistantPersona, initialQuery?: string, bookingHintId?: string) => {
       if (persona) {
         setActivePersona(persona)
+      }
+      if (bookingHintId !== undefined) {
+        setActiveBookingId(bookingHintId)
       }
       setIsOpen(true)
       if (initialQuery) {
         setTimeout(() => {
-          sendMessage(initialQuery)
+          sendMessage(initialQuery, bookingHintId)
         }, 150)
       }
     },
@@ -135,6 +142,7 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
       value={{
         isOpen,
         activePersona,
+        activeBookingId,
         messages,
         isTyping,
         openAssistant,
@@ -142,6 +150,7 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
         switchPersona,
         sendMessage,
         clearHistory,
+        setActiveBookingId,
       }}
     >
       {children}

@@ -1494,7 +1494,7 @@ export default function Home() {
                     {t('home.aiUnsure', 'Not sure what repair you need?')}
                   </h4>
                   <p className="text-[11px] text-slate-600 dark:text-zinc-400">
-                    {t('home.aiDescription', 'Our AI Assistant diagnoses the issue and matches the right artisan in 10 seconds.')}
+                    {t('home.aiDescription', 'Get AI assistance with understanding your service request.')}
                   </p>
                 </div>
               </div>
