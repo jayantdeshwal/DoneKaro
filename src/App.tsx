@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { AiAssistantProvider } from './context/AiAssistantContext'
+import { SupportProvider } from '@/features/support'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Search from './pages/Search'
@@ -141,7 +142,9 @@ function App() {
         <AuthProvider>
           <NotificationProvider>
             <AiAssistantProvider>
-              <AppRoutes />
+              <SupportProvider>
+                <AppRoutes />
+              </SupportProvider>
             </AiAssistantProvider>
           </NotificationProvider>
         </AuthProvider>

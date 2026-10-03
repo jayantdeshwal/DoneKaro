@@ -11,6 +11,7 @@ import {
   ComplaintItem,
   CreateComplaintParams,
   CreateComplaintResult,
+  EligibleSupportBooking,
 } from '../types'
 
 function resolveTradeLabel(categoryId?: string | null): string {
@@ -268,4 +269,96 @@ export async function fetchUserComplaints(): Promise<ComplaintItem[]> {
       scheduled_at: item.bookings.scheduled_at,
     } : undefined,
   }))
+}
+
+/**
+ * Fetches recent bookings for the caller (as customer or worker)
+ * that have an assigned counterparty, making them eligible for support/complaints.
+ */
+export async function fetchEligibleBookingsForSupport(): Promise<EligibleSupportBooking[]> {
+  const supabase = getSupabaseClient()
+
+  const { data: sessionData } = await supabase.auth.getSession()
+  const user = sessionData?.session?.user
+  if (!user) return []
+
+  const { data, error } = await (supabase.from('bookings') as any)
+    .select('id, category_id, status, scheduled_at, customer_id, worker_id, created_at')
+    .or(`customer_id.eq.${user.id},worker_id.eq.${user.id}`)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error || !data) {
+    console.warn('[SupportService] Error fetching eligible bookings:', error?.message)
+    return []
+  }
+
+  // Filter bookings that have a counterparty
+  const eligible = data.filter((b: any) => {
+    const isCustomer = b.customer_id === user.id
+    const counterpartyId = isCustomer ? b.worker_id : b.customer_id
+    return Boolean(counterpartyId)
+  })
+
+  // Collect counterparty names
+  const workerIds = eligible
+    .filter((b: any) => b.customer_id === user.id && b.worker_id)
+    .map((b: any) => b.worker_id as string)
+
+  const customerIds = eligible
+    .filter((b: any) => b.worker_id === user.id && b.customer_id)
+    .map((b: any) => b.customer_id as string)
+
+  const workerNameMap: Record<string, string> = {}
+  const customerNameMap: Record<string, string> = {}
+
+  if (workerIds.length > 0) {
+    const { data: workers } = await (supabase.from('approved_worker_directory') as any)
+      .select('id, name')
+      .in('id', Array.from(new Set(workerIds)))
+    if (workers) {
+      workers.forEach((w: any) => {
+        if (w.name) workerNameMap[w.id] = w.name
+      })
+    }
+  }
+
+  if (customerIds.length > 0) {
+    const { data: customers } = await (supabase.from('profiles') as any)
+      .select('id, full_name')
+      .in('id', Array.from(new Set(customerIds)))
+    if (customers) {
+      customers.forEach((c: any) => {
+        if (c.full_name) {
+          const parts = String(c.full_name).trim().split(/\s+/)
+          customerNameMap[c.id] = parts.length === 1 ? parts[0] : `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`
+        }
+      })
+    }
+  }
+
+  return eligible.map((b: any) => {
+    const isCustomer = b.customer_id === user.id
+    const counterpartyId = isCustomer ? b.worker_id : b.customer_id
+    let counterpartyName = isCustomer ? 'Assigned Artisan' : 'Customer'
+
+    if (counterpartyId) {
+      if (isCustomer && workerNameMap[counterpartyId]) {
+        counterpartyName = workerNameMap[counterpartyId]
+      } else if (!isCustomer && customerNameMap[counterpartyId]) {
+        counterpartyName = customerNameMap[counterpartyId]
+      }
+    }
+
+    return {
+      bookingId: b.id,
+      categoryId: b.category_id,
+      categoryName: resolveTradeLabel(b.category_id),
+      bookingStatus: b.status,
+      scheduledAt: b.scheduled_at,
+      counterpartyName,
+      counterpartyId,
+      createdAt: b.created_at,
+    }
+  })
 }

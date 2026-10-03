@@ -27,9 +27,11 @@ import {
   Banknote,
   Info,
   UserCheck,
+  ShieldAlert,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useAiAssistant } from '@/context/AiAssistantContext'
+import { useSupport } from '@/features/support'
 import { getSupabaseClient } from '@/lib/supabase'
 import ContactModal from '@/components/ContactModal'
 import { buildCustomerToWorkerWhatsAppMessage } from '@/utils/contact'
@@ -114,6 +116,7 @@ export default function Bookings() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { openAssistant } = useAiAssistant()
+  const { openSupport } = useSupport()
 
   const [allBookings, setAllBookings] = useState<BookingRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -1019,6 +1022,16 @@ export default function Bookings() {
                 <span>{t('bookings.askAi', 'AI Help')}</span>
               </Button>
             )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSupport({ bookingId: booking.id, defaultTab: 'complaint' })}
+              className="text-xs font-semibold flex items-center gap-1.5 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>{i18n.language === 'hi' ? 'केयर / शिकायत' : 'Care & Support'}</span>
+            </Button>
           </div>
 
           {canCancel && (
@@ -1130,7 +1143,14 @@ export default function Bookings() {
               className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
               <Shield className="w-3.5 h-3.5" />
-              <span>{i18n.language === 'hi' ? 'सहायता एवं सहयोग' : 'Help & Support'}</span>
+              <span>{i18n.language === 'hi' ? 'AI सहायता' : 'AI Help'}</span>
+            </button>
+            <button
+              onClick={() => openSupport({ bookingId: upcomingBookings[0]?.id, defaultTab: 'complaint' })}
+              className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>{i18n.language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}</span>
             </button>
           </div>
         </div>

@@ -41,8 +41,10 @@ import {
   Power,
   Sparkles,
   Bot,
+  ShieldAlert,
 } from 'lucide-react'
 import { useAiAssistant } from '../context/AiAssistantContext'
+import { useSupport } from '@/features/support'
 import { getSupabaseClient } from '@/lib/supabase'
 import { uploadAvatar, uploadIdProof, validateFile } from '@/services/storage'
 import { triggerPWAInstall } from '@/components/PWAInstallPrompt'
@@ -68,6 +70,7 @@ export default function Profile() {
   const { user, updateUser, updateEmail, logout, isWorker, isAdmin, isLoading: authLoading } = useAuth()
   const { language, setLanguage, toggleLanguage } = useLanguage()
   const { openAssistant } = useAiAssistant()
+  const { openSupport } = useSupport()
 
   const [editMode, setEditMode] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
@@ -959,16 +962,59 @@ export default function Profile() {
                 </div>
               </div>
 
+              {/* Row: Care & Support (Formal Complaints & Suggestions) */}
+              <div
+                onClick={() => openSupport()}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <ShieldAlert className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-colors" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                      {language === 'hi' ? 'केयर एवं सहायता (शिकायत / सुझाव)' : 'Care & Support (Complaint / Suggestion)'}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'आधिकारिक समस्या समाधान व सुझाव दर्ज करें' : 'Official issue resolution & feedback'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              {/* Row: My Support Requests */}
+              <div
+                onClick={() => openSupport({ defaultTab: 'history' })}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <FileText className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {language === 'hi' ? 'मेरे सहायता अनुरोध' : 'My Support Requests'}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'शिकायतों की लाइव स्थिति और टोकन जांचें' : 'View status of your submitted requests'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
               {/* Row: Help Center & AI Assistant */}
               <div
-                onClick={() => openAssistant(isWorker ? 'worker_sarathi' : 'customer_care')}
+                onClick={() => openAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')}
                 className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
               >
                 <div className="flex items-center gap-3.5">
                   <HelpCircle className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                    {t('profile.faqsHelp', 'Help Center & FAQs')}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {t('profile.faqsHelp', 'Help Center & FAQs')}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'AI सहायक से प्रश्न पूछें' : 'Ask questions with AI Assistant'}
+                    </span>
+                  </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
               </div>

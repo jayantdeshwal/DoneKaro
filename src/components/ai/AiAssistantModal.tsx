@@ -27,7 +27,7 @@ import {
   FileText,
   AlertCircle,
 } from 'lucide-react'
-import { SupportRequestModal, SupportHistoryModal } from '@/features/support'
+import { useSupport } from '@/features/support'
 
 export default function AiAssistantModal() {
   const { t } = useTranslation()
@@ -45,11 +45,9 @@ export default function AiAssistantModal() {
     clearHistory,
   } = useAiAssistant()
 
+  const { openSupport } = useSupport()
   const [input, setInput] = useState('')
   const [copiedActionId, setCopiedActionId] = useState<string | null>(null)
-  const [supportModalOpen, setSupportModalOpen] = useState(false)
-  const [historyModalOpen, setHistoryModalOpen] = useState(false)
-  const [supportBookingId, setSupportBookingId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -116,10 +114,9 @@ export default function AiAssistantModal() {
       sendMessage(action.payload)
     } else if (action.type === 'create_support_request') {
       if (action.payload === 'history') {
-        setHistoryModalOpen(true)
+        openSupport({ defaultTab: 'history' })
       } else {
-        setSupportBookingId(action.payload || null)
-        setSupportModalOpen(true)
+        openSupport({ bookingId: action.payload || null, defaultTab: 'complaint' })
       }
     }
   }
@@ -143,9 +140,8 @@ export default function AiAssistantModal() {
   }
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
       onClick={e => {
         if (e.target === e.currentTarget) closeAssistant()
       }}
@@ -243,6 +239,20 @@ export default function AiAssistantModal() {
               <span>{isHindi ? 'काम व सेवा सलाह' : 'Work Advice'}</span>
             </button>
           )}
+        </div>
+
+        {/* Care & Support Discovery Strip */}
+        <div className="px-3.5 py-1.5 bg-rose-50/60 dark:bg-rose-950/20 border-b border-rose-100 dark:border-rose-900/30 flex items-center justify-between text-[11px] text-rose-700 dark:text-rose-400">
+          <span className="truncate">
+            {isHindi ? 'आधिकारिक शिकायत या सुझाव दर्ज करना चाहते हैं?' : 'Need to file a formal complaint or suggestion?'}
+          </span>
+          <button
+            type="button"
+            onClick={() => openSupport()}
+            className="font-bold underline hover:text-rose-900 dark:hover:text-rose-200 shrink-0 ml-2 cursor-pointer"
+          >
+            {isHindi ? 'केयर डेस्क' : 'Care & Support'}
+          </button>
         </div>
 
         {/* Quick Suggestion Chips Carousel */}
@@ -385,27 +395,5 @@ export default function AiAssistantModal() {
         </form>
       </div>
     </div>
-
-    {/* Support Request Confirmation Modal (Phase 10C) */}
-    {supportModalOpen && (
-      <SupportRequestModal
-        isOpen={supportModalOpen}
-        onClose={() => setSupportModalOpen(false)}
-        bookingId={supportBookingId}
-        onViewHistory={() => {
-          setSupportModalOpen(false)
-          setHistoryModalOpen(true)
-        }}
-      />
-    )}
-
-    {/* Support History Modal (Phase 10C) */}
-    {historyModalOpen && (
-      <SupportHistoryModal
-        isOpen={historyModalOpen}
-        onClose={() => setHistoryModalOpen(false)}
-      />
-    )}
-  </>
   )
 }

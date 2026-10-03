@@ -40,6 +40,7 @@ import {
 import { Badge, Button, Card, Skeleton, Avatar, Modal } from '@/ui'
 import { useAuth } from '@/context/AuthContext'
 import { useAiAssistant } from '@/context/AiAssistantContext'
+import { useSupport } from '@/features/support'
 import { getSupabaseClient } from '@/lib/supabase'
 import ContactModal from '@/components/ContactModal'
 import { formatPhoneDisplay, buildWorkerToCustomerWhatsAppMessage } from '@/utils/contact'
@@ -84,6 +85,7 @@ export default function WorkerDashboard() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { openAssistant } = useAiAssistant()
+  const { openSupport } = useSupport()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -688,9 +690,9 @@ export default function WorkerDashboard() {
         </div>
 
         {/* ===================================================================== */}
-        {/* 3. THREE QUICK ACTION TILES (Matching Profile.tsx & UC2)              */}
+        {/* 3. FOUR QUICK ACTION TILES (Matching Profile.tsx & UC2)               */}
         {/* ===================================================================== */}
-        <div className={`grid-cols-3 gap-2.5 sm:gap-3 mb-6 ${isLeadsTab ? 'hidden md:grid' : 'grid'}`}>
+        <div className={`grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-6 ${isLeadsTab ? 'hidden md:grid' : 'grid'}`}>
           {/* Tile 1: Availability Toggle */}
           <button
             type="button"
@@ -747,6 +749,20 @@ export default function WorkerDashboard() {
             </div>
             <span className="text-xs font-bold text-slate-900 dark:text-zinc-200 group-hover:text-blue-500 dark:group-hover:text-blue-400 leading-tight">
               {i18n.language === 'hi' ? 'काम व सेवा सलाह' : 'Work Advice'}
+            </span>
+          </button>
+
+          {/* Tile 4: Care & Support */}
+          <button
+            type="button"
+            onClick={() => openSupport()}
+            className="p-3 sm:p-4 rounded-2xl bg-surface-100 border border-semantic-border-light hover:border-rose-500/40 hover:bg-surface-200/80 transition-all flex flex-col items-center justify-center text-center group shadow-sm active:scale-95 cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-xl bg-surface-200 group-hover:bg-rose-500/15 flex items-center justify-center text-rose-500 mb-2 transition-colors">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold text-slate-900 dark:text-zinc-200 group-hover:text-rose-500 dark:group-hover:text-rose-400 leading-tight">
+              {i18n.language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}
             </span>
           </button>
         </div>
@@ -1840,6 +1856,19 @@ export default function WorkerDashboard() {
                 >
                   <Briefcase className="w-3.5 h-3.5" />
                   <span>{i18n.language === 'hi' ? 'सारथी सलाह' : 'Sarathi Advice'}</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const bId = detailsModalBooking.id
+                    setDetailsModalBooking(null)
+                    openSupport({ bookingId: bId, defaultTab: 'complaint' })
+                  }}
+                  className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5 border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>{i18n.language === 'hi' ? 'केयर / शिकायत' : 'Care & Support'}</span>
                 </Button>
                 {summary?.receipt_number && (
                   <Button

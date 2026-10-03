@@ -7,7 +7,7 @@ import { useAiAssistant } from '../context/AiAssistantContext'
 import { Button, Avatar, Badge } from '@kaamgar/ui'
 import {
   Menu, X, Bell, User, LogOut, Settings, Shield, Home, Search, List, UserPlus,
-  Truck, Star, Briefcase, ChevronDown, Globe, Phone, Mail, MapPin, ShieldCheck,
+  Truck, Star, Briefcase, ChevronDown, Globe, Phone, Mail, MapPin, ShieldCheck, ShieldAlert,
   ArrowRight, ArrowLeft, Heart, Smartphone, LogIn, Sparkles, Sun, Moon,
   Bot, Grid, Zap, Calendar, ClipboardList, UserCheck
 } from 'lucide-react'
@@ -17,6 +17,7 @@ import { useTheme } from '../context/ThemeContext'
 import NetworkStatus from './NetworkStatus'
 import PWAInstallPrompt from './PWAInstallPrompt'
 import AiAssistantModal from './ai/AiAssistantModal'
+import { CareSupportModal, useSupport } from '@/features/support'
 import JugnuLogo from './common/JugnuLogo'
 
 export default function Layout() {
@@ -26,6 +27,7 @@ export default function Layout() {
   const { user, isAuthenticated, isWorker, isAdmin, logout, isLoading } = useAuth()
   const { notifications, removeNotification, unreadCount } = useNotifications()
   const { openAssistant } = useAiAssistant()
+  const { openSupport } = useSupport()
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -486,6 +488,27 @@ export default function Layout() {
                             </NavLink>
                           </>
                         )}
+
+                        {/* Care & Support (Formal Complaints & Suggestions) */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserMenuOpen(false)
+                            openSupport()
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-rose-600 dark:hover:text-rose-400 transition-colors text-left cursor-pointer"
+                          role="menuitem"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-rose-500/15 flex items-center justify-center text-rose-500">
+                            <ShieldAlert className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col text-left">
+                            <span className="font-semibold">{language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}</span>
+                            <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-normal">
+                              {language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests'}
+                            </span>
+                          </div>
+                        </button>
                       </div>
 
                       {/* Theme Toggle Section */}
@@ -998,7 +1021,40 @@ export default function Layout() {
                 </Badge>
               </button>
 
-              {/* Option 3: Help & Support Card (AI Assistant + Helpline) */}
+              {/* Option 3: Care & Support (Formal Complaints & Suggestions) */}
+              <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-xs">
+                      <ShieldAlert className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        {language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}
+                      </p>
+                      <p className="text-[10px] text-slate-600 dark:text-zinc-400">
+                        {language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      openSupport()
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-xs hover:bg-rose-500 active:scale-95 transition-all cursor-pointer text-center"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>{language === 'hi' ? 'केयर डेस्क खोलें' : 'Open Care & Support'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Option 4: AI Support Assistant */}
               <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -1006,8 +1062,12 @@ export default function Layout() {
                       <Bot className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">Help & Support (24/7)</p>
-                      <p className="text-[10px] text-slate-600 dark:text-zinc-400">सहायता और कस्टमर केयर</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        {language === 'hi' ? 'AI सहायक' : 'AI Assistant'}
+                      </p>
+                      <p className="text-[10px] text-slate-600 dark:text-zinc-400">
+                        {language === 'hi' ? 'बुकिंग सवाल एवं सलाह' : 'Personalized questions & guidance'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1022,7 +1082,7 @@ export default function Layout() {
                     className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-xs hover:bg-amber-400 active:scale-95 transition-all cursor-pointer text-center"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>AI Support</span>
+                    <span>{language === 'hi' ? 'AI से पूछें' : 'Ask AI Assistant'}</span>
                   </button>
                 </div>
               </div>
@@ -1067,6 +1127,7 @@ export default function Layout() {
       
       <PWAInstallPrompt />
       <AiAssistantModal />
+      <CareSupportModal />
     </div>
   )
 }
