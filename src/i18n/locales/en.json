@@ -1061,7 +1061,10 @@
     "cancelSignOut": "Cancel & Sign Out",
     "linkMobileTitle": "Link Mobile for 2FA",
     "linkMobileSubtitle": "Your administrator account requires a verified mobile number for mandatory SMS OTP verification.",
-    "verifyLinkMobileBtn": "Verify via OTP & Link Mobile"
+    "verifyLinkMobileBtn": "Verify via OTP & Link Mobile",
+    "invalidMobileRetry": "We couldn't process your mobile number. Please try again.",
+    "otpCancelled": "OTP verification was cancelled.",
+    "otpWidgetError": "Could not open OTP verification widget. Please ensure ad-blockers are disabled and retry."
   },
   "registerPage": {
     "title": "New to Jugnu? Create Account",

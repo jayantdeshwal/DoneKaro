@@ -49,10 +49,13 @@ self.addEventListener('fetch', event => {
   // Skip non-GET requests
   if (request.method !== 'GET') return
 
-  // Don't cache Supabase auth/API calls or MSG91 verification
+  // Don't cache Supabase auth/API calls or external auth/OTP/CAPTCHA verification dependencies
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('msg91.com') ||
+    url.hostname.includes('phone91.com') ||
+    url.hostname.includes('hcaptcha.com') ||
+    url.hostname.includes('cdnjs.cloudflare.com') ||
     url.pathname.startsWith('/rest/') ||
     url.pathname.startsWith('/auth/') ||
     url.pathname.startsWith('/.well-known/')
@@ -103,6 +106,11 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_NAME).then(cache => cache.put(request, copy))
           return response
         }).catch(async () => {
+          // Never return HTML (such as offline.html) for script/style requests.
+          // Returning HTML for a .js file causes a fatal syntax error ("Unexpected token '<'").
+          if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+            return new Response('', { status: 503, statusText: 'Service Unavailable' })
+          }
           return caches.match('/offline.html')
         })
       })

@@ -271,19 +271,17 @@ export default function WorkerRegistration() {
         },
         onFailure: (err) => {
           setVerifyingOtp(false)
+          if (err && typeof err === 'object' && (err as any).cancelled) return
+          const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification cancelled or failed.'
           setErrors(prev => ({
             ...prev,
-            phone: typeof err === 'string' ? err : 'OTP verification cancelled or failed.',
+            phone: msg,
           }))
         },
       })
 
       if (!launched) {
         setVerifyingOtp(false)
-        setErrors(prev => ({
-          ...prev,
-          phone: 'OTP verification widget could not be loaded. Please ensure ad-blockers are disabled and try again.',
-        }))
       }
     } catch (err) {
       setVerifyingOtp(false)

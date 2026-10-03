@@ -100,15 +100,13 @@ export default function Register() {
         },
         onFailure: (err) => {
           setCustomerLoading(false)
-          setCustomerError(
-            typeof err === 'string'
-              ? err
-              : 'OTP verification failed or was cancelled. Please verify to complete sign up.'
-          )
+          if (err && typeof err === 'object' && (err as any).cancelled) return
+          const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please verify to complete sign up.'
+          setCustomerError(msg)
         },
       })
 
-      if (!widgetOpened) {
+      if (!widgetOpened && !customerError) {
         setCustomerLoading(false)
         setCustomerError('OTP verification widget could not be loaded. Please ensure ad-blockers are disabled.')
       }

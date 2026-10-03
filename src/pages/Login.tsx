@@ -144,11 +144,13 @@ export default function Login() {
         },
         onFailure: (err) => {
           setCustomerLoading(false)
-          setCustomerError(typeof err === 'string' ? err : 'OTP verification cancelled or failed.')
+          if (err && typeof err === 'object' && (err as any).cancelled) return
+          const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
+          setCustomerError(msg)
         },
       })
 
-      if (!launched) {
+      if (!launched && !customerError) {
         setCustomerLoading(false)
         setCustomerError('Could not open OTP verification widget. Please ensure ad-blockers are disabled.')
       }
@@ -200,11 +202,13 @@ export default function Login() {
         },
         onFailure: (err) => {
           setWorkerLoading(false)
-          setWorkerError(typeof err === 'string' ? err : 'OTP verification cancelled or failed.')
+          if (err && typeof err === 'object' && (err as any).cancelled) return
+          const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
+          setWorkerError(msg)
         },
       })
 
-      if (!launched) {
+      if (!launched && !workerError) {
         setWorkerLoading(false)
         setWorkerError('Could not open OTP verification widget. Please ensure ad-blockers are disabled.')
       }
@@ -270,11 +274,13 @@ export default function Login() {
         },
         onFailure: (err) => {
           setAdminLoading(false)
-          setAdminError(typeof err === 'string' ? err : 'OTP verification cancelled or failed.')
+          if (err && typeof err === 'object' && (err as any).cancelled) return
+          const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
+          setAdminError(msg)
         },
       })
 
-      if (!launched) {
+      if (!launched && !adminError) {
         setAdminLoading(false)
         setAdminError('OTP widget could not be launched. Please disable ad-blockers and retry.')
       }
