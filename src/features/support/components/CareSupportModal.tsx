@@ -35,9 +35,32 @@ import {
   fetchEligibleBookingsForSupport,
   submitSupportComplaint,
   fetchUserComplaints,
+  submitSupportSuggestion,
+  fetchUserSuggestions,
   SupportBookingContext,
 } from '../services/supportService'
-import { ComplaintItem, ComplaintStatus, EligibleSupportBooking, SupportTab } from '../types'
+import {
+  ComplaintItem,
+  ComplaintStatus,
+  EligibleSupportBooking,
+  SupportTab,
+  SuggestionItem,
+  SuggestionStatus,
+  SuggestionCategory,
+} from '../types'
+
+function getSuggestionCategoryLabel(category: SuggestionCategory, isHindi: boolean): string {
+  switch (category) {
+    case 'app_experience':
+      return isHindi ? 'ऐप अनुभव' : 'App Experience'
+    case 'new_feature':
+      return isHindi ? 'नई सुविधा / ट्रेड' : 'New Feature / Trade'
+    case 'service_coverage':
+      return isHindi ? 'सेवा क्षेत्र' : 'Service Area'
+    case 'other':
+      return isHindi ? 'सामान्य विचार' : 'General Feedback'
+  }
+}
 
 export const CareSupportModal: React.FC = () => {
   const { i18n } = useTranslation()
@@ -65,12 +88,17 @@ export const CareSupportModal: React.FC = () => {
   const [copiedToken, setCopiedToken] = useState(false)
 
   // Tab 2 (Suggestion) state
-  const [suggestionCategory, setSuggestionCategory] = useState<'app_experience' | 'new_feature' | 'service_coverage' | 'other'>('app_experience')
+  const [suggestionCategory, setSuggestionCategory] = useState<SuggestionCategory>('app_experience')
   const [suggestionText, setSuggestionText] = useState('')
-  const [suggestionSubmitted, setSuggestionSubmitted] = useState(false)
+  const [submittingSuggestion, setSubmittingSuggestion] = useState(false)
+  const [suggestionError, setSuggestionError] = useState<string | null>(null)
+  const [createdSuggestion, setCreatedSuggestion] = useState<SuggestionItem | null>(null)
+  const [copiedSuggestionToken, setCopiedSuggestionToken] = useState(false)
 
   // Tab 3 (History) state
   const [historyComplaints, setHistoryComplaints] = useState<ComplaintItem[]>([])
+  const [historySuggestions, setHistorySuggestions] = useState<SuggestionItem[]>([])
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'complaints' | 'suggestions'>('all')
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [historyError, setHistoryError] = useState<string | null>(null)
   const [copiedHistoryId, setCopiedHistoryId] = useState<string | null>(null)
@@ -83,7 +111,9 @@ export const CareSupportModal: React.FC = () => {
       setCreatedComplaint(null)
       setCopiedToken(false)
       setSuggestionText('')
-      setSuggestionSubmitted(false)
+      setSuggestionError(null)
+      setCreatedSuggestion(null)
+      setCopiedSuggestionToken(false)
       return
     }
 
@@ -128,13 +158,16 @@ export const CareSupportModal: React.FC = () => {
   const loadHistory = useCallback(() => {
     setLoadingHistory(true)
     setHistoryError(null)
-    fetchUserComplaints()
-      .then(list => setHistoryComplaints(list))
+    Promise.all([fetchUserComplaints(), fetchUserSuggestions()])
+      .then(([complaintsList, suggestionsList]) => {
+        setHistoryComplaints(complaintsList)
+        setHistorySuggestions(suggestionsList)
+      })
       .catch(() => {
         setHistoryError(
           isHindi
-            ? 'शिकायत इतिहास लोड करने में असमर्थ।'
-            : 'Unable to load support complaint history.'
+            ? 'अनुरोध इतिहास लोड करने में असमर्थ।'
+            : 'Unable to load support request history.'
         )
       })
       .finally(() => setLoadingHistory(false))
@@ -206,14 +239,38 @@ export const CareSupportModal: React.FC = () => {
   }
 
   // Handle suggestion submission
-  const handleSuggestionSubmit = (e: React.FormEvent) => {
+  const handleSuggestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (suggestionText.trim().length < 10) return
-    setSuggestionSubmitted(true)
+    setSubmittingSuggestion(true)
+    setSuggestionError(null)
+
+    try {
+      const res = await submitSupportSuggestion({
+        category: suggestionCategory,
+        message: suggestionText.trim(),
+      })
+      if (!res.success || !res.suggestion) {
+        setSuggestionError(
+          res.error || (isHindi ? 'सुझाव दर्ज करने में असमर्थ।' : 'Unable to submit your suggestion.')
+        )
+      } else {
+        setCreatedSuggestion(res.suggestion)
+        setSuggestionText('')
+      }
+    } catch {
+      setSuggestionError(
+        isHindi
+          ? 'सर्वर से संपर्क करने में असमर्थ। कृपया बाद में प्रयास करें।'
+          : 'An unexpected error occurred. Please try again.'
+      )
+    } finally {
+      setSubmittingSuggestion(false)
+    }
   }
 
   // Status badge helper
-  const renderStatusBadge = (status: ComplaintStatus) => {
+  const renderStatusBadge = (status: ComplaintStatus | SuggestionStatus) => {
     switch (status) {
       case 'open':
         return (
@@ -223,10 +280,11 @@ export const CareSupportModal: React.FC = () => {
           </span>
         )
       case 'investigating':
+      case 'in_review':
         return (
           <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 uppercase">
             <HelpCircle className="w-3 h-3" />
-            {isHindi ? 'जाँच जारी' : 'INVESTIGATING'}
+            {status === 'in_review' ? (isHindi ? 'समीक्षाधीन' : 'IN REVIEW') : (isHindi ? 'जाँच जारी' : 'INVESTIGATING')}
           </span>
         )
       case 'resolved':
@@ -243,6 +301,8 @@ export const CareSupportModal: React.FC = () => {
             {isHindi ? 'खारिज' : 'DISMISSED'}
           </span>
         )
+      default:
+        return null
     }
   }
 
@@ -622,38 +682,111 @@ export const CareSupportModal: React.FC = () => {
           {/* ========================================================================= */}
           {activeTab === 'suggestion' && (
             <div className="space-y-4">
-              {suggestionSubmitted ? (
-                <div className="text-center py-8 space-y-4">
+              {createdSuggestion ? (
+                <div className="text-center py-4 space-y-4 animate-fade-in">
                   <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20 shadow-inner">
                     <Sparkles className="w-8 h-8" />
                   </div>
                   <div>
                     <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                      {isHindi ? 'आपके सुझाव के लिए धन्यवाद!' : 'Thank You for Your Suggestion!'}
+                      {isHindi ? 'सुझाव सफलतापूर्वक दर्ज हुआ' : 'Feedback Submitted Successfully'}
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
                       {isHindi
-                        ? 'मुज़फ्फरनगर में जुगनू को बेहतर बनाने के लिए आपके विचार अत्यंत महत्वपूर्ण हैं। हमारी उत्पाद टीम नियमित रूप से सभी सुझावों की समीक्षा करती है।'
-                        : 'Your insights help make Jugnu better for everyone in Muzaffarnagar. Our operations team reviews every piece of feedback.'}
+                        ? 'मुज़फ्फरनगर में जुगनू को बेहतर बनाने के लिए आपका विचार सुरक्षित रूप से दर्ज कर लिया गया है।'
+                        : 'Your suggestion has been formally recorded with the platform operations team.'}
                     </p>
                   </div>
-                  <div className="flex gap-2.5 justify-center pt-2">
+
+                  {/* Token & Details Card */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-left space-y-3 text-xs">
+                    <div className="flex justify-between items-center pb-2.5 border-b border-slate-200 dark:border-zinc-700">
+                      <div>
+                        <span className="text-[11px] text-slate-500 dark:text-zinc-400 block font-medium">
+                          {isHindi ? 'सुझाव संदर्भ संख्या' : 'Suggestion Reference'}:
+                        </span>
+                        <span className="font-mono font-bold text-base text-amber-600 dark:text-amber-400 tracking-wider">
+                          #SUG-{createdSuggestion.id.slice(0, 8).toUpperCase()}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(`#SUG-${createdSuggestion.id.slice(0, 8).toUpperCase()}`)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-zinc-700 dark:hover:bg-zinc-650 text-slate-800 dark:text-zinc-200 font-semibold text-xs transition-colors"
+                      >
+                        {copiedToken ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="text-emerald-600">{isHindi ? 'कॉपी हुआ' : 'Copied'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>{isHindi ? 'कॉपी करें' : 'Copy'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-zinc-400 font-medium">
+                        {isHindi ? 'विषय' : 'Topic'}:
+                      </span>
+                      <span className="font-semibold text-slate-900 dark:text-zinc-200">
+                        {getSuggestionCategoryLabel(createdSuggestion.category, isHindi)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-zinc-400 font-medium">
+                        {isHindi ? 'वर्तमान स्थिति' : 'Current Status'}:
+                      </span>
+                      {renderStatusBadge(createdSuggestion.status)}
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-zinc-400 font-medium">
+                        {isHindi ? 'दिनांक' : 'Submitted At'}:
+                      </span>
+                      <span className="text-slate-700 dark:text-zinc-300">
+                        {new Date(createdSuggestion.created_at).toLocaleString(isHindi ? 'hi-IN' : 'en-IN')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed px-2">
+                    {isHindi
+                      ? '💡 हमारे प्रशासक नियमित रूप से सभी सुझावों की समीक्षा करते हैं। आप कभी भी "मेरे अनुरोध" में इसकी स्थिति देख सकते हैं।'
+                      : '💡 Platform administrators review suggestions regularly. You can track this item anytime under "My Requests".'}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
                     <button
                       type="button"
                       onClick={() => {
-                        setSuggestionSubmitted(false)
+                        setCreatedSuggestion(null)
                         setSuggestionText('')
                       }}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 transition-colors"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 transition-colors"
                     >
                       {isHindi ? 'एक और सुझाव भेजें' : 'Send Another'}
                     </button>
                     <button
                       type="button"
-                      onClick={closeSupport}
-                      className="px-5 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-xs"
+                      onClick={() => {
+                        setCreatedSuggestion(null)
+                        switchTab('history')
+                      }}
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-xs"
                     >
-                      {isHindi ? 'पूर्ण' : 'Done'}
+                      {isHindi ? 'मेरे अनुरोध देखें' : 'View My Requests'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeSupport}
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
+                    >
+                      {isHindi ? 'समाप्त' : 'Done'}
                     </button>
                   </div>
                 </div>
@@ -669,6 +802,13 @@ export const CareSupportModal: React.FC = () => {
                         : 'Have an idea for a new trade, service area, or app improvement in Muzaffarnagar?'}
                     </p>
                   </div>
+
+                  {suggestionError && (
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{suggestionError}</span>
+                    </div>
+                  )}
 
                   {/* Category Chips */}
                   <div className="space-y-1.5">
@@ -713,12 +853,12 @@ export const CareSupportModal: React.FC = () => {
                           : 'Please share your detailed ideas or recommendations...'
                       }
                       rows={5}
-                      maxLength={1000}
+                      maxLength={2000}
                       className="w-full text-xs rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 resize-none"
                     />
                     <div className="flex justify-between items-center text-[10px] text-slate-400">
                       <span>{isHindi ? 'न्यूनतम 10 अक्षर आवश्यक' : 'Minimum 10 characters required'}</span>
-                      <span>{suggestionText.length}/1000</span>
+                      <span>{suggestionText.length}/2000</span>
                     </div>
                   </div>
 
@@ -732,10 +872,17 @@ export const CareSupportModal: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={suggestionText.trim().length < 10}
-                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+                      disabled={suggestionText.trim().length < 10 || submittingSuggestion}
+                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
                     >
-                      {isHindi ? 'सुझाव भेजें' : 'Send Feedback'}
+                      {submittingSuggestion ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>{isHindi ? 'भेजा जा रहा है...' : 'Submitting...'}</span>
+                        </>
+                      ) : (
+                        <span>{isHindi ? 'सुझाव भेजें' : 'Send Feedback'}</span>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -755,88 +902,193 @@ export const CareSupportModal: React.FC = () => {
                 </div>
               ) : historyError ? (
                 <div className="py-12 text-center text-rose-500 text-xs">{historyError}</div>
-              ) : historyComplaints.length === 0 ? (
+              ) : historyComplaints.length === 0 && historySuggestions.length === 0 ? (
                 <div className="py-14 text-center space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 flex items-center justify-center mx-auto">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-800 dark:text-zinc-200">
-                      {isHindi ? 'कोई शिकायत या अनुरोध दर्ज नहीं है' : 'No Support Requests Found'}
+                      {isHindi ? 'कोई शिकायत या सुझाव दर्ज नहीं है' : 'No Support Requests Found'}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-xs mx-auto">
                       {isHindi
-                        ? 'आपके खाते में कोई सक्रिय या पुरानी शिकायत नहीं है। आपकी सेवा इतिहास सुचारू है।'
-                        : 'You do not have any past or active support complaints on record.'}
+                        ? 'आपके खाते में कोई सक्रिय या पुरानी शिकायत/सुझाव नहीं है। आपकी सेवा इतिहास सुचारू है।'
+                        : 'You do not have any past or active support requests or feedback on record.'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => switchTab('complaint')}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
-                  >
-                    {isHindi ? 'शिकायत दर्ज करें' : 'File a Complaint'}
-                  </button>
+                  <div className="flex gap-2 justify-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => switchTab('complaint')}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+                    >
+                      {isHindi ? 'शिकायत दर्ज करें' : 'File a Complaint'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => switchTab('suggestion')}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors cursor-pointer"
+                    >
+                      {isHindi ? 'सुझाव दें' : 'Give Suggestion'}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {historyComplaints.map(item => (
-                    <div
-                      key={item.id}
-                      className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/70 space-y-2.5 text-xs transition-colors hover:border-slate-300 dark:hover:border-zinc-600"
+                  {/* Filter Sub-Tabs */}
+                  <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-zinc-800/80 rounded-xl text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('all')}
+                      className={`flex-1 py-1.5 px-2.5 rounded-lg font-semibold transition-all ${
+                        historyFilter === 'all'
+                          ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-slate-900 dark:text-white bg-slate-200/80 dark:bg-zinc-700 px-2 py-0.5 rounded text-[11px]">
-                            #CMP-{item.id.slice(0, 8).toUpperCase()}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(`#CMP-${item.id.slice(0, 8).toUpperCase()}`, true, item.id)}
-                            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
-                            title={isHindi ? 'टोकन कॉपी करें' : 'Copy Reference'}
-                          >
-                            {copiedHistoryId === item.id ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                        {renderStatusBadge(item.status)}
-                      </div>
+                      {isHindi ? 'सभी' : 'All'} ({historyComplaints.length + historySuggestions.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('complaints')}
+                      className={`flex-1 py-1.5 px-2.5 rounded-lg font-semibold transition-all ${
+                        historyFilter === 'complaints'
+                          ? 'bg-white dark:bg-zinc-700 text-rose-600 dark:text-rose-400 shadow-xs'
+                          : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {isHindi ? 'शिकायतें' : 'Complaints'} ({historyComplaints.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter('suggestions')}
+                      className={`flex-1 py-1.5 px-2.5 rounded-lg font-semibold transition-all ${
+                        historyFilter === 'suggestions'
+                          ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-xs'
+                          : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {isHindi ? 'सुझाव' : 'Suggestions'} ({historySuggestions.length})
+                    </button>
+                  </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
-                        <span>
-                          {isHindi ? 'बुकिंग ID' : 'Booking'}:{' '}
-                          <span className="font-mono text-slate-700 dark:text-zinc-300 font-medium">
-                            #JUG-{item.booking_id.slice(0, 8).toUpperCase()}
-                          </span>
-                        </span>
-                        <span>
-                          {new Date(item.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </span>
-                      </div>
-
-                      <p className="text-slate-800 dark:text-zinc-200 leading-relaxed bg-white dark:bg-zinc-900/60 p-2.5 rounded-xl border border-slate-200/50 dark:border-zinc-700/50">
-                        {item.reason}
-                      </p>
-
-                      {item.resolution_note && (
-                        <div className="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-[11px] space-y-1">
-                          <div className="flex items-center gap-1.5 font-semibold text-emerald-900 dark:text-emerald-200">
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>{isHindi ? 'व्यवस्थापक समाधान टिप्पणी' : 'Admin Resolution Note'}:</span>
+                  {/* Complaints List */}
+                  {(historyFilter === 'all' || historyFilter === 'complaints') &&
+                    historyComplaints.map(item => (
+                      <div
+                        key={`cmp-${item.id}`}
+                        className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/70 space-y-2.5 text-xs transition-colors hover:border-slate-300 dark:hover:border-zinc-600"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 px-2 py-0.5 rounded text-[11px]">
+                              #CMP-{item.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(`#CMP-${item.id.slice(0, 8).toUpperCase()}`, true, item.id)}
+                              className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
+                              title={isHindi ? 'टोकन कॉपी करें' : 'Copy Reference'}
+                            >
+                              {copiedHistoryId === item.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                           </div>
-                          <p>{item.resolution_note}</p>
+                          {renderStatusBadge(item.status)}
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
+                          <span>
+                            {isHindi ? 'संबंधित बुकिंग' : 'Booking'}:{' '}
+                            <span className="font-mono text-slate-700 dark:text-zinc-300 font-medium">
+                              #JUG-{item.booking_id.slice(0, 8).toUpperCase()}
+                            </span>
+                          </span>
+                          <span>
+                            {new Date(item.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+
+                        <p className="text-slate-800 dark:text-zinc-200 leading-relaxed bg-white dark:bg-zinc-900/60 p-2.5 rounded-xl border border-slate-200/50 dark:border-zinc-700/50">
+                          {item.reason}
+                        </p>
+
+                        {item.resolution_note && (
+                          <div className="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-[11px] space-y-1">
+                            <div className="flex items-center gap-1.5 font-semibold text-emerald-900 dark:text-emerald-200">
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>{isHindi ? 'व्यवस्थापक समाधान टिप्पणी' : 'Admin Resolution Note'}:</span>
+                            </div>
+                            <p>{item.resolution_note}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                  {/* Suggestions List */}
+                  {(historyFilter === 'all' || historyFilter === 'suggestions') &&
+                    historySuggestions.map(item => (
+                      <div
+                        key={`sug-${item.id}`}
+                        className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/70 space-y-2.5 text-xs transition-colors hover:border-slate-300 dark:hover:border-zinc-600"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 rounded text-[11px]">
+                              #SUG-{item.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(`#SUG-${item.id.slice(0, 8).toUpperCase()}`, true, item.id)}
+                              className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
+                              title={isHindi ? 'टोकन कॉपी करें' : 'Copy Reference'}
+                            >
+                              {copiedHistoryId === item.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                          {renderStatusBadge(item.status)}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
+                          <span className="font-medium text-slate-700 dark:text-zinc-300">
+                            {getSuggestionCategoryLabel(item.category, isHindi)}
+                          </span>
+                          <span>
+                            {new Date(item.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+
+                        <p className="text-slate-800 dark:text-zinc-200 leading-relaxed bg-white dark:bg-zinc-900/60 p-2.5 rounded-xl border border-slate-200/50 dark:border-zinc-700/50">
+                          {item.message}
+                        </p>
+
+                        {item.resolution_note && (
+                          <div className="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-[11px] space-y-1">
+                            <div className="flex items-center gap-1.5 font-semibold text-emerald-900 dark:text-emerald-200">
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>{isHindi ? 'व्यवस्थापक प्रतिक्रिया / टिप्पणी' : 'Admin Response Note'}:</span>
+                            </div>
+                            <p>{item.resolution_note}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>

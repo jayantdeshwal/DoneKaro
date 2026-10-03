@@ -12,6 +12,9 @@ import {
   CreateComplaintParams,
   CreateComplaintResult,
   EligibleSupportBooking,
+  SuggestionItem,
+  SuggestionSubmission,
+  CreateSuggestionResult,
 } from '../types'
 
 function resolveTradeLabel(categoryId?: string | null): string {
@@ -361,4 +364,95 @@ export async function fetchEligibleBookingsForSupport(): Promise<EligibleSupport
       createdAt: b.created_at,
     }
   })
+}
+
+/**
+ * Submits a user suggestion to public.suggestions.
+ * Strictly verifies caller session and enforces input validation under RLS.
+ */
+export async function submitSupportSuggestion(
+  submission: SuggestionSubmission
+): Promise<CreateSuggestionResult> {
+  const supabase = getSupabaseClient()
+
+  // 1. Verify caller session
+  const { data: sessionData } = await supabase.auth.getSession()
+  const user = sessionData?.session?.user
+  if (!user) {
+    return {
+      success: false,
+      error: 'You must be signed in to submit platform feedback.',
+    }
+  }
+
+  // 2. Validate input fields
+  const trimmedMessage = (submission.message || '').trim()
+  if (trimmedMessage.length < 10) {
+    return {
+      success: false,
+      error: 'Please describe your suggestion in at least 10 characters.',
+    }
+  }
+
+  if (trimmedMessage.length > 2000) {
+    return {
+      success: false,
+      error: 'Suggestion description exceeds the maximum length of 2000 characters.',
+    }
+  }
+
+  const validCategories = ['app_experience', 'new_feature', 'service_coverage', 'other']
+  if (!validCategories.includes(submission.category)) {
+    return {
+      success: false,
+      error: 'Please select a valid suggestion category.',
+    }
+  }
+
+  // 3. Authoritative insert into public.suggestions
+  const { data: inserted, error: insertError } = await (supabase.from('suggestions') as any)
+    .insert({
+      submitted_by: user.id,
+      category: submission.category,
+      message: trimmedMessage,
+      status: 'open',
+    })
+    .select('id, submitted_by, category, message, status, resolution_note, created_at, updated_at, resolved_at')
+    .single()
+
+  if (insertError || !inserted) {
+    console.warn('[SupportService] Error inserting suggestion:', insertError?.message)
+    return {
+      success: false,
+      error: 'Unable to submit your suggestion at this moment. Please try again.',
+    }
+  }
+
+  return {
+    success: true,
+    suggestion: inserted as SuggestionItem,
+  }
+}
+
+/**
+ * Fetches suggestions submitted by the caller under RLS isolation.
+ */
+export async function fetchUserSuggestions(): Promise<SuggestionItem[]> {
+  const supabase = getSupabaseClient()
+
+  const { data: sessionData } = await supabase.auth.getSession()
+  const user = sessionData?.session?.user
+  if (!user) return []
+
+  const { data, error } = await (supabase.from('suggestions') as any)
+    .select('id, submitted_by, category, message, status, resolution_note, created_at, updated_at, resolved_at')
+    .eq('submitted_by', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error || !data) {
+    console.warn('[SupportService] Error fetching user suggestions:', error?.message)
+    return []
+  }
+
+  return data as SuggestionItem[]
 }

@@ -22,6 +22,7 @@ import Notifications from './pages/Notifications'
 import WorkerDashboard from './pages/WorkerDashboard'
 import WorkerReviews from './pages/WorkerReviews'
 import CategoryPage from './pages/CategoryPage'
+import { AdminSupportPage } from './features/admin-support'
 
 import { useState } from 'react'
 import { useAuth } from './context/AuthContext'
@@ -129,6 +130,7 @@ function AppRoutes() {
         <Route path="worker/dashboard" element={<ProtectedRoute><WorkerDashboard /></ProtectedRoute>} />
         <Route path="worker/reviews" element={<WorkerRoute><WorkerReviews /></WorkerRoute>} />
         <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="admin/support" element={<AdminRoute><AdminSupportPage /></AdminRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

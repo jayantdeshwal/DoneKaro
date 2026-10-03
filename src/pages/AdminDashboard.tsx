@@ -43,6 +43,7 @@ import {
   Sparkles,
   Compass,
   ShieldCheck,
+  ShieldAlert,
   Zap,
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -997,6 +998,16 @@ export default function AdminDashboard() {
                   }`}
                 />
                 Refresh Live Data
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/admin/support')}
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                Support Manager
               </Button>
 
               <Button

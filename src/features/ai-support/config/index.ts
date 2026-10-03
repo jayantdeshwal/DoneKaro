@@ -21,9 +21,9 @@ export interface AiSupportConfig {
    * Strictly separates customer and worker assistance.
    */
   allowedPersonasByRole: {
-    customer: readonly ['customer_booking', 'customer_care']
+    customer: readonly ['customer_booking']
     worker: readonly ['worker_sarathi']
-    admin: readonly ['customer_booking', 'customer_care', 'worker_sarathi']
+    admin: readonly []
   }
 
   /**
@@ -37,9 +37,9 @@ export const AI_SUPPORT_CONFIG: AiSupportConfig = {
   supportCallEnabled: false,
   fallbackEnabled: true,
   allowedPersonasByRole: {
-    customer: ['customer_booking', 'customer_care'] as const,
+    customer: ['customer_booking'] as const,
     worker: ['worker_sarathi'] as const,
-    admin: ['customer_booking', 'customer_care', 'worker_sarathi'] as const,
+    admin: [] as const,
   },
   maxQueryLength: 1000,
   historyContextLimit: 6,

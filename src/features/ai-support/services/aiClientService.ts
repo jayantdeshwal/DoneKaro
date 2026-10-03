@@ -184,26 +184,6 @@ function extractContextualActions(
         icon: 'Search',
       })
     }
-  } else if (persona === 'customer_care') {
-    if (liveContext?.primaryBooking?.receiptNumber && (q.includes('receipt') || q.includes('रसीद'))) {
-      actions.push({
-        id: 'act_view_receipt',
-        labelEn: 'View Receipt',
-        labelHi: 'रसीद देखें',
-        type: 'navigate',
-        payload: '/bookings',
-        icon: 'Calendar',
-      })
-    } else {
-      actions.push({
-        id: 'act_go_bookings',
-        labelEn: 'Check My Bookings',
-        labelHi: 'मेरी बुकिंग्स देखें',
-        type: 'navigate',
-        payload: '/bookings',
-        icon: 'Calendar',
-      })
-    }
   } else if (persona === 'worker_sarathi') {
     actions.push({
       id: 'act_worker_dash',

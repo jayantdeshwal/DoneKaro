@@ -58,56 +58,6 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
     ],
   },
 
-  customer_care: {
-    id: 'customer_care',
-    nameEn: 'Help & Support',
-    nameHi: 'सहायता एवं सहयोग',
-    roleTitleEn: 'Customer Support & Guidance',
-    roleTitleHi: 'ग्राहक सहायता एवं मार्गदर्शन',
-    badgeEn: '🛡️ Help & Support',
-    badgeHi: '🛡️ सहायता एवं सहयोग',
-    avatar: '🛡️',
-    greetingEn: 'Hello! I am Jugnu Help & Support. Need help with an ongoing booking, arrival inquiries, or platform rules?',
-    greetingHi: 'नमस्कार! मैं जुगनू सहायता एवं सहयोग हूँ। क्या आपको किसी बुकिंग, आगमन संबंधी प्रश्न या प्लेटफ़ॉर्म नियमों में सहायता चाहिए?',
-    chips: [
-      {
-        id: 'cc_delay',
-        labelEn: '⏱️ Artisan Arrival & Contact',
-        labelHi: '⏱️ कारीगर संपर्क व आगमन',
-        query: 'My booked artisan has not arrived yet. How can I contact them or track my booking status?',
-        icon: 'Clock',
-      },
-      {
-        id: 'cc_pricing',
-        labelEn: '💰 Charges & Approval Rules',
-        labelHi: '💰 अतिरिक्त शुल्क व नियम',
-        query: 'How do quotes and additional charge approvals work during a service on Jugnu?',
-        icon: 'DollarSign',
-      },
-      {
-        id: 'cc_cancel',
-        labelEn: '📅 Booking Changes & Another Provider',
-        labelHi: '📅 दूसरा कारीगर चुनना',
-        query: 'Can I choose another provider if my current quote or booking cannot proceed?',
-        icon: 'Calendar',
-      },
-      {
-        id: 'cc_quality',
-        labelEn: '⚠️ Work Quality & Reporting',
-        labelHi: '⚠️ काम की गुणवत्ता व रिपोर्ट',
-        query: 'How do I leave a review or report an issue with completed service work?',
-        icon: 'AlertTriangle',
-      },
-      {
-        id: 'cc_support',
-        labelEn: '📋 In-App Support Guidelines',
-        labelHi: '📋 सहायता नियम व विकल्प',
-        query: 'How does Jugnu handle disputes, service quality, and customer support?',
-        icon: 'FileText',
-      },
-    ],
-  },
-
   worker_sarathi: {
     id: 'worker_sarathi',
     nameEn: 'Work Advice',

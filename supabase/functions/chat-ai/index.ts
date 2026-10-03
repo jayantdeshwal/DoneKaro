@@ -25,7 +25,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-const ALLOWED_PERSONAS = ['customer_booking', 'customer_care', 'worker_sarathi'] as const
+const ALLOWED_PERSONAS = ['customer_booking', 'worker_sarathi'] as const
 type AssistantPersona = typeof ALLOWED_PERSONAS[number]
 
 const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant for Jugnu (जुगनू - "घर के हर काम का जुगनू"), the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
@@ -63,16 +63,6 @@ Your mission:
 3. Explain the quote marketplace: artisans submit quotes, customer reviews and chooses, up to 2 providers compete in active slot.
 4. Transparent pricing: Jugnu does not set fixed prices; artisans provide quotes based on the work required.
 5. Answer politely and concisely, first in English and then in Hindi.`,
-
-  customer_care: `${BASE_GROUNDING_INSTRUCTION}
-
-MODE: HELP & SUPPORT (सहायता एवं सहयोग)
-Your mission:
-1. Help customers navigate active booking questions, artisan contact, charge approval rules, and quality reporting.
-2. DELAYS: Advise the customer to contact the assigned artisan using the Call Artisan or WhatsApp button on their active booking card in My Bookings. Never promise arrival within 15 minutes. Note that platform support phone calls are disabled.
-3. EXTRA CHARGES: Explain that additional charges must be requested in the app by the worker and approved by the customer. Do not pay unapproved offline charges.
-4. QUALITY & COMPLAINTS: Empathize and explain that complaints must be reviewed and submitted by the customer through the official support request confirmation flow (action: CREATE_SUPPORT_REQUEST). The AI assistant NEVER creates, files, or escalates complaints directly. If an authoritative complaint is on record, quote its reference (#CMP-...) and status.
-5. Answer politely and empathetically with clear guidance, first in English and then in Hindi.`,
 
   worker_sarathi: `${BASE_GROUNDING_INSTRUCTION}
 
@@ -469,6 +459,20 @@ serve(async (req: Request) => {
 
     const callerRole = profile?.role || 'customer'
 
+    // Server-side enforcement: Admin accounts have NO AI access
+    if (callerRole === 'admin') {
+      return new Response(
+        JSON.stringify({
+          error: 'Forbidden: Admin accounts do not have AI Assistant access',
+          fallback_required: false,
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
     // 2. Read and enforce maximum payload size (32KB)
     const rawBody = await req.text()
     if (rawBody.length > 32768) {
@@ -520,7 +524,7 @@ serve(async (req: Request) => {
 
     // Enforce role-aware mode access:
     // Worker accounts must use worker_sarathi.
-    // Customer accounts must NOT access worker_sarathi.
+    // Customer accounts must use customer_booking.
     if (callerRole === 'worker' && persona !== 'worker_sarathi') {
       return new Response(
         JSON.stringify({
@@ -534,10 +538,10 @@ serve(async (req: Request) => {
       )
     }
 
-    if (callerRole !== 'worker' && callerRole !== 'admin' && persona === 'worker_sarathi') {
+    if (callerRole === 'customer' && persona !== 'customer_booking') {
       return new Response(
         JSON.stringify({
-          error: 'Forbidden: Worker persona requires registered worker role',
+          error: 'Forbidden: Customer accounts must use the Booking Help persona',
           fallback_required: false,
         }),
         {

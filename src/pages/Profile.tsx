@@ -672,17 +672,27 @@ export default function Profile() {
                 </button>
               )}
 
-              {/* Card 3: Help & Support (AI Assistant) */}
+              {/* Card 3: Support */}
               <button
                 type="button"
-                onClick={() => openAssistant(isWorker ? 'worker_sarathi' : 'customer_care')}
+                onClick={() => {
+                  if (isWorker) {
+                    openAssistant('worker_sarathi')
+                  } else {
+                    openSupport()
+                  }
+                }}
                 className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 group-hover:bg-blue-500/15 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2 transition-colors">
-                  <Bot className="w-5 h-5 text-amber-600 dark:text-brand-400" />
+                  {isWorker ? (
+                    <Bot className="w-5 h-5 text-amber-600 dark:text-brand-400" />
+                  ) : (
+                    <ShieldAlert className="w-5 h-5 text-rose-500" />
+                  )}
                 </div>
                 <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400 leading-tight">
-                  {isWorker ? 'सारथी AI' : t('profile.helpSupport', 'AI Support')}
+                  {isWorker ? 'सारथी AI' : (language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support')}
                 </span>
               </button>
             </>

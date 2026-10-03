@@ -5,7 +5,6 @@
 
 export const ALLOWED_PERSONAS = [
   'customer_booking',
-  'customer_care',
   'worker_sarathi',
 ] as const
 

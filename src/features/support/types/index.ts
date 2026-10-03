@@ -62,7 +62,28 @@ export interface OpenSupportOptions {
   initialReason?: string
 }
 
-export interface SuggestionSubmission {
-  category: 'app_experience' | 'new_feature' | 'service_coverage' | 'other'
+export type SuggestionCategory = 'app_experience' | 'new_feature' | 'service_coverage' | 'other'
+export type SuggestionStatus = 'open' | 'in_review' | 'resolved' | 'dismissed'
+
+export interface SuggestionItem {
+  id: string
+  submitted_by: string
+  category: SuggestionCategory
   message: string
+  status: SuggestionStatus
+  resolution_note: string | null
+  created_at: string
+  updated_at: string
+  resolved_at: string | null
+}
+
+export interface SuggestionSubmission {
+  category: SuggestionCategory
+  message: string
+}
+
+export interface CreateSuggestionResult {
+  success: boolean
+  suggestion?: SuggestionItem
+  error?: string
 }

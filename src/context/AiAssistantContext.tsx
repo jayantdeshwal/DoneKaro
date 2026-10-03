@@ -30,16 +30,6 @@ const INITIAL_MESSAGES: Record<AssistantPersona, ChatMessage[]> = {
       textHi: ASSISTANT_CONFIGS.customer_booking.greetingHi,
     },
   ],
-  customer_care: [
-    {
-      id: 'init_cc',
-      sender: 'assistant',
-      persona: 'customer_care',
-      timestamp: new Date(),
-      textEn: ASSISTANT_CONFIGS.customer_care.greetingEn,
-      textHi: ASSISTANT_CONFIGS.customer_care.greetingHi,
-    },
-  ],
   worker_sarathi: [
     {
       id: 'init_ws',

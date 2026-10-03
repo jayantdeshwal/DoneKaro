@@ -16,7 +16,6 @@ import {
   Check,
   Zap,
   RotateCcw,
-  Shield,
   Briefcase,
   Search,
   MessageCircle,
@@ -55,19 +54,23 @@ export default function AiAssistantModal() {
   const currentConfig = ASSISTANT_CONFIGS[activePersona] || ASSISTANT_CONFIGS.customer_booking
   const currentMessages = messages[activePersona] || []
 
-  // Enforce role-aware mode access: workers only see worker_sarathi, customers see booking and care
+  // Enforce role-aware mode access: workers only see worker_sarathi, customers only see customer_booking
   useEffect(() => {
     if (!isOpen) return
-    if (isWorker && !isAdmin) {
+    if (isAdmin) {
+      closeAssistant()
+      return
+    }
+    if (isWorker) {
       if (activePersona !== 'worker_sarathi') {
         switchPersona('worker_sarathi')
       }
-    } else if (!isAdmin) {
-      if (activePersona === 'worker_sarathi') {
+    } else {
+      if (activePersona !== 'customer_booking') {
         switchPersona('customer_booking')
       }
     }
-  }, [isOpen, isWorker, isAdmin, activePersona, switchPersona])
+  }, [isOpen, isWorker, isAdmin, activePersona, switchPersona, closeAssistant])
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -85,7 +88,7 @@ export default function AiAssistantModal() {
     }
   }, [isOpen, activePersona])
 
-  if (!isOpen) return null
+  if (!isOpen || isAdmin) return null
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -193,51 +196,20 @@ export default function AiAssistantModal() {
           </div>
         </div>
 
-        {/* Persona Switcher Tabs (Role-Aware) */}
+        {/* Persona Indicator (Role-Aware) */}
         <div className="px-3 py-2 bg-slate-50/80 dark:bg-zinc-850/80 border-b border-slate-200 dark:border-zinc-800 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {/* Mode 1: Customer Booking Help (Visible to customers and admin) */}
-          {(!isWorker || isAdmin) && (
-            <button
-              onClick={() => switchPersona('customer_booking')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activePersona === 'customer_booking'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700'
-              }`}
-            >
+          {!isWorker && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-xs">
               <span>🛠️</span>
               <span>{isHindi ? 'बुकिंग सहायता' : 'Booking Help'}</span>
-            </button>
+            </div>
           )}
 
-          {/* Mode 2: Customer Help & Support (Visible to customers and admin) */}
-          {(!isWorker || isAdmin) && (
-            <button
-              onClick={() => switchPersona('customer_care')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activePersona === 'customer_care'
-                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
-              }`}
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>{isHindi ? 'सहायता एवं सहयोग' : 'Help & Support'}</span>
-            </button>
-          )}
-
-          {/* Mode 3: Worker Work Advice (Visible to workers and admin) */}
-          {(isWorker || isAdmin) && (
-            <button
-              onClick={() => switchPersona('worker_sarathi')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activePersona === 'worker_sarathi'
-                  ? 'bg-amber-600 text-white font-bold shadow-xs'
-                  : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-750'
-              }`}
-            >
+          {isWorker && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-600 text-white shadow-xs">
               <Briefcase className="w-3.5 h-3.5" />
               <span>{isHindi ? 'काम व सेवा सलाह' : 'Work Advice'}</span>
-            </button>
+            </div>
           )}
         </div>
 
