@@ -491,12 +491,16 @@ export default function Layout() {
                           </>
                         )}
 
-                        {/* Care & Support (Formal Complaints & Suggestions) */}
+                        {/* Care & Support (Customer / Worker) OR Management (Admin) */}
                         <button
                           type="button"
                           onClick={() => {
                             setUserMenuOpen(false)
-                            openSupport()
+                            if (isAdmin) {
+                              navigate('/admin?tab=management')
+                            } else {
+                              openSupport()
+                            }
                           }}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-rose-600 dark:hover:text-rose-400 transition-colors text-left cursor-pointer"
                           role="menuitem"
@@ -505,9 +509,15 @@ export default function Layout() {
                             <ShieldAlert className="w-4 h-4" />
                           </div>
                           <div className="flex flex-col text-left">
-                            <span className="font-semibold">{language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}</span>
+                            <span className="font-semibold">
+                              {isAdmin
+                                ? (language === 'hi' ? 'प्रबंधन' : 'Management')
+                                : (language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support')}
+                            </span>
                             <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-normal">
-                              {language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests'}
+                              {isAdmin
+                                ? (language === 'hi' ? 'शिकायत एवं सुझाव प्रबंधन' : 'Complaints & suggestions oversight')
+                                : (language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests')}
                             </span>
                           </div>
                         </button>
@@ -1023,7 +1033,7 @@ export default function Layout() {
                 </Badge>
               </button>
 
-              {/* Option 3: Care & Support (Formal Complaints & Suggestions) */}
+              {/* Option 3: Care & Support (Customer / Worker) OR Management (Admin) */}
               <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -1032,10 +1042,14 @@ export default function Layout() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">
-                        {language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}
+                        {isAdmin
+                          ? (language === 'hi' ? 'प्रबंधन' : 'Management')
+                          : (language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support')}
                       </p>
                       <p className="text-[10px] text-slate-600 dark:text-zinc-400">
-                        {language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests'}
+                        {isAdmin
+                          ? (language === 'hi' ? 'शिकायत एवं सुझाव प्रबंधन' : 'Complaints & suggestions oversight')
+                          : (language === 'hi' ? 'शिकायत, सुझाव व अनुरोध स्थिति' : 'Complaints, suggestions & requests')}
                       </p>
                     </div>
                   </div>
@@ -1046,12 +1060,20 @@ export default function Layout() {
                     type="button"
                     onClick={() => {
                       setMobileMenuOpen(false)
-                      openSupport()
+                      if (isAdmin) {
+                        navigate('/admin?tab=management')
+                      } else {
+                        openSupport()
+                      }
                     }}
                     className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-xs hover:bg-rose-500 active:scale-95 transition-all cursor-pointer text-center"
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>{language === 'hi' ? 'केयर डेस्क खोलें' : 'Open Care & Support'}</span>
+                    <span>
+                      {isAdmin
+                        ? (language === 'hi' ? 'प्रबंधन खोलें' : 'Open Management')
+                        : (language === 'hi' ? 'केयर डेस्क खोलें' : 'Open Care & Support')}
+                    </span>
                   </button>
                 </div>
               </div>

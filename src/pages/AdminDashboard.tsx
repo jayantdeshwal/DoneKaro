@@ -65,6 +65,7 @@ import { getIdProofSignedUrl } from '@/services/storage'
 import { removePhoneFromRegisteredCache } from '@/services/authCheck'
 import { markAllNotificationsRead as markAllNotificationsReadRpc, markNotificationRead as markNotificationReadRpc } from '@/services/notifications'
 import AdminJobDetails from '@/components/admin/AdminJobDetails'
+import { AdminSupportPage } from '@/features/admin-support'
 
 type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'payment_pending' | 'completed' | 'cancelled' | 'disputed'
 
@@ -132,12 +133,12 @@ export default function AdminDashboard() {
   const { user, isAdmin, isSuperAdmin } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  type AdminTabType = 'dashboard' | 'overview' | 'workers' | 'customers' | 'bookings' | 'notifications' | 'admins'
+  type AdminTabType = 'dashboard' | 'overview' | 'workers' | 'customers' | 'bookings' | 'notifications' | 'admins' | 'management'
 
   const tabParam = searchParams.get('tab') as AdminTabType | null
 
   const [activeTab, setActiveTab] = useState<AdminTabType>(
-    tabParam && ['dashboard', 'overview', 'workers', 'customers', 'bookings', 'notifications', 'admins'].includes(tabParam)
+    tabParam && ['dashboard', 'overview', 'workers', 'customers', 'bookings', 'notifications', 'admins', 'management'].includes(tabParam)
       ? (tabParam === 'overview' ? 'dashboard' : tabParam)
       : 'dashboard'
   )
@@ -153,7 +154,7 @@ export default function AdminDashboard() {
     }
     if (
       tab &&
-      ['dashboard', 'workers', 'customers', 'bookings', 'notifications', 'admins'].includes(tab)
+      ['dashboard', 'workers', 'customers', 'bookings', 'notifications', 'admins', 'management'].includes(tab)
     ) {
       setActiveTab(tab)
     } else if (!tab || tab === 'dashboard') {
@@ -166,7 +167,7 @@ export default function AdminDashboard() {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(true)
   const [notificationsError, setNotificationsError] = useState('')
   const [notificationFilter, setNotificationFilter] = useState<
-    'all' | 'registrations' | 'documents' | 'bookings' | 'unread'
+    'all' | 'registrations' | 'documents' | 'unread'
   >('all')
 
   // Approval / Rejection action modal
@@ -621,12 +622,6 @@ export default function AdminDashboard() {
           n.title.toLowerCase().includes('document') ||
           n.title.toLowerCase().includes('id proof')
       ).length,
-      bookings: adminNotifications.filter(
-        n =>
-          Boolean(n.booking_id) ||
-          n.notification_type.toLowerCase().includes('booking') ||
-          n.title.toLowerCase().includes('booking')
-      ).length,
       unread: unreadNotifsCount,
     }
   }, [adminNotifications, unreadNotifsCount])
@@ -647,13 +642,6 @@ export default function AdminDashboard() {
           n.notification_type.toLowerCase().includes('document') ||
           n.title.toLowerCase().includes('document') ||
           n.title.toLowerCase().includes('id proof')
-        )
-      }
-      if (notificationFilter === 'bookings') {
-        return (
-          Boolean(n.booking_id) ||
-          n.notification_type.toLowerCase().includes('booking') ||
-          n.title.toLowerCase().includes('booking')
         )
       }
       return true
@@ -1003,11 +991,14 @@ export default function AdminDashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/admin/support')}
+                onClick={() => {
+                  setActiveTab('management')
+                  setSearchParams({ tab: 'management' })
+                }}
                 className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
               >
                 <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-                Support Manager
+                Management
               </Button>
 
               <Button
@@ -1250,6 +1241,11 @@ export default function AdminDashboard() {
               label: 'Administrators',
               icon: Shield,
               badge: adminTeam.length > 0 ? adminTeam.length : undefined,
+            },
+            {
+              key: 'management',
+              label: 'Management',
+              icon: ShieldAlert,
             },
           ].map(tab => {
             const isActive = activeTab === tab.key || (tab.key === 'dashboard' && (activeTab === 'dashboard' || activeTab === 'overview'))
@@ -2299,7 +2295,7 @@ export default function AdminDashboard() {
         </div>
         )}
 
-        {/* 5. NOTIFICATIONS TAB (With Booking Notifications Filter & Spring Animations) */}
+        {/* 5. NOTIFICATIONS TAB (With Operational Alerts & Spring Animations) */}
         {activeTab === 'notifications' && (
           <div className="space-y-4 sm:space-y-6">
             {/* Dedicated Mobile Alerts Header */}
@@ -2348,7 +2344,7 @@ export default function AdminDashboard() {
                     )}
                   </div>
                   <p className="text-sm text-semantic-text-secondary mt-1">
-                    Real-time alerts for worker registrations, document verifications, customer booking activity, and platform events.
+                    Real-time operational alerts for worker registrations, document verifications, and platform events.
                   </p>
                 </div>
 
@@ -2378,7 +2374,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Spring-Animated Filter Pills (Including Booking Notifications) */}
+              {/* Spring-Animated Filter Pills (Registrations, Documents, Unread) */}
               <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-semantic-border-light">
                 {[
                   {
@@ -2398,12 +2394,6 @@ export default function AdminDashboard() {
                     label: t('admin.filterDocuments', 'ID Documents'),
                     count: notifCounts.documents,
                     icon: FileText,
-                  },
-                  {
-                    key: 'bookings',
-                    label: 'Booking Notifications',
-                    count: notifCounts.bookings,
-                    icon: Calendar,
                   },
                   {
                     key: 'unread',
@@ -2475,10 +2465,6 @@ export default function AdminDashboard() {
                     const isWorkerEvent =
                       notif.notification_type === 'worker_registration_submitted' ||
                       notif.notification_type === 'worker_document_uploaded'
-                    const isBookingEvent =
-                      Boolean(notif.booking_id) ||
-                      notif.notification_type.toLowerCase().includes('booking') ||
-                      notif.title.toLowerCase().includes('booking')
 
                     return (
                       <motion.div
@@ -2499,8 +2485,6 @@ export default function AdminDashboard() {
                                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                                 : notif.notification_type === 'worker_document_uploaded'
                                 ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-                                : isBookingEvent
-                                ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'
                                 : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                             }`}
                           >
@@ -2510,10 +2494,7 @@ export default function AdminDashboard() {
                             {notif.notification_type === 'worker_document_uploaded' && (
                               <FileText className="w-5 h-5" />
                             )}
-                            {isBookingEvent && (
-                              <Calendar className="w-5 h-5" />
-                            )}
-                            {!isWorkerEvent && !isBookingEvent && (
+                            {!isWorkerEvent && (
                               <Bell className="w-5 h-5" />
                             )}
                           </div>
@@ -2530,14 +2511,6 @@ export default function AdminDashboard() {
                                   className="text-[10px] px-1.5 py-0.2 uppercase font-bold tracking-wider"
                                 >
                                   NEW
-                                </Badge>
-                              )}
-                              {isBookingEvent && (
-                                <Badge
-                                  variant="info"
-                                  className="text-[10px] px-1.5 py-0.2 font-semibold"
-                                >
-                                  Booking Alert
                                 </Badge>
                               )}
                               <span className="text-xs text-semantic-text-tertiary">
@@ -2564,24 +2537,6 @@ export default function AdminDashboard() {
                             >
                               <Eye className="w-3.5 h-3.5" />
                               {t('admin.reviewWorker', 'Review Worker')}
-                            </Button>
-                          )}
-
-                          {isBookingEvent && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => {
-                                if (notif.booking_id) {
-                                  setBookingSearch(notif.booking_id)
-                                }
-                                setActiveTab('bookings')
-                                setSearchParams({ tab: 'bookings' })
-                              }}
-                              className="text-xs flex items-center gap-1.5 shadow-sm font-semibold px-3 py-1.5 rounded-xl"
-                            >
-                              <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                              View Booking
                             </Button>
                           )}
 
@@ -2780,6 +2735,13 @@ export default function AdminDashboard() {
                 </div>
               )}
             </Card>
+          </div>
+        )}
+
+        {/* 7. MANAGEMENT TAB (Complaints & Suggestions Oversight) */}
+        {activeTab === 'management' && (
+          <div className="pt-2">
+            <AdminSupportPage embedded />
           </div>
         )}
       </div>

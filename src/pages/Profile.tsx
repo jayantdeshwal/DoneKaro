@@ -568,7 +568,7 @@ export default function Profile() {
         {/* ===================================================================== */}
         {/* 3. QUICK ACTION CARDS ROW                                             */}
         {/* ===================================================================== */}
-        <div className={`gap-2.5 sm:gap-3 mb-6 ${isAdmin ? 'grid grid-cols-2 sm:grid-cols-4' : 'grid grid-cols-3'}`}>
+        <div className={`gap-2.5 sm:gap-3 mb-6 ${isAdmin ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5' : 'grid grid-cols-3'}`}>
           {isAdmin ? (
             <>
               {/* Admin Card 1: Admin Dashboard */}
@@ -599,17 +599,17 @@ export default function Profile() {
                 </span>
               </button>
 
-              {/* Admin Card 3: Manage Administrators */}
+              {/* Admin Card 3: Support Management */}
               <button
                 type="button"
-                onClick={() => navigate('/admin?tab=admins')}
-                className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-amber-500/40 hover:border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+                onClick={() => navigate('/admin?tab=management')}
+                className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-rose-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
               >
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-105 transition-transform">
-                  <Shield className="w-5 h-5 text-amber-500" />
+                <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center text-rose-500 dark:text-rose-400 mb-2 group-hover:scale-105 transition-transform">
+                  <ShieldAlert className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 leading-tight">
-                  Administrators
+                <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 leading-tight">
+                  Management
                 </span>
               </button>
 
@@ -624,6 +624,20 @@ export default function Profile() {
                 </div>
                 <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 leading-tight">
                   Platform Alerts
+                </span>
+              </button>
+
+              {/* Admin Card 5: Manage Administrators */}
+              <button
+                type="button"
+                onClick={() => navigate('/admin?tab=admins')}
+                className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-amber-500/40 hover:border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-105 transition-transform">
+                  <Shield className="w-5 h-5 text-amber-500" />
+                </div>
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 leading-tight">
+                  Administrators
                 </span>
               </button>
             </>
@@ -743,6 +757,19 @@ export default function Profile() {
                   <Shield className="w-5 h-5 text-rose-500 dark:text-rose-400" />
                   <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
                     Admin Management Portal
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              <div
+                onClick={() => navigate('/admin?tab=management')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <ShieldAlert className="w-5 h-5 text-rose-500 dark:text-rose-400" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                    {language === 'hi' ? 'शिकायत एवं सुझाव प्रबंधन' : 'Support Management (Complaints & Suggestions)'}
                   </span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all" />

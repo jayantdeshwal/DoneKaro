@@ -82,16 +82,6 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
     color: 'text-indigo-400',
     bg: 'bg-indigo-950/60 border border-indigo-800/40',
   },
-  admin_new_booking: {
-    icon: Calendar,
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-950/60 border border-cyan-800/40',
-  },
-  admin_booking_cancelled: {
-    icon: AlertCircle,
-    color: 'text-amber-400',
-    bg: 'bg-amber-950/60 border border-amber-800/40',
-  },
   system: {
     icon: Bell,
     color: 'text-semantic-text-secondary',

@@ -26,7 +26,11 @@ import { ComplaintDetails } from './ComplaintDetails'
 import { SuggestionList } from './SuggestionList'
 import { SuggestionDetails } from './SuggestionDetails'
 
-export const AdminSupportPage: React.FC = () => {
+export interface AdminSupportPageProps {
+  embedded?: boolean
+}
+
+export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = false }) => {
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState<AdminSupportTab>('complaints')
@@ -79,13 +83,13 @@ export const AdminSupportPage: React.FC = () => {
   const openComplaintsCount = complaints.filter(c => c.status === 'open' || c.status === 'investigating').length
   const openSuggestionsCount = suggestions.filter(s => s.status === 'open' || s.status === 'in_review').length
 
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
+  const content = (
+    <div className="space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            {!embedded && (
               <button
                 onClick={() => navigate('/admin')}
                 className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs font-semibold"
@@ -94,14 +98,15 @@ export const AdminSupportPage: React.FC = () => {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Admin Console</span>
               </button>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                Complaints & Suggestions Manager
-              </h1>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Authoritative platform support oversight, dispute resolution, and feedback tracking.
-            </p>
+            )}
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+              Management: Complaints & Suggestions
+            </h1>
           </div>
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
+            Authoritative platform support oversight, dispute resolution, and feedback tracking.
+          </p>
+        </div>
 
           <div className="flex items-center gap-2.5">
             <button
@@ -227,6 +232,17 @@ export const AdminSupportPage: React.FC = () => {
             </div>
           </div>
         )}
+    </div>
+  )
+
+  if (embedded) {
+    return content
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {content}
       </div>
     </div>
   )
