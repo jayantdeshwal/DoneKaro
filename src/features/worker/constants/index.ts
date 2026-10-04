@@ -1,0 +1,52 @@
+import React from 'react'
+import {
+  Home as HomeIcon,
+  Wrench,
+  Sparkles,
+  Truck,
+  Zap,
+  Hammer,
+  Paintbrush,
+  Snowflake,
+  Settings,
+  Droplets,
+  Flame,
+  Scissors,
+  Palette,
+  User,
+  Shirt,
+  Car,
+  ShieldAlert,
+  HardHat,
+  Briefcase,
+  IdCard,
+} from 'lucide-react'
+
+export const categoryIconMap: Record<string, React.ElementType> = {
+  home: HomeIcon,
+  wrench: Wrench,
+  sparkles: Sparkles,
+  truck: Truck,
+  zap: Zap,
+  hammer: Hammer,
+  brush: Paintbrush,
+  paintbrush: Paintbrush,
+  'hard-hat': HardHat,
+  'brick-wall': Wrench,
+  snowflake: Snowflake,
+  cog: Settings,
+  droplets: Droplets,
+  flame: Flame,
+  scissors: Scissors,
+  palette: Palette,
+  user: User,
+  shirt: Shirt,
+  car: Car,
+  'shield-alert': ShieldAlert,
+}
+
+export const REGISTRATION_STEPS = [
+  { key: 'personal' as const, labelKey: 'auth.workerRegistration.step1', fallback: 'Personal Info', icon: User },
+  { key: 'work' as const, labelKey: 'auth.workerRegistration.step2', fallback: 'Work Details', icon: Briefcase },
+  { key: 'documents' as const, labelKey: 'auth.workerRegistration.step3', fallback: 'Documents', icon: IdCard },
+]
