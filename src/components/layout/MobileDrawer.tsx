@@ -10,7 +10,7 @@ import {
   X, User, LogOut, Shield, Globe, ShieldAlert,
   Sun, Moon, Bot, Sparkles, ArrowLeft
 } from 'lucide-react'
-import JugnuLogo from '../common/JugnuLogo'
+import AppLogo from '../common/AppLogo'
 
 export interface MobileDrawerProps {
   isOpen: boolean
@@ -29,6 +29,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
   if (!isOpen) return null
 
   const handleBackToLogin = () => {
+    sessionStorage.removeItem('donekaro_guest_mode')
     sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     onClose()
@@ -49,7 +50,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
         {/* 1. Sidebar Header: Logo & Close X Button */}
         <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-zinc-800/80 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md z-10">
           <div className="flex items-center gap-2.5">
-            <JugnuLogo className="w-8 h-8" />
+            <AppLogo className="w-8 h-8" />
             <div>
               <span className="font-extrabold text-base text-slate-900 dark:text-zinc-100 block leading-tight">
                 {t('app.name')}

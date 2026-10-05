@@ -4,7 +4,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { CATEGORIES, getCategoryName } from '@kaamgar/shared'
 import { ShieldCheck, ArrowRight, MapPin, Mail, Heart } from 'lucide-react'
-import JugnuLogo from '../common/JugnuLogo'
+import AppLogo from '../common/AppLogo'
 
 export function AppFooter() {
   const { t } = useTranslation()
@@ -18,7 +18,7 @@ export function AppFooter() {
           {/* Column 1: Brand & Identity (spans 2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center gap-3 group">
-              <JugnuLogo className="w-10 h-10 group-hover:scale-105 transition-transform" />
+              <AppLogo className="w-10 h-10 group-hover:scale-105 transition-transform" />
               <div>
                 <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white block">
                   {t('app.name')}
@@ -119,7 +119,7 @@ export function AppFooter() {
             {/* Help & Support direct links */}
             <div className="pt-3 border-t border-slate-200 dark:border-zinc-800 space-y-1.5">
               <a
-                href="mailto:support@jugnu.in"
+                href="mailto:support@donekaro.in"
                 className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
                 <Mail className="w-3.5 h-3.5 shrink-0" />

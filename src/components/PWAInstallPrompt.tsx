@@ -108,6 +108,7 @@ export default function PWAInstallPrompt() {
   }
 
   const handleDismiss = () => {
+    sessionStorage.setItem('donekaro_pwa_dismissed_session', 'true')
     sessionStorage.setItem('kaamgar_pwa_dismissed_session', 'true')
     setIsExpanded(false)
   }
@@ -149,7 +150,7 @@ export default function PWAInstallPrompt() {
                         </span>
                       </div>
                       <h4 className="font-extrabold text-sm sm:text-base text-white tracking-tight leading-snug">
-                        {t('pwa.installBannerTitle', 'Install Jugnu App')}
+                        {t('pwa.installBannerTitle', 'Install DoneKaro App')}
                       </h4>
                     </div>
 

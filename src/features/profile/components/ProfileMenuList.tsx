@@ -58,12 +58,12 @@ export function ProfileMenuList({
   // Native share / WhatsApp referral
   const handleShareApp = () => {
     const shareText = language === 'hi'
-      ? 'जुगनू: बिना किसी कमीशन के सीधे मुजफ्फरनगर के सत्यापित इलेक्ट्रीशियन, प्लंबर व एसी कारीगर बुक करें! देखें: https://jugnu.app'
-      : 'Jugnu: Hire verified local Electricians, Plumbers, Cleaning & AC technicians with 0% commission! Visit: https://jugnu.app'
+      ? 'DoneKaro: बिना किसी कमीशन के सीधे मुजफ्फरनगर के सत्यापित इलेक्ट्रीशियन, प्लंबर व एसी कारीगर बुक करें! देखें: https://donekaro.app'
+      : 'DoneKaro: Hire verified local Electricians, Plumbers, Cleaning & AC technicians with 0% commission! Visit: https://donekaro.app'
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
-        title: 'Jugnu',
+        title: 'DoneKaro',
         text: shareText,
         url: window.location.origin,
       }).catch(() => {})
@@ -405,7 +405,7 @@ export function ProfileMenuList({
               <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
             </div>
 
-            {/* Row: About Jugnu */}
+            {/* Row: About DoneKaro */}
             <div
               onClick={() => onNavigate('/')}
               className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
@@ -413,7 +413,7 @@ export function ProfileMenuList({
               <div className="flex items-center gap-3.5">
                 <Info className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
                 <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {t('profile.aboutApp', 'About Jugnu')}
+                  {t('profile.aboutApp', 'About DoneKaro')}
                 </span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
@@ -443,7 +443,7 @@ export function ProfileMenuList({
           <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-white to-amber-50 dark:from-purple-950/40 dark:via-zinc-900 dark:to-brand-500/10 border border-purple-200/80 dark:border-purple-500/30 flex items-center justify-between gap-4 shadow-sm dark:shadow-xl">
             <div className="flex-1 min-w-0">
               <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white mb-1">
-                {t('profile.referTitle', 'Share Jugnu & Earn Goodwill')}
+                {t('profile.referTitle', 'Share DoneKaro & Earn Goodwill')}
               </h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed mb-3">
                 {t('profile.referDesc', 'Help your friends and family find verified local electricians, plumbers, and technicians without middlemen.')}

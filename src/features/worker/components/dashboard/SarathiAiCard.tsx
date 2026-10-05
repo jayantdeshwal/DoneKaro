@@ -27,8 +27,8 @@ export const SarathiAiCard: React.FC<SarathiAiCardProps> = ({
           <div className="flex items-center gap-2">
             <h3 className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
               {i18n.language === 'hi'
-                ? 'जुगनू सारथी AI (काम व सेवा सलाह)'
-                : 'Jugnu Sarathi AI (Work Advice)'}
+                ? 'DoneKaro सारथी AI (काम व सेवा सलाह)'
+                : 'DoneKaro Sarathi AI (Work Advice)'}
             </h3>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
               24x7 AI

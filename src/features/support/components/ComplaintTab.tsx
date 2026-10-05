@@ -171,7 +171,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
             {isHindi
               ? 'आपका अनुरोध सुरक्षित रूप से दर्ज कर लिया गया है।'
-              : 'Your complaint has been formally registered with Jugnu administration.'}
+              : 'Your complaint has been formally registered with DoneKaro administration.'}
           </p>
         </div>
 
@@ -233,8 +233,8 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
 
         <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed px-2">
           {isHindi
-            ? '⚠️ जुगनू प्रशासन टीम द्वारा इसकी निष्पक्ष समीक्षा की जाएगी। आप कभी भी "मेरे अनुरोध" में इसकी स्थिति देख सकते हैं।'
-            : '⚠️ Jugnu administration will investigate this matter according to platform service standards. You can track progress under "My Requests".'}
+            ? '⚠️ DoneKaro प्रशासन टीम द्वारा इसकी निष्पक्ष समीक्षा की जाएगी। आप कभी भी "मेरे अनुरोध" में इसकी स्थिति देख सकते हैं।'
+            : '⚠️ DoneKaro administration will investigate this matter according to platform service standards. You can track progress under "My Requests".'}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
@@ -340,8 +340,8 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
 
         <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-[11px] text-amber-800 dark:text-amber-300/90 leading-relaxed">
           {isHindi
-            ? '📌 यह अनुरोध जुगनू व्यवस्थापक पैनल में दर्ज होगा और आपको एक आधिकारिक संदर्भ टोकन मिलेगा। AI सहायक स्वतः कोई शिकायत दर्ज नहीं करता।'
-            : '📌 This creates an authoritative record in the Jugnu admin panel with a unique reference token. AI Support is read-only and cannot mutate complaints.'}
+            ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में दर्ज होगा और आपको एक आधिकारिक संदर्भ टोकन मिलेगा। AI सहायक स्वतः कोई शिकायत दर्ज नहीं करता।'
+            : '📌 This creates an authoritative record in the DoneKaro admin panel with a unique reference token. AI Support is read-only and cannot mutate complaints.'}
         </div>
 
         <div className="flex items-center justify-end gap-2.5 pt-2">
@@ -394,8 +394,8 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
             </p>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
               {isHindi
-                ? 'आधिकारिक शिकायत दर्ज करने और उसकी प्रगति को ट्रैक करने के लिए कृपया अपने सत्यापित जुगनू खाते में लॉगिन करें।'
-                : 'To file a formal dispute and track resolution progress against verified bookings, please sign in to your Jugnu account.'}
+                ? 'आधिकारिक शिकायत दर्ज करने और उसकी प्रगति को ट्रैक करने के लिए कृपया अपने सत्यापित DoneKaro खाते में लॉगिन करें।'
+                : 'To file a formal dispute and track resolution progress against verified bookings, please sign in to your DoneKaro account.'}
             </p>
           </div>
           <div className="flex gap-2 justify-center pt-2">

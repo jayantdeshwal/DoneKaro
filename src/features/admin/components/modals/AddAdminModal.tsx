@@ -89,7 +89,7 @@ export function AddAdminModal({
             required
             value={newAdminEmail}
             onChange={e => setNewAdminEmail(e.target.value)}
-            placeholder="admin@jugnu.in"
+            placeholder="admin@donekaro.in"
             className="w-full px-3.5 py-2.5 bg-surface-200/80 border border-semantic-border-light rounded-xl text-semantic-text-primary text-sm focus:outline-none focus:border-brand-500 transition-colors"
           />
         </div>

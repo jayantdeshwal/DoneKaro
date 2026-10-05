@@ -6,7 +6,7 @@ export interface PhoneCheckResult {
 }
 
 /**
- * Checks whether a given phone number is registered in Jugnu.
+ * Checks whether a given phone number is registered in DoneKaro.
  * Uses the security-definer RPC `check_phone_registration` which returns boolean status only (zero PII exposure).
  */
 export async function checkPhoneRegistration(rawPhone: string): Promise<PhoneCheckResult> {

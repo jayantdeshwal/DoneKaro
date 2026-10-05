@@ -240,7 +240,7 @@ serve(async (req: Request) => {
     const formattedRecipientPhone = `91${cleanDigits}`
     const recipientName = recipientProfile?.full_name || 'Valued User'
     const customerName = customerProfile?.full_name || 'Customer'
-    const workerName = workerProfile?.full_name || 'Jugnu Artisan'
+    const workerName = workerProfile?.full_name || 'DoneKaro Artisan'
     const serviceCategory = categoryData?.name_en || booking.category_id
 
     // 6. Trigger MSG91 Flow API if configured

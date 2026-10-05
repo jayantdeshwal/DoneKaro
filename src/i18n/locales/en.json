@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Jugnu",
-    "tagline": "Ghar Ke Har Kaam Ka Jugnu"
+    "name": "DoneKaro",
+    "tagline": "DoneKaro"
   },
   "nav": {
     "home": "Home",
@@ -93,7 +93,7 @@
     "verified": "Verified"
   },
   "home": {
-    "heroTitle": "Ghar Ke Har Kaam Ka Jugnu",
+    "heroTitle": "DoneKaro",
     "heroSubtitle": "Connect directly with verified electricians, plumbers, AC technicians & salon experts in Muzaffarnagar. Transparent rates, zero middleman commission, scheduled local service.",
     "searchPlaceholder": "What service do you need?",
     "searchButton": "Find Workers",
@@ -115,13 +115,13 @@
       "local": "Local Focus",
       "localDesc": "Muzaffarnagar only"
     },
-    "heroBadge": "✨ Jugnu • Verified Local Experts In Muzaffarnagar",
-    "problemBadge": "The Old Way vs. The Jugnu Way",
+    "heroBadge": "✨ DoneKaro • Verified Local Experts In Muzaffarnagar",
+    "problemBadge": "The Old Way vs. The DoneKaro Way",
     "problemTitle": "Tired of the Daily Hassle of Home Repairs?",
     "problemSubtitle": "Finding reliable help in Muzaffarnagar shouldn't mean endless follow-up calls, contractor markups, or unvetted strangers.",
     "problemOldHeader": "The Old Unorganized Way",
     "problemOldSub": "Calling random numbers or roadside contractors",
-    "problemNewHeader": "The Jugnu Standard",
+    "problemNewHeader": "The DoneKaro Standard",
     "problemNewSub": "Muzaffarnagar's verified direct community",
     "problem1OldTitle": "40-50% Contractor Markup",
     "problem1OldDesc": "Middlemen inflate the bills while underpaying the hardworking artisan.",
@@ -137,7 +137,7 @@
     "problem3NewDesc": "Every artisan is physically vetted and government-ID verified before approval.",
     "reviewGuaranteeBadge": "Zero Fake Reviews Guarantee",
     "reviewGuaranteeTitle": "100% Genuine, Booking-Verified Reviews",
-    "reviewGuaranteeSubtitle": "We strictly reject fabricated reviews. Every rating on Jugnu comes solely from residents who booked and completed an authentic service.",
+    "reviewGuaranteeSubtitle": "We strictly reject fabricated reviews. Every rating on DoneKaro comes solely from residents who booked and completed an authentic service.",
     "reviewPillar1Title": "OTP-Verified Bookings Only",
     "reviewPillar1Desc": "Only customers whose booking was completed via a secure OTP can rate an artisan.",
     "reviewPillar2Title": "Zero Paid or Biased Ratings",
@@ -158,7 +158,7 @@
     "workerTakingReg": "Accepting Registrations",
     "beFirstWorker": "Be the First to Register",
     "viewAllServices": "View All Services & Search Directory",
-    "whyTitle": "Why Choose Jugnu?",
+    "whyTitle": "Why Choose DoneKaro?",
     "whySubtitle": "Building a secure, transparent, and fair service ecosystem for both residents and local artisans",
     "whyPillar1Title": "Strict ID Verification",
     "whyPillar1Desc": "Every artisan's government Aadhaar or Voter ID is manually inspected and approved by platform administrators.",
@@ -541,9 +541,9 @@
       "goToDashboard": "Go to Worker Dashboard"
     },
     "notRegisteredTitle": "Account Not Registered",
-    "notRegisteredCustomerDesc": "No account found with mobile number +91 {{phone}}. You are not registered yet. Please sign up to create your Jugnu account first.",
+    "notRegisteredCustomerDesc": "No account found with mobile number +91 {{phone}}. You are not registered yet. Please sign up to create your DoneKaro account first.",
     "notRegisteredWorkerTitle": "Worker Account Not Found",
-    "notRegisteredWorkerDesc": "No worker account found with mobile number +91 {{phone}}. Please register as a verified Jugnu artisan first to receive jobs.",
+    "notRegisteredWorkerDesc": "No worker account found with mobile number +91 {{phone}}. Please register as a verified DoneKaro artisan first to receive jobs.",
     "signUpAsCustomerBtn": "Sign Up as Customer (Free)",
     "registerAsWorkerBtn": "Register as Worker / Artisan",
     "alreadyRegisteredTitle": "Mobile Number Already Registered",
@@ -660,7 +660,7 @@
     ,"totalPaid": "Total Paid"
     ,"printReceipt": "Print / Save Receipt"
     ,"verifiedCashPayment": "Verified Cash Payment"
-    ,"receiptFooterNote": "This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by Jugnu."
+    ,"receiptFooterNote": "This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by DoneKaro."
     ,"onlinePaymentComingSoon": "Online payment (UPI / Cards) coming soon"
     ,"receiptNotAvailableYet": "Receipt is being generated. Please refresh in a moment."
     ,"viewDetails": "View Details"
@@ -739,7 +739,7 @@
     "problemDescription": "Problem Description",
     "problemImage": "Problem Image",
     "sendProviderQuote": "Send Provider Quote",
-    "quoteDescriptionHint": "Enter the amount and details you choose to offer. Jugnu does not calculate or suggest this amount.",
+    "quoteDescriptionHint": "Enter the amount and details you choose to offer. DoneKaro does not calculate or suggest this amount.",
     "estimatedAmount": "Estimated Amount",
     "description": "Description",
     "quoteDetailsPlaceholder": "Explain what your quote includes",
@@ -945,7 +945,7 @@
     "logout": "Logout",
     "accountDetails": "Account Details",
     "editHint": "Update your personal and work details below, then click Save Changes.",
-    "viewHint": "Your personal information and Jugnu preferences.",
+    "viewHint": "Your personal information and DoneKaro preferences.",
     "fullName": "Full Name",
     "phoneLabel": "Phone Number",
     "noPhoneSpecified": "No phone specified",
@@ -994,19 +994,19 @@
     }
   },
   "authChoice": {
-    "badge": "Jugnu Portal",
-    "title": "Welcome to Jugnu",
+    "badge": "DoneKaro Portal",
+    "title": "Welcome to DoneKaro",
     "subtitle": "Your trusted local platform connecting residents with verified skilled workers. How would you like to proceed?",
     "loginTitle": "Log In / Sign In",
     "loginBadge": "Existing Account",
-    "loginDesc": "Already registered with Jugnu? Sign in to access your bookings, worker dashboard, or administrator portal.",
+    "loginDesc": "Already registered with DoneKaro? Sign in to access your bookings, worker dashboard, or administrator portal.",
     "loginPoint1": "Customer booking dashboard & status",
-    "loginPoint2": "Jugnu worker job management",
+    "loginPoint2": "DoneKaro worker job management",
     "loginPoint3": "Secure 2FA-protected administrator console",
     "loginBtn": "Go to Login",
-    "registerTitle": "New to Jugnu? Sign Up",
-    "registerBadge": "New to Jugnu",
-    "registerDesc": "Join Jugnu for the first time as a Customer seeking services or as a skilled Worker seeking daily work.",
+    "registerTitle": "New to DoneKaro? Sign Up",
+    "registerBadge": "New to DoneKaro",
+    "registerDesc": "Join DoneKaro for the first time as a Customer seeking services or as a skilled Worker seeking daily work.",
     "registerPoint1": "Customer Sign Up: Book local electricians, plumbers & more",
     "registerPoint2": "Worker Sign Up: Verified artisan profile to get direct jobs",
     "registerPoint3": "Simple mobile OTP verification & password setup",
@@ -1016,7 +1016,7 @@
   },
   "loginPage": {
     "customerTitle": "Customer Login",
-    "workerTitle": "Jugnu Worker Login",
+    "workerTitle": "DoneKaro Worker Login",
     "adminTitle": "Administrator Portal",
     "customerSubtitle": "Sign in to book verified local services",
     "workerSubtitle": "Access your jobs, appointments & earnings",
@@ -1033,9 +1033,9 @@
     "registerNow": "Register now with this number",
     "otpHint": "A 6-digit OTP will be verified to sign you in.",
     "customerOtpBtn": "Send OTP & Sign In",
-    "registerCustomerCta": "New to Jugnu? Create Customer Account",
+    "registerCustomerCta": "New to DoneKaro? Create Customer Account",
     "registerWorkerNow": "Register as a worker now",
-    "registerWorkerCta": "New to Jugnu? Create Worker Account",
+    "registerWorkerCta": "New to DoneKaro? Create Worker Account",
     "passwordlessTitle": "Instant Passwordless Login",
     "passwordlessDesc": "Enter your mobile number to receive an instant verification OTP. No passwords required.",
     "workerPortalTitle": "Artisan & Worker Portal",
@@ -1049,7 +1049,7 @@
     "adminSubmitBtn": "Authenticate & Launch 2FA OTP",
     "newWorkerPrompt": "New Partner? Register as a verified artisan",
     "newWorkerLink": "Register as Worker to get jobs",
-    "newToKaamgar": "New to Jugnu?",
+    "newToKaamgar": "New to DoneKaro?",
     "signUpLink": "Create an account (Sign Up)",
     "backToOptions": "Back to Login / Sign Up options",
     "adminConsoleBadge": "High Security Console",
@@ -1067,7 +1067,7 @@
     "otpWidgetError": "Could not open OTP verification widget. Please ensure ad-blockers are disabled and retry."
   },
   "registerPage": {
-    "title": "New to Jugnu? Create Account",
+    "title": "New to DoneKaro? Create Account",
     "subtitle": "Select your role to register with mobile OTP verification & password",
     "tabCustomer": "Customer Sign Up",
     "tabWorker": "Worker Sign Up",
@@ -1140,20 +1140,20 @@
     "contact": "Contact",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "copyright": "© 2026 Jugnu. All rights reserved.",
+    "copyright": "© 2026 DoneKaro. All rights reserved.",
     "madeWith": "Made with ❤️ for Muzaffarnagar",
     "tagline": "Connecting Muzaffarnagar residents with background-verified local artisans and technicians.",
     "explore": "Explore & Book",
     "localities": "Key Localities",
     "supportHelpline": "Help & Support",
     "supportHelplineHours": "Mon - Sun: 9:00 AM - 8:00 PM",
-    "emergencyCall": "Support: support@jugnu.in",
-    "supportEmail": "support@jugnu.in",
+    "emergencyCall": "Support: support@donekaro.in",
+    "supportEmail": "support@donekaro.in",
     "pilotNotice": "Official Community Pilot Platform • City of Muzaffarnagar"
   },
   "pwa": {
     "installApp": "Install App",
-    "installBannerTitle": "Install Jugnu App",
+    "installBannerTitle": "Install DoneKaro App",
     "installBannerSubtitle": "Add to your home screen for faster bookings, instant WhatsApp contact, and offline access.",
     "installBtn": "Install App",
     "laterBtn": "Later",
@@ -1161,7 +1161,7 @@
   },
   "appBanner": {
     "eyebrow": "Official Mobile App • <2MB Storage",
-    "title": "Get the Jugnu Mobile App",
+    "title": "Get the DoneKaro Mobile App",
     "subtitle": "Install the app directly on your phone for faster bookings, 1-tap WhatsApp chat, and 0% commission local artisan services.",
     "installBtn": "Install Mobile App Now",
     "installedStatus": "App Already Installed on This Device",
@@ -1177,12 +1177,12 @@
     "iosStep1": "1. Tap the Share button at the bottom of Safari",
     "iosStep2": "2. Select 'Add to Home Screen' and tap Add",
     "androidManualTitle": "Installing on Android (Chrome):",
-    "androidManualDesc": "Tap the 3 dots (⋮) in Chrome and select 'Install app' or 'Add to Home screen' to add the Jugnu icon to your phone."
+    "androidManualDesc": "Tap the 3 dots (⋮) in Chrome and select 'Install app' or 'Add to Home screen' to add the DoneKaro icon to your phone."
   },
   "guestBar": {
     "prompt": "Browsing in Guest Mode",
     "subprompt": "Sign in to book artisans, chat, and access verified phone numbers",
-    "exploringAsGuest": "You are exploring Jugnu in Guest Mode"
+    "exploringAsGuest": "You are exploring DoneKaro in Guest Mode"
   },
   "profile": {
     "title": "My Account",
@@ -1194,15 +1194,15 @@
     "editProfile": "Edit Profile",
     "myBookings": "My bookings",
     "workerMode": "Worker Mode",
-    "becomeWorker": "Earn with Jugnu",
+    "becomeWorker": "Earn with DoneKaro",
     "helpSupport": "Help & support",
     "manageAddresses": "Manage addresses & localities",
     "manageAddressesDesc": "Muzaffarnagar pincodes (251001 & 251002)",
     "emailReceipts": "Email & notifications",
     "reviewsRatings": "My ratings & reviews",
-    "aboutApp": "About Jugnu",
+    "aboutApp": "About DoneKaro",
     "faqsHelp": "Help Center & FAQs",
-    "referTitle": "Refer & earn / Share Jugnu",
+    "referTitle": "Refer & earn / Share DoneKaro",
     "referDesc": "Help your friends and family find verified local electricians, plumbers, and technicians without middlemen.",
     "referNow": "Refer now",
     "completed": "Completed",
@@ -1225,9 +1225,9 @@
     "askCare": "Ask Help & Support...",
     "askSarathi": "Ask Work Advice...",
     "openAssistant": "Ask AI Support",
-    "customerBannerTitle": "Jugnu AI Support (24x7)",
+    "customerBannerTitle": "DoneKaro AI Support (24x7)",
     "customerBannerDesc": "Select an assistant for service guidance or booking help",
-    "workerBannerTitle": "Jugnu Sarathi AI (Work Advice)",
+    "workerBannerTitle": "DoneKaro Sarathi AI (Work Advice)",
     "workerBannerDesc": "WhatsApp reply templates, earning tips & service policy guide"
   },
   "canonicalCategories": {

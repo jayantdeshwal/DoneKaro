@@ -108,7 +108,7 @@ export function buildGroundedAction(
  * 3. Claiming to have filed tickets, complaints, or processed refunds.
  * 4. Claiming to have cancelled bookings.
  * 5. Claiming escalation without authoritative backing.
- * 6. Reintroducing direct Jugnu support phone calls.
+ * 6. Reintroducing direct DoneKaro support phone calls.
  */
 export function sanitizeAndGroundAiResponse(
   rawText: string,
@@ -122,7 +122,7 @@ export function sanitizeAndGroundAiResponse(
   if (arrivalTimeRegex.test(text)) {
     text = text.replace(
       arrivalTimeRegex,
-      '[Live transit ETA is unavailable. Jugnu does not track real-time artisan GPS locations. Scheduled time represents the agreed appointment slot only, not a live transit ETA. To check arrival or communicate, please contact your assigned artisan directly using the Call Artisan or WhatsApp button on your active booking card in My Bookings. (Note: Jugnu platform support phone calls are not supported; support is managed in-app.)]'
+      '[Live transit ETA is unavailable. DoneKaro does not track real-time artisan GPS locations. Scheduled time represents the agreed appointment slot only, not a live transit ETA. To check arrival or communicate, please contact your assigned artisan directly using the Call Artisan or WhatsApp button on your active booking card in My Bookings. (Note: DoneKaro platform support phone calls are not supported; support is managed in-app.)]'
     )
     corrected = true
   }
@@ -178,7 +178,7 @@ export function sanitizeAndGroundAiResponse(
   if (supportPhoneRegex.test(text)) {
     text = text.replace(
       supportPhoneRegex,
-      '[Jugnu platform support phone calls are not supported; customer support is managed directly inside the app]'
+      '[DoneKaro platform support phone calls are not supported; customer support is managed directly inside the app]'
     )
     corrected = true
   }

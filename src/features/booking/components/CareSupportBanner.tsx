@@ -18,7 +18,7 @@ export function CareSupportBanner({ upcomingBookingId }: CareSupportBannerProps)
         </div>
         <div>
           <h3 className="text-xs font-bold text-slate-900 dark:text-white">
-            {i18n.language === 'hi' ? 'जुगनू केयर एवं सहायता' : 'Jugnu Care & Support'}
+            {i18n.language === 'hi' ? 'DoneKaro केयर एवं सहायता' : 'DoneKaro Care & Support'}
           </h3>
           <p className="text-[11px] text-slate-500 dark:text-zinc-400">
             {i18n.language === 'hi'

@@ -16,7 +16,7 @@ export function ServiceLocalitiesModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Muzaffarnagar Service Localities"
-      description="Jugnu operates across verified service localities in Muzaffarnagar."
+      description="DoneKaro operates across verified service localities in Muzaffarnagar."
     >
       <div className="space-y-2.5 pt-2">
         {MUZAFFARNAGAR_PINCODES.map(pincode => (

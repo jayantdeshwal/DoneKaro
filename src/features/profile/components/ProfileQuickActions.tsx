@@ -147,7 +147,7 @@ export function ProfileQuickActions({
                 <Briefcase className="w-5 h-5" />
               </div>
               <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 leading-tight">
-                {t('profile.becomeWorker', 'Earn with Jugnu')}
+                {t('profile.becomeWorker', 'Earn with DoneKaro')}
               </span>
             </button>
           )}

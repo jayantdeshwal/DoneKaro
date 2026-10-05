@@ -5,6 +5,16 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import en from './locales/en.json'
 import hi from './locales/hi.json'
 
+// Ensure smooth language migration from legacy kaamgar-language to donekaro_language
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  try {
+    const legacy = localStorage.getItem('kaamgar-language')
+    if (legacy && !localStorage.getItem('donekaro_language')) {
+      localStorage.setItem('donekaro_language', legacy)
+    }
+  } catch {}
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -21,7 +31,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'kaamgar-language',
+      lookupLocalStorage: 'donekaro_language',
     },
     
     interpolation: {

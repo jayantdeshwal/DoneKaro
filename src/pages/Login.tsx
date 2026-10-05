@@ -24,7 +24,7 @@ import {
   Moon,
 } from 'lucide-react'
 import { sanitizeErrorMessage } from '@/utils/errors'
-import JugnuLogo from '@/components/common/JugnuLogo'
+import AppLogo from '@/components/common/AppLogo'
 
 export default function Login() {
   const { t } = useTranslation()
@@ -291,6 +291,7 @@ export default function Login() {
   }
 
   const handleExploreAsGuest = () => {
+    sessionStorage.setItem('donekaro_guest_mode', 'true')
     sessionStorage.setItem('kaamgar_guest_mode', 'true')
     window.dispatchEvent(new Event('storage'))
     navigate('/')
@@ -322,7 +323,7 @@ export default function Login() {
             type="button"
             onClick={triggerPWAInstall}
             className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-pointer"
-            title="Install Jugnu Android/PWA App"
+            title="Install DoneKaro Android/PWA App"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Install App</span>
@@ -355,10 +356,10 @@ export default function Login() {
         {/* Brand Banner */}
         <div className="text-center mb-6">
           <Link to="/" className="inline-block transition-transform hover:scale-105">
-            <JugnuLogo className="h-10 w-auto mx-auto" />
+            <AppLogo className="h-10 w-auto mx-auto" />
           </Link>
           <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            {t('loginPage.welcomeBack', 'Welcome to Jugnu')}
+            {t('loginPage.welcomeBack', 'Welcome to DoneKaro')}
           </h1>
           <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
             {t('loginPage.platformSubtitle', 'Muzaffarnagar\'s Trusted Home & Professional Services')}
@@ -486,7 +487,7 @@ export default function Login() {
 
               <div className="mt-5 pt-4 border-t border-slate-200 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400">
                 <Button type="button" variant="secondary" onClick={() => navigate('/register?role=customer')} className="w-full mt-3 text-xs sm:text-sm">
-                  <span>{t('loginPage.registerCustomerCta', 'New to Jugnu? Create Customer Account')}</span>
+                  <span>{t('loginPage.registerCustomerCta', 'New to DoneKaro? Create Customer Account')}</span>
                   <ArrowRight className="w-3 h-3 inline" />
                 </Button>
               </div>
@@ -559,7 +560,7 @@ export default function Login() {
 
               <div className="mt-5 pt-4 border-t border-slate-200 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-400">
                 <Button type="button" variant="secondary" onClick={() => navigate('/register/worker')} className="w-full mt-3 text-xs sm:text-sm border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
-                  <span>{t('loginPage.registerWorkerCta', 'New to Jugnu? Create Worker Account')}</span>
+                  <span>{t('loginPage.registerWorkerCta', 'New to DoneKaro? Create Worker Account')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -636,7 +637,7 @@ export default function Login() {
 
       {/* Minimal Footer */}
       <footer className="relative z-10 w-full max-w-md mx-auto text-center py-2 text-[11px] text-slate-400 dark:text-zinc-500">
-        Jugnu • Muzaffarnagar Urban Services • 100% Secure Platform
+        DoneKaro • Muzaffarnagar Urban Services • 100% Secure Platform
       </footer>
     </div>
   )

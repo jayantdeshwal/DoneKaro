@@ -90,7 +90,7 @@ export function AdminHeaderBanner({
               </div>
 
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-1.5">
-                Jugnu Administration
+                DoneKaro Administration
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">

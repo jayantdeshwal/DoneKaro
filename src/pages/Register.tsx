@@ -137,7 +137,7 @@ export default function Register() {
               <Sparkles className="w-7 h-7 text-amber-600 dark:text-amber-400" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {t('registerPage.title', 'New to Jugnu? Join Today')}
+              {t('registerPage.title', 'New to DoneKaro? Join Today')}
             </h1>
             <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
               {t('registerPage.subtitle', 'Passwordless mobile registration with instant OTP verification')}
@@ -310,7 +310,7 @@ export default function Register() {
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-left space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span>Become a Verified Jugnu Artisan / Service Provider</span>
+                  <span>Become a Verified DoneKaro Artisan / Service Provider</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
                   Join Muzaffarnagar's premier network of skilled local technicians and service experts.

@@ -31,12 +31,13 @@ export default function Home() {
   const navigate = useNavigate()
   const aiAssistant = useAiAssistant()
   const { isAuthenticated } = useAuth()
-  const isGuestMode = !isAuthenticated || (typeof window !== 'undefined' && sessionStorage.getItem('kaamgar_guest_mode') === 'true')
+  const isGuestMode = !isAuthenticated || (typeof window !== 'undefined' && (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true'))
 
   // Top viewport scroll progress
   const { scrollYProgress } = useScroll()
 
   const handleBackToLogin = () => {
+    sessionStorage.removeItem('donekaro_guest_mode')
     sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
@@ -161,7 +162,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-brand-300 font-medium truncate">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="truncate">{t('guestBar.exploringAsGuest', 'You are exploring Jugnu in Guest Mode')}</span>
+              <span className="truncate">{t('guestBar.exploringAsGuest', 'You are exploring DoneKaro in Guest Mode')}</span>
             </div>
             <button
               type="button"

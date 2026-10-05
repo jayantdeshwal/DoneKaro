@@ -112,7 +112,7 @@ export default function WorkerRegistration() {
 
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-semantic-text-primary">
-            {t('auth.workerRegistration.title', 'Become a Jugnu Service Partner')}
+            {t('auth.workerRegistration.title', 'Become a DoneKaro Service Partner')}
           </h1>
           <p className="text-xs text-semantic-text-secondary mt-1">
             {t(

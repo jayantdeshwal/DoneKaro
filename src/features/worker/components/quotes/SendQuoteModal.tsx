@@ -70,7 +70,7 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
       title={t('workerDashboard.sendProviderQuote', 'Send Provider Quote')}
       description={t(
         'workerDashboard.quoteDescriptionHint',
-        'Enter the amount and details you choose to offer. Jugnu does not calculate or suggest this amount.'
+        'Enter the amount and details you choose to offer. DoneKaro does not calculate or suggest this amount.'
       )}
     >
       <div className="space-y-4">

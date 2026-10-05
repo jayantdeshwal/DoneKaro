@@ -1,5 +1,5 @@
 /**
- * Shared Formatting Utilities for Jugnu
+ * Shared Formatting Utilities for DoneKaro
  * Centralizes Indian currency, dates, and localized display formats.
  */
 

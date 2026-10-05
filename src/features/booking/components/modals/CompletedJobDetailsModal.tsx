@@ -100,7 +100,7 @@ export function CompletedJobDetailsModal({
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  {t('bookings.verifiedArtisan', 'Verified Jugnu Artisan')}
+                  {t('bookings.verifiedArtisan', 'Verified DoneKaro Artisan')}
                 </p>
               </div>
             </div>

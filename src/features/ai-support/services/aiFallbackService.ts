@@ -72,8 +72,8 @@ function matchBookingRule(query: string): FallbackResult {
   if (query.includes('plumb') || query.includes('leak') || query.includes('pipe') || query.includes('tank') || query.includes('नल') || query.includes('पानी')) {
     return {
       sourceType: 'jugnu_rule',
-      textEn: `🚰 **Plumbing Services in Muzaffarnagar**\n\n- **Common repairs**: Tap leakage, overhead tank overflow, pipe fitting, and motor priming.\n- **How it works**: Post your request on Jugnu. Verified local plumbers submit quotes directly to you.\n- **Payment**: Direct payment in Cash upon job completion and verification.`,
-      textHi: `🚰 **मुज़फ़्फ़रनगर में प्लंबर सेवाएँ**\n\n- **सामान्य मरम्मत**: नल लीकेज, पानी की टंकी, पाइप लीकेज और मोटर समस्याएँ।\n- **बुकिंग प्रक्रिया**: जुगनू पर अपना अनुरोध दर्ज करें। सत्यापित प्लंबर सीधे कोटेशन भेजेंगे।\n- **भुगतान**: कार्य पूरा होने और जाँच के बाद सीधे नकद (Cash) भुगतान।`,
+      textEn: `🚰 **Plumbing Services in Muzaffarnagar**\n\n- **Common repairs**: Tap leakage, overhead tank overflow, pipe fitting, and motor priming.\n- **How it works**: Post your request on DoneKaro. Verified local plumbers submit quotes directly to you.\n- **Payment**: Direct payment in Cash upon job completion and verification.`,
+      textHi: `🚰 **मुज़फ़्फ़रनगर में प्लंबर सेवाएँ**\n\n- **सामान्य मरम्मत**: नल लीकेज, पानी की टंकी, पाइप लीकेज और मोटर समस्याएँ।\n- **बुकिंग प्रक्रिया**: DoneKaro पर अपना अनुरोध दर्ज करें। सत्यापित प्लंबर सीधे कोटेशन भेजेंगे।\n- **भुगतान**: कार्य पूरा होने और जाँच के बाद सीधे नकद (Cash) भुगतान।`,
       actions: [
         {
           id: 'act_find_plumber',
@@ -128,8 +128,8 @@ function matchBookingRule(query: string): FallbackResult {
   // 5. Default General Booking Guide
   return {
     sourceType: 'general_guidance',
-    textEn: `🛠️ **Jugnu Booking Help**\n\n- Jugnu connects you with verified local artisans in Muzaffarnagar (PIN 251001 & 251002).\n- **How the quote marketplace works**:\n  1. Select a service category and post your requirement.\n  2. Available local artisans review your request and submit quotes.\n  3. You review quotes and choose the provider you prefer.\n  4. Pay directly in Cash after the work is completed and verified.\n- Browse available categories or search to get started.`,
-    textHi: `🛠️ **जुगनू बुकिंग सहायता**\n\n- जुगनू आपको मुज़फ़्फ़रनगर (पिन 251001 और 251002) के सत्यापित स्थानीय कारीगरों से जोड़ता है।\n- **कोटेशन प्रणाली कैसे काम करती है**:\n  1. सेवा श्रेणी चुनें और अपनी समस्या दर्ज करें।\n  2. उपलब्ध कारीगर आपका अनुरोध देखकर कोटेशन भेजते हैं।\n  3. आप कोटेशन देखकर अपनी पसंद का कारीगर चुनते हैं।\n  4. काम पूरा और सत्यापित होने पर सीधे नकद (Cash) में भुगतान करें।`,
+    textEn: `🛠️ **DoneKaro Booking Help**\n\n- DoneKaro connects you with verified local artisans in Muzaffarnagar (PIN 251001 & 251002).\n- **How the quote marketplace works**:\n  1. Select a service category and post your requirement.\n  2. Available local artisans review your request and submit quotes.\n  3. You review quotes and choose the provider you prefer.\n  4. Pay directly in Cash after the work is completed and verified.\n- Browse available categories or search to get started.`,
+    textHi: `🛠️ **DoneKaro बुकिंग सहायता**\n\n- DoneKaro आपको मुज़फ़्फ़रनगर (पिन 251001 और 251002) के सत्यापित स्थानीय कारीगरों से जोड़ता है।\n- **कोटेशन प्रणाली कैसे काम करती है**:\n  1. सेवा श्रेणी चुनें और अपनी समस्या दर्ज करें।\n  2. उपलब्ध कारीगर आपका अनुरोध देखकर कोटेशन भेजते हैं।\n  3. आप कोटेशन देखकर अपनी पसंद का कारीगर चुनते हैं।\n  4. काम पूरा और सत्यापित होने पर सीधे नकद (Cash) में भुगतान करें।`,
     actions: [
       {
         id: 'act_browse_categories',
@@ -150,8 +150,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   if (pb && (query.includes('job') || query.includes('booking') || query.includes('kam') || query.includes('काम') || query.includes('कस्टमर') || query.includes('ग्राहक'))) {
     return {
       sourceType: 'application_data',
-      textEn: `💼 **Active Job Information**\n\n- **Service**: ${pb.categoryName}\n- **Customer**: ${pb.counterpartyName}\n- **Job Status**: ${pb.status.toUpperCase()}\n- **Agreed Initial Quote**: ₹${pb.initialQuoteAmount?.toFixed(2) || '0.00'}\n- **Final Amount**: ₹${pb.finalPayableAmount?.toFixed(2) || '0.00'}\n- **Payment Status**: ${pb.paymentStatus?.toUpperCase() || 'UNPAID'} (Cash upon completion)\n${pb.pendingAdditionalCount > 0 ? `- **Notice**: ${pb.pendingAdditionalCount} change request(s) awaiting customer approval.\n` : ''}${liveContext?.workerCompletedJobsCount !== undefined ? `- **Your Completed Jobs on Jugnu**: ${liveContext.workerCompletedJobsCount}\n` : ''}`,
-      textHi: `💼 **सक्रिय काम की जानकारी**\n\n- **सेवा**: ${pb.categoryName}\n- **ग्राहक**: ${pb.counterpartyName}\n- **काम की स्थिति**: ${pb.status}\n- **स्वीकृत कोटेशन**: ₹${pb.initialQuoteAmount?.toFixed(2) || '0.00'}\n- **अंतिम राशि**: ₹${pb.finalPayableAmount?.toFixed(2) || '0.00'}\n- **भुगतान स्थिति**: ${pb.paymentStatus || 'लंबित'} (काम पूरा होने पर नकद)\n${pb.pendingAdditionalCount > 0 ? `- **सूचना**: ${pb.pendingAdditionalCount} अतिरिक्त शुल्क अनुरोध ग्राहक स्वीकृति के लिए लंबित है।\n` : ''}${liveContext?.workerCompletedJobsCount !== undefined ? `- **जुगनू पर पूरे किए गए काम**: ${liveContext.workerCompletedJobsCount}\n` : ''}`,
+      textEn: `💼 **Active Job Information**\n\n- **Service**: ${pb.categoryName}\n- **Customer**: ${pb.counterpartyName}\n- **Job Status**: ${pb.status.toUpperCase()}\n- **Agreed Initial Quote**: ₹${pb.initialQuoteAmount?.toFixed(2) || '0.00'}\n- **Final Amount**: ₹${pb.finalPayableAmount?.toFixed(2) || '0.00'}\n- **Payment Status**: ${pb.paymentStatus?.toUpperCase() || 'UNPAID'} (Cash upon completion)\n${pb.pendingAdditionalCount > 0 ? `- **Notice**: ${pb.pendingAdditionalCount} change request(s) awaiting customer approval.\n` : ''}${liveContext?.workerCompletedJobsCount !== undefined ? `- **Your Completed Jobs on DoneKaro**: ${liveContext.workerCompletedJobsCount}\n` : ''}`,
+      textHi: `💼 **सक्रिय काम की जानकारी**\n\n- **सेवा**: ${pb.categoryName}\n- **ग्राहक**: ${pb.counterpartyName}\n- **काम की स्थिति**: ${pb.status}\n- **स्वीकृत कोटेशन**: ₹${pb.initialQuoteAmount?.toFixed(2) || '0.00'}\n- **अंतिम राशि**: ₹${pb.finalPayableAmount?.toFixed(2) || '0.00'}\n- **भुगतान स्थिति**: ${pb.paymentStatus || 'लंबित'} (काम पूरा होने पर नकद)\n${pb.pendingAdditionalCount > 0 ? `- **सूचना**: ${pb.pendingAdditionalCount} अतिरिक्त शुल्क अनुरोध ग्राहक स्वीकृति के लिए लंबित है।\n` : ''}${liveContext?.workerCompletedJobsCount !== undefined ? `- **DoneKaro पर पूरे किए गए काम**: ${liveContext.workerCompletedJobsCount}\n` : ''}`,
       actions: [
         {
           id: 'act_worker_dash',
@@ -253,15 +253,15 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   if (query.includes('whatsapp') || query.includes('message') || query.includes('template') || query.includes('मैसेज')) {
     return {
       sourceType: 'general_guidance',
-      textEn: `💬 **Polite Customer Message Template**\n\n"नमस्ते! मैं जुगनू (Jugnu) से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- Tip: Clear, polite communication builds strong ratings and repeat customers.`,
-      textHi: `💬 **सम्मानजनक ग्राहक मैसेज टेम्पलेट**\n\n"नमस्ते! मैं जुगनू (Jugnu) से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- सुझाव: समय पर और स्पष्ट बातचीत से अच्छी रेटिंग और दोबारा काम मिलता है।`,
+      textEn: `💬 **Polite Customer Message Template**\n\n"नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- Tip: Clear, polite communication builds strong ratings and repeat customers.`,
+      textHi: `💬 **सम्मानजनक ग्राहक मैसेज टेम्पलेट**\n\n"नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- सुझाव: समय पर और स्पष्ट बातचीत से अच्छी रेटिंग और दोबारा काम मिलता है।`,
       actions: [
         {
           id: 'act_copy_template',
           labelEn: 'Copy Message Template',
           labelHi: 'मैसेज कॉपी करें',
           type: 'copy_text',
-          payload: 'नमस्ते! मैं जुगनू से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है और मैं आपके पते पर पहुँच रहा हूँ।',
+          payload: 'नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है और मैं आपके पते पर पहुँच रहा हूँ।',
           icon: 'Copy',
         },
       ],
@@ -281,8 +281,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   // 5. Default Work Advice response
   return {
     sourceType: 'general_guidance',
-    textEn: `💼 **Jugnu Work Advice**\n\n- Welcome to Jugnu Artisan Support. Here to help you build a reputable local service business in Muzaffarnagar.\n- Keep your status active during your working hours to receive local job quote requests.\n- Receive 100% of customer payments directly in Cash upon verified job completion.`,
-    textHi: `💼 **जुगनू काम व सेवा सलाह**\n\n- जुगनू कारीगर सहायता में आपका स्वागत है। मुज़फ़्फ़रनगर में एक सफल सेवा व्यवसाय बनाने में हम आपके साथी हैं।\n- काम के समय अपनी ड्यूटी चालू रखें ताकि नए कोटेशन अनुरोध मिल सकें।\n- काम पूरा होने पर सीधे नकद (Cash) में पूरा भुगतान प्राप्त करें।`,
+    textEn: `💼 **DoneKaro Work Advice**\n\n- Welcome to DoneKaro Artisan Support. Here to help you build a reputable local service business in Muzaffarnagar.\n- Keep your status active during your working hours to receive local job quote requests.\n- Receive 100% of customer payments directly in Cash upon verified job completion.`,
+    textHi: `💼 **DoneKaro काम व सेवा सलाह**\n\n- DoneKaro कारीगर सहायता में आपका स्वागत है। मुज़फ़्फ़रनगर में एक सफल सेवा व्यवसाय बनाने में हम आपके साथी हैं।\n- काम के समय अपनी ड्यूटी चालू रखें ताकि नए कोटेशन अनुरोध मिल सकें।\n- काम पूरा होने पर सीधे नकद (Cash) में पूरा भुगतान प्राप्त करें।`,
     actions: [],
   }
 }

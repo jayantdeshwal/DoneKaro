@@ -1,8 +1,8 @@
 {
   "id": "/?source=pwa",
-  "name": "Jugnu - Ghar Ke Har Kaam Ka Jugnu",
-  "short_name": "Jugnu",
-  "description": "Jugnu — Ghar Ke Har Kaam Ka Jugnu. Verified local skilled artisans and technicians. 0% commission.",
+  "name": "DoneKaro - Local Home Services",
+  "short_name": "DoneKaro",
+  "description": "DoneKaro — Verified local skilled artisans and technicians. 0% commission.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

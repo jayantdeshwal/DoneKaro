@@ -7,7 +7,7 @@
  * - Handles ambiguity: never guesses when multiple active bookings exist.
  * - Explicitly restricts "most recent booking" fallback to post-service queries only (receipts/history).
  * - Distinguishes scheduled appointment slots from live transit ETAs.
- * - Clarifies contacting assigned workers in-app vs Jugnu support (no support phone).
+ * - Clarifies contacting assigned workers in-app vs DoneKaro support (no support phone).
  */
 
 import { getSupabaseClient } from '@/lib/supabase'
@@ -387,8 +387,8 @@ export function formatLiveContextForPrompt(ctx: AILiveContext | null): string {
   }
 
   // Telemetry and contact boundaries
-  lines.push(`[Worker Live Location]: UNAVAILABLE (Jugnu does NOT track real-time artisan GPS locations. Never state or promise arrival ETAs).`)
-  lines.push(`[Contact Boundary]: Users can contact their assigned worker directly using the in-app Contact Artisan button on the booking card. Jugnu platform support phone calls are not supported; all support is managed in-app.`)
+  lines.push(`[Worker Live Location]: UNAVAILABLE (DoneKaro does NOT track real-time artisan GPS locations. Never state or promise arrival ETAs).`)
+  lines.push(`[Contact Boundary]: Users can contact their assigned worker directly using the in-app Contact Artisan button on the booking card. DoneKaro platform support phone calls are not supported; all support is managed in-app.`)
   lines.push(`[Support Request Boundary]: AI Support is read-only and CANNOT automatically insert complaints. When a user requests to file a complaint, recommend the 'CREATE_SUPPORT_REQUEST' action so the user can review and confirm.`)
 
   if (ctx.workerCompletedJobsCount !== undefined) {

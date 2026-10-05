@@ -1,7 +1,7 @@
 /**
  * Canonical Indian phone number normalization utility.
  *
- * Single source of truth for all authentication phone normalization in Jugnu.
+ * Single source of truth for all authentication phone normalization in DoneKaro.
  * NEVER import separate phone normalization logic elsewhere — always use this module.
  *
  * Canonical internal representation: exactly 10 digits, no prefix, no leading 0.

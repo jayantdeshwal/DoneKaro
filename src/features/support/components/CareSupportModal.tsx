@@ -50,7 +50,7 @@ export const CareSupportModal: React.FC = () => {
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                 {isHindi
-                  ? 'जुगनू आधिकारिक समाधान एवं शिकायत डेस्क'
+                  ? 'DoneKaro आधिकारिक समाधान एवं शिकायत डेस्क'
                   : 'Official platform support, complaints & suggestions'}
               </p>
             </div>

@@ -1,6 +1,6 @@
-# Jugnu
+# DoneKaro
 
-Ghar Ke Har Kaam Ka Jugnu. A hyperlocal service platform connecting residents of Muzaffarnagar with verified electricians, plumbers, carpenters, AC technicians, and painters with 0% commission.
+DoneKaro. A hyperlocal service platform connecting residents of Muzaffarnagar with verified electricians, plumbers, carpenters, AC technicians, and painters with 0% commission.
 
 ## Run locally
 

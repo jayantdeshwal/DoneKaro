@@ -159,8 +159,8 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
               </h3>
               <p className="text-xs text-slate-500 dark:text-zinc-400">
                 {isHindi
-                  ? 'जुगनू मॉडरेशन टीम द्वारा आधिकारिक समीक्षा'
-                  : 'Reviewed directly by Jugnu administration'}
+                  ? 'DoneKaro मॉडरेशन टीम द्वारा आधिकारिक समीक्षा'
+                  : 'Reviewed directly by DoneKaro administration'}
               </p>
             </div>
           </div>
@@ -236,8 +236,8 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
 
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed px-2">
                 {isHindi
-                  ? '⚠️ जुगनू प्रशासन टीम सेवा मानकों और सुरक्षा नियमों के तहत इसकी समीक्षा करेगी। AI सपोर्ट केवल जानकारी प्रदान करता है और इसमें स्वतः बदलाव नहीं कर सकता।'
-                  : '⚠️ The Jugnu admin team will review this incident in accordance with platform policies. AI Support is read-only and cannot alter complaint statuses.'}
+                  ? '⚠️ DoneKaro प्रशासन टीम सेवा मानकों और सुरक्षा नियमों के तहत इसकी समीक्षा करेगी। AI सपोर्ट केवल जानकारी प्रदान करता है और इसमें स्वतः बदलाव नहीं कर सकता।'
+                  : '⚠️ The DoneKaro admin team will review this incident in accordance with platform policies. AI Support is read-only and cannot alter complaint statuses.'}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
@@ -331,8 +331,8 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
               {/* Platform Assurance Notice */}
               <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-[11px] text-amber-800 dark:text-amber-300/90 leading-relaxed">
                 {isHindi
-                  ? '📌 यह अनुरोध जुगनू व्यवस्थापक पैनल में सुरक्षित रूप से दर्ज होगा। AI सहायक स्वयं कोई शिकायत दर्ज नहीं करता है।'
-                  : '📌 This request will be submitted to the official Jugnu administration panel. AI Support cannot create complaints on your behalf.'}
+                  ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में सुरक्षित रूप से दर्ज होगा। AI सहायक स्वयं कोई शिकायत दर्ज नहीं करता है।'
+                  : '📌 This request will be submitted to the official DoneKaro administration panel. AI Support cannot create complaints on your behalf.'}
               </div>
 
               {/* Action Buttons */}

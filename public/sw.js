@@ -1,5 +1,5 @@
-// Muzaffarnagar Kaamgar - Progressive Web App Service Worker
-const CACHE_NAME = 'kaamgar-pwa-v1.1.0'
+// DoneKaro - Progressive Web App Service Worker
+const CACHE_NAME = 'donekaro-pwa-v1.0.0'
 
 const PRECACHE_ASSETS = [
   '/',
@@ -32,7 +32,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
-          .filter(name => name.startsWith('kaamgar-pwa-') && name !== CACHE_NAME)
+          .filter(name => (name.startsWith('kaamgar-pwa-') || name.startsWith('donekaro-pwa-')) && name !== CACHE_NAME)
           .map(name => caches.delete(name))
       )
     }).then(() => {
@@ -158,7 +158,7 @@ self.addEventListener('periodicsync', event => {
 
 // 6. Push Notifications
 self.addEventListener('push', event => {
-  let data = { title: 'Jugnu', body: 'New update available!' }
+  let data = { title: 'DoneKaro', body: 'New update available!' }
   try {
     if (event.data) {
       data = event.data.json()
@@ -170,7 +170,7 @@ self.addEventListener('push', event => {
   }
 
   const options = {
-    body: data.body || 'You have a new update from Jugnu.',
+    body: data.body || 'You have a new update from DoneKaro.',
     icon: '/icon-192.png',
     badge: '/favicon.svg',
     vibrate: [100, 50, 100],
@@ -180,7 +180,7 @@ self.addEventListener('push', event => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Jugnu', options)
+    self.registration.showNotification(data.title || 'DoneKaro', options)
   )
 })
 

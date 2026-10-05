@@ -9,6 +9,9 @@ export function formatJobReference(jobId: JobId): string {
   return jobId ? `#JUG-${jobId.slice(0, 8).toUpperCase()}` : ''
 }
 
+/** Canonical alias for formatJobReference, preserving stable #JUG- format. */
+export const formatJobId = formatJobReference
+
 export interface User {
   id: string
   name: string
@@ -98,6 +101,7 @@ export const JUGNU_CATEGORIES: CategoryGroup[] = [
   },
 ]
 
+export const DONEKARO_CATEGORIES = JUGNU_CATEGORIES
 export const ALL_SERVICES: ServiceItem[] = JUGNU_CATEGORIES.flatMap(cat => cat.services)
 
 // Flat list of canonical services and categories

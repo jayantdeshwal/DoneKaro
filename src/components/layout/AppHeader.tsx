@@ -7,7 +7,7 @@ import { useAiAssistant } from '@/features/ai-support'
 import { useTheme } from '../../context/ThemeContext'
 import { Button, Badge } from '@kaamgar/ui'
 import { Menu, Globe, Sun, Moon, Bot, ArrowLeft } from 'lucide-react'
-import JugnuLogo from '../common/JugnuLogo'
+import AppLogo from '../common/AppLogo'
 import { UserMenuDropdown } from './UserMenuDropdown'
 import { getNavItems } from './navConfig'
 
@@ -30,6 +30,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
     location.pathname === path || (path !== '/' && location.pathname.startsWith(path))
 
   const handleBackToLogin = () => {
+    sessionStorage.removeItem('donekaro_guest_mode')
     sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
@@ -40,10 +41,10 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         {/* ========================================================= */}
         {/* MOBILE TOP BAR (Visible on screens < 768px: md:hidden)   */}
-        {/* Left: 3-lines menu + Jugnu Brand | Right: AI Support     */}
+        {/* Left: 3-lines menu + DoneKaro Brand | Right: AI Support  */}
         {/* ========================================================= */}
         <div className="flex md:hidden h-14 items-center justify-between">
-          {/* Left Group: 3-lines button + Jugnu logo & name placed close together */}
+          {/* Left Group: 3-lines button + DoneKaro logo & name placed close together */}
           <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
@@ -56,7 +57,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
             </button>
 
             <NavLink to="/" className="flex items-center gap-2 min-w-0" aria-label={t('app.name')}>
-              <JugnuLogo className="w-8 h-8 rounded-xl shrink-0 shadow-sm" />
+              <AppLogo className="w-8 h-8 rounded-xl shrink-0 shadow-sm" />
               <span className="font-black text-lg tracking-tight text-slate-900 dark:text-white truncate">
                 {t('app.name')}
               </span>
@@ -85,7 +86,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
         <div className="hidden md:flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <NavLink to="/" className="flex items-center gap-2.5" aria-label={t('app.name')}>
-              <JugnuLogo className="w-9 h-9 rounded-xl shadow-sm" />
+              <AppLogo className="w-9 h-9 rounded-xl shadow-sm" />
               <span className="font-black text-xl text-slate-900 dark:text-white">
                 {t('app.name')}
               </span>

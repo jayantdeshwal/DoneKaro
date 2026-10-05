@@ -89,10 +89,10 @@ export const WorkerReceiptModal: React.FC<WorkerReceiptModalProps> = ({
           <div className="text-center pb-4 border-b border-slate-200 dark:border-zinc-800">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>JUGNU</span>
+              <span>DONEKARO</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              Ghar Ke Har Kaam Ka Jugnu
+              DoneKaro • Muzaffarnagar
             </p>
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mt-1">
               {t('bookings.officialReceipt', 'Official Cash Payment Receipt')}
@@ -196,7 +196,7 @@ export const WorkerReceiptModal: React.FC<WorkerReceiptModalProps> = ({
             <span>
               {t(
                 'bookings.receiptFooterNote',
-                'This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by Jugnu.'
+                'This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by DoneKaro.'
               )}
             </span>
           </div>

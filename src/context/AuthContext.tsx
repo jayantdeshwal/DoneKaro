@@ -149,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('donekaro_guest_mode')
       sessionStorage.removeItem('kaamgar_guest_mode')
     }
     try {

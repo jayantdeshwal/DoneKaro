@@ -28,7 +28,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 const ALLOWED_PERSONAS = ['customer_booking', 'worker_sarathi'] as const
 type AssistantPersona = typeof ALLOWED_PERSONAS[number]
 
-const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant for Jugnu (जुगनू - "घर के हर काम का जुगनू"), the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
+const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant for DoneKaro, the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
 
 STRICT TRUTH BOUNDARY (MANDATORY):
 1. TIER 1 - AUTHORITATIVE APPLICATION DATA:
@@ -36,14 +36,14 @@ STRICT TRUTH BOUNDARY (MANDATORY):
    - Use the exact amounts, status, and receipt numbers from this block.
    - If no live data block is present, explicitly guide the user to check their 'My Bookings' or 'Worker Dashboard' tab.
    - NEVER fabricate booking IDs, quote amounts, worker names, arrival times, or payment receipts.
-2. TIER 2 - VERIFIED JUGNU RULES:
-   - Jugnu is a quote-first marketplace: providers submit quotes, customer reviews and accepts.
+2. TIER 2 - VERIFIED DONEKARO RULES:
+   - DoneKaro is a quote-first marketplace: providers submit quotes, customer reviews and accepts.
    - Additional work on-site requires a change request in the app with customer approval before payment.
    - Payments are made directly in Cash to the artisan upon work completion and verification.
 3. TIER 3 - GENERAL GUIDANCE:
    - Provide safe, practical home troubleshooting and communication guidance.
 4. TIER 4 - UNKNOWN / UNAVAILABLE:
-   - Live worker location or transit ETA is UNAVAILABLE (Jugnu does NOT track artisan real-time GPS locations).
+   - Live worker location or transit ETA is UNAVAILABLE (DoneKaro does NOT track artisan real-time GPS locations).
    - If information is not in the live data block, explicitly state it. NEVER guess or promise.
 
 NO-HALLUCINATION ENFORCEMENT:
@@ -51,7 +51,7 @@ NO-HALLUCINATION ENFORCEMENT:
 - NEVER state that a payment is completed or a receipt generated if payment status is unpaid or pending.
 - NEVER state that a complaint, ticket, or refund has been filed or resolved. AI Support is read-only.
 - NEVER state that you have cancelled a booking.
-- NEVER invent phone numbers. Jugnu platform support phone calls are disabled; support is managed in-app. Users may contact their assigned artisan directly via the Call Artisan option on their booking card.`
+- NEVER invent phone numbers. DoneKaro platform support phone calls are disabled; support is managed in-app. Users may contact their assigned artisan directly via the Call Artisan option on their booking card.`
 
 const SYSTEM_PROMPTS: Record<AssistantPersona, string> = {
   customer_booking: `${BASE_GROUNDING_INSTRUCTION}
@@ -61,7 +61,7 @@ Your mission:
 1. Help citizens of Muzaffarnagar diagnose household issues (electricity, plumbing, AC repair, cleaning, salon, carpentry, painting).
 2. Recommend the exact trade service needed and explain how to submit a request.
 3. Explain the quote marketplace: artisans submit quotes, customer reviews and chooses, up to 2 providers compete in active slot.
-4. Transparent pricing: Jugnu does not set fixed prices; artisans provide quotes based on the work required.
+4. Transparent pricing: DoneKaro does not set fixed prices; artisans provide quotes based on the work required.
 5. Answer politely and concisely, first in English and then in Hindi.`,
 
   worker_sarathi: `${BASE_GROUNDING_INSTRUCTION}
@@ -342,8 +342,8 @@ async function fetchEdgeLiveContext(
     }
 
     // Telemetry and contact boundaries
-    lines.push(`[Worker Live Location]: UNAVAILABLE (Jugnu does NOT track real-time artisan GPS locations. Never state or promise arrival ETAs).`)
-    lines.push(`[Contact Boundary]: Users can contact their assigned worker directly using the in-app Call Artisan or WhatsApp button on the booking card. Jugnu platform support phone calls are not supported; all support is managed in-app.`)
+    lines.push(`[Worker Live Location]: UNAVAILABLE (DoneKaro does NOT track real-time artisan GPS locations. Never state or promise arrival ETAs).`)
+    lines.push(`[Contact Boundary]: Users can contact their assigned worker directly using the in-app Call Artisan or WhatsApp button on the booking card. DoneKaro platform support phone calls are not supported; all support is managed in-app.`)
 
     if (isWorker) {
       const { count } = await supabase
@@ -690,7 +690,7 @@ serve(async (req: Request) => {
     if (arrivalTimeRegex.test(finalContent)) {
       finalContent = finalContent.replace(
         arrivalTimeRegex,
-        '[Live transit ETA is unavailable. Jugnu does not track real-time artisan GPS locations. Scheduled time represents the agreed appointment slot only, not a live transit ETA. To check arrival or communicate, please contact your assigned artisan directly using the Call Artisan or WhatsApp button on your active booking card in My Bookings. (Note: Jugnu platform support phone calls are not supported; support is managed in-app.)]'
+        '[Live transit ETA is unavailable. DoneKaro does not track real-time artisan GPS locations. Scheduled time represents the agreed appointment slot only, not a live transit ETA. To check arrival or communicate, please contact your assigned artisan directly using the Call Artisan or WhatsApp button on your active booking card in My Bookings. (Note: DoneKaro platform support phone calls are not supported; support is managed in-app.)]'
       )
     }
 
@@ -739,7 +739,7 @@ serve(async (req: Request) => {
     if (supportPhoneRegex.test(finalContent)) {
       finalContent = finalContent.replace(
         supportPhoneRegex,
-        '[Jugnu platform support phone calls are not supported; customer support is managed directly inside the app]'
+        '[DoneKaro platform support phone calls are not supported; customer support is managed directly inside the app]'
       )
     }
 

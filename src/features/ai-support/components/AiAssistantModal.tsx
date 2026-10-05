@@ -150,7 +150,7 @@ export default function AiAssistantModal() {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Jugnu AI Support"
+      aria-label="DoneKaro AI Support"
     >
       <div className="w-full sm:max-w-lg h-[92vh] sm:h-[650px] max-h-[92vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-zinc-100">
         {/* Top Handle for mobile drag visual */}

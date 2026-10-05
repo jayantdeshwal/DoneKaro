@@ -31,7 +31,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'cb_clean',
         labelEn: '✨ Deep Home Cleaning',
         labelHi: '✨ पूरे घर की डीप क्लीनिंग',
-        query: 'How does deep home cleaning and kitchen cleaning booking work on Jugnu?',
+        query: 'How does deep home cleaning and kitchen cleaning booking work on DoneKaro?',
         icon: 'Sparkles',
       },
       {
@@ -45,7 +45,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'cb_pincode',
         labelEn: '📍 Coverage in Muzaffarnagar',
         labelHi: '📍 मुज़फ़्फ़रनगर में उपलब्धता',
-        query: 'Which areas and pincodes are currently covered by Jugnu in Muzaffarnagar?',
+        query: 'Which areas and pincodes are currently covered by DoneKaro in Muzaffarnagar?',
         icon: 'MapPin',
       },
       {
@@ -74,7 +74,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'ws_more_jobs',
         labelEn: '🔔 Tips for Submitting Winning Quotes',
         labelHi: '🔔 सटीक कोटेशन देने के सुझाव',
-        query: 'What are best practices for submitting accurate quotes to customers on Jugnu?',
+        query: 'What are best practices for submitting accurate quotes to customers on DoneKaro?',
         icon: 'TrendingUp',
       },
       {
@@ -109,7 +109,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
         id: 'ws_rules',
         labelEn: '📜 Platform Standards & Safety',
         labelHi: '📜 प्लेटफ़ॉर्म नियम व सुरक्षा',
-        query: 'What are the safety and professionalism standards expected of Jugnu artisans?',
+        query: 'What are the safety and professionalism standards expected of DoneKaro artisans?',
         icon: 'CheckCircle',
       },
     ],
@@ -133,11 +133,11 @@ export const MUZAFFARNAGAR_KNOWLEDGE = {
   ],
   standardRates: {
     electrician: {
-      visit: 'Provider-defined quote; Jugnu does not set a fixed visiting price.',
+      visit: 'Provider-defined quote; DoneKaro does not set a fixed visiting price.',
       scope: 'Switchboard / MCB fixing, wiring diagnosis, fan/light installation.',
     },
     plumber: {
-      visit: 'Provider-defined quote; Jugnu does not set a fixed visiting price.',
+      visit: 'Provider-defined quote; DoneKaro does not set a fixed visiting price.',
       scope: 'Tap replacement, pipe leak repair, flush tank, motor pump priming.',
     },
     ac_repair: {

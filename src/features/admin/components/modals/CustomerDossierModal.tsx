@@ -66,7 +66,7 @@ export function CustomerDossierModal({
 
           <div>
             <p className="text-xs font-semibold text-semantic-text-secondary uppercase mb-2">
-              Booking History with Jugnu
+              Booking History with DoneKaro
             </p>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {bookings.filter(b => b.customer_id === inspectCustomer.id).length === 0 ? (

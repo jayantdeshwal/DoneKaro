@@ -101,7 +101,7 @@ export const SuggestionTab: React.FC<SuggestionTabProps> = ({ isHindi }) => {
           </h4>
           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
             {isHindi
-              ? 'मुज़फ्फरनगर में जुगनू को बेहतर बनाने के लिए आपका विचार सुरक्षित रूप से दर्ज कर लिया गया है।'
+              ? 'मुज़फ्फरनगर में DoneKaro को बेहतर बनाने के लिए आपका विचार सुरक्षित रूप से दर्ज कर लिया गया है।'
               : 'Your suggestion has been formally recorded with the platform operations team.'}
           </p>
         </div>
