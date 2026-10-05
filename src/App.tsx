@@ -1,30 +1,32 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Suspense } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
-import { AiAssistantProvider } from './context/AiAssistantContext'
+import { AiAssistantProvider } from '@/features/ai-support'
 import { SupportProvider } from '@/features/support'
 import Layout from './components/Layout'
 import { useAuth } from './context/AuthContext'
+import { RouteErrorBoundary } from './components/ErrorBoundary'
+import { lazyWithRetry } from './utils/lazyWithRetry'
 
-// Lazy-loaded route components
-const Home = lazy(() => import('./pages/Home'))
-const Search = lazy(() => import('./pages/Search'))
-const WorkerProfile = lazy(() => import('./pages/WorkerProfile'))
-const Booking = lazy(() => import('./pages/Booking'))
-const Bookings = lazy(() => import('./pages/Bookings'))
-const Login = lazy(() => import('./pages/Login'))
-const Register = lazy(() => import('./pages/Register'))
-const WorkerRegistration = lazy(() => import('./pages/WorkerRegistration'))
-const Profile = lazy(() => import('./pages/Profile'))
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
-const Notifications = lazy(() => import('./pages/Notifications'))
-const WorkerDashboard = lazy(() => import('./pages/WorkerDashboard'))
-const WorkerReviews = lazy(() => import('./pages/WorkerReviews'))
-const CategoryPage = lazy(() => import('./pages/CategoryPage'))
-const AdminSupportPage = lazy(() =>
+// Lazy-loaded route components with retry resilience
+const Home = lazyWithRetry(() => import('./pages/Home'))
+const Search = lazyWithRetry(() => import('./pages/Search'))
+const WorkerProfile = lazyWithRetry(() => import('./pages/WorkerProfile'))
+const Booking = lazyWithRetry(() => import('./pages/Booking'))
+const Bookings = lazyWithRetry(() => import('./pages/Bookings'))
+const Login = lazyWithRetry(() => import('./pages/Login'))
+const Register = lazyWithRetry(() => import('./pages/Register'))
+const WorkerRegistration = lazyWithRetry(() => import('./pages/WorkerRegistration'))
+const Profile = lazyWithRetry(() => import('./pages/Profile'))
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'))
+const Notifications = lazyWithRetry(() => import('./pages/Notifications'))
+const WorkerDashboard = lazyWithRetry(() => import('./pages/WorkerDashboard'))
+const WorkerReviews = lazyWithRetry(() => import('./pages/WorkerReviews'))
+const CategoryPage = lazyWithRetry(() => import('./pages/CategoryPage'))
+const AdminSupportPage = lazyWithRetry(() =>
   import('./features/admin-support').then((m) => ({ default: m.AdminSupportPage }))
 )
 
@@ -36,8 +38,17 @@ function PageLoader() {
   )
 }
 
+function LazyRouteWrapper({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  return (
+    <RouteErrorBoundary resetKey={location.pathname}>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </RouteErrorBoundary>
+  )
+}
+
 const lazyElement = (element: React.ReactNode) => (
-  <Suspense fallback={<PageLoader />}>{element}</Suspense>
+  <LazyRouteWrapper>{element}</LazyRouteWrapper>
 )
 
 function AdminRoute({ children }: { children: React.ReactNode }) {

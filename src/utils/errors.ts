@@ -25,7 +25,8 @@ const SENSITIVE_PATTERNS = [
   /context: plpgsql/i,
   /stack trace/i,
   /postgrest/i,
-  /\b(?:bearer|token|apikey|secret|jwt)\b/i,
+  /\b(?:bearer|token|apikey|secret|jwt|authkey|widgetid|access_token|refresh_token)\b/i,
+  /\b(?:password|passwd|otp|pin)\b/i,
 ]
 
 // Recognized clean user-facing domain messages that are safe to present directly
@@ -122,4 +123,18 @@ export function sanitizeErrorMessage(
   }
 
   return fallbackMessage
+}
+
+/**
+ * Safe logger that logs diagnostic info in development
+ * and redacts sensitive data (tokens, passwords, PII, SQL internals) in production.
+ */
+export function safeLogError(context: string, error: unknown, meta?: Record<string, unknown>): void {
+  if (import.meta.env.DEV) {
+    console.error(`[${context}]`, error, meta ?? '')
+    return
+  }
+  // Production-safe logging: log only context and sanitized message
+  const safeMessage = sanitizeErrorMessage(error)
+  console.error(`[${context}] ${safeMessage}`)
 }

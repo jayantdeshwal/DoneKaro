@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronDown } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { Input, Button } from '../index'
+import { Input } from './Input'
 
 export interface DropdownItem {
   label: string

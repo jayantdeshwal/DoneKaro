@@ -9,10 +9,12 @@ import {
   fetchAdminJobDetails,
 } from '@/services/adminJobs'
 
-interface AdminJobDetailsProps {
+export interface AdminJobDetailsModalProps {
   bookingId: string
   onClose: () => void
 }
+
+export type AdminJobDetailsProps = AdminJobDetailsModalProps
 
 const statusLabels: Record<AdminJobDetailStatus, { key: string; fallback: string }> = {
   pending: { key: 'admin.bookingStatus.pending', fallback: 'Pending' },
@@ -71,7 +73,7 @@ function DatasetMessage({ unavailable, empty, unavailableText, emptyText }: { un
   return null
 }
 
-export default function AdminJobDetails({ bookingId, onClose }: AdminJobDetailsProps) {
+export function AdminJobDetailsModal({ bookingId, onClose }: AdminJobDetailsModalProps) {
   const { t, i18n } = useTranslation()
   const [details, setDetails] = useState<AdminJobDetailsData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -238,3 +240,6 @@ export default function AdminJobDetails({ bookingId, onClose }: AdminJobDetailsP
     </div>
   )
 }
+
+export const AdminJobDetails = AdminJobDetailsModal
+export default AdminJobDetailsModal

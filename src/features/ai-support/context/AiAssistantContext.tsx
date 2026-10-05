@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { AssistantPersona, ChatMessage } from '../services/ai/types'
-import { ASSISTANT_CONFIGS } from '../services/ai/domainKnowledge'
-import { processAiQuery } from '../services/ai/aiEngine'
+import { AssistantPersona, ChatMessage } from '../types'
+import { ASSISTANT_CONFIGS } from '@/services/ai/domainKnowledge'
+import { processAiQuery } from '../services/aiClientService'
+import { safeLogError } from '@/utils/errors'
 
-interface AiAssistantContextType {
+export interface AiAssistantContextType {
   isOpen: boolean
   activePersona: AssistantPersona
   activeBookingId: string | null
@@ -82,7 +83,20 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
           [activePersona]: [...prev[activePersona], reply],
         }))
       } catch (err) {
-        console.error('Failed to process AI query:', err)
+        safeLogError('AiAssistantContext', err)
+        const fallbackMessage: ChatMessage = {
+          id: `err_${Date.now()}`,
+          sender: 'assistant',
+          persona: activePersona,
+          timestamp: new Date(),
+          textEn: 'I encountered an unexpected issue connecting to the assistant. Please try again or reach out to Care & Support.',
+          textHi: 'सहायक से जुड़ने में समस्या आई। कृपया पुनः प्रयास करें या सहायता व समर्थन से संपर्क करें।',
+          sourceType: 'unknown',
+        }
+        setMessages(prev => ({
+          ...prev,
+          [activePersona]: [...prev[activePersona], fallbackMessage],
+        }))
       } finally {
         setIsTyping(false)
       }

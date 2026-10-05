@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationContext'
-import { useAiAssistant } from '../../context/AiAssistantContext'
+import { useAiAssistant } from '@/features/ai-support'
 import { getBottomTabs } from './navConfig'
 
 export function BottomNavigation() {

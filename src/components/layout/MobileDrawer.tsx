@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-import { useAiAssistant } from '../../context/AiAssistantContext'
+import { useAiAssistant } from '@/features/ai-support'
 import { useSupport } from '@/features/support'
 import { Avatar, Badge } from '@kaamgar/ui'
 import {
@@ -229,8 +229,8 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
           </div>
 
-          {/* Option 4: AI Support Assistant (Non-Admin only) */}
-          {!isAdmin && (
+          {/* Option 4: AI Support Assistant (Authenticated Non-Admin only) */}
+          {isAuthenticated && !isAdmin && (
             <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">

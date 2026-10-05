@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationContext'
-import { useAiAssistant } from '../../context/AiAssistantContext'
+import { useAiAssistant } from '@/features/ai-support'
 import { useTheme } from '../../context/ThemeContext'
 import { Button, Badge } from '@kaamgar/ui'
 import { Menu, Globe, Sun, Moon, Bot, ArrowLeft } from 'lucide-react'
@@ -63,8 +63,8 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
             </NavLink>
           </div>
 
-          {/* Top Right: AI Support Button (Non-Admin only) */}
-          {!isAdmin && (
+          {/* Top Right: AI Support Button (Authenticated Non-Admin only) */}
+          {isAuthenticated && !isAdmin && (
             <button
               type="button"
               onClick={() => openAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')}

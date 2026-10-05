@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useLanguage } from '../../context/LanguageContext'
-import { useAiAssistant } from '../../context/AiAssistantContext'
-import { useAuth } from '../../context/AuthContext'
-import { ASSISTANT_CONFIGS } from '../../services/ai/domainKnowledge'
-import { AssistantPersona, ChatAction } from '../../services/ai/types'
+import { useLanguage } from '@/context/LanguageContext'
+import { useAiAssistant } from '../context/AiAssistantContext'
+import { useAuth } from '@/context/AuthContext'
+import { ASSISTANT_CONFIGS } from '@/services/ai/domainKnowledge'
+import { AssistantPersona, ChatAction } from '../types'
 import {
   X,
   Send,
@@ -31,7 +31,7 @@ import { useSupport } from '@/features/support'
 export default function AiAssistantModal() {
   const { t } = useTranslation()
   const { language } = useLanguage()
-  const { isWorker, isAdmin } = useAuth()
+  const { isWorker, isAdmin, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const {
     isOpen,
@@ -88,7 +88,7 @@ export default function AiAssistantModal() {
     }
   }, [isOpen, activePersona])
 
-  if (!isOpen || isAdmin) return null
+  if (!isOpen || isAdmin || !isAuthenticated) return null
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()

@@ -1,7 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { Card } from '@kaamgar/ui'
 import { Shield } from 'lucide-react'
-import AdminJobDetails from '@/components/admin/AdminJobDetails'
 import { AdminSupportPage } from '@/features/admin-support'
 import {
   useAdminData,
@@ -19,6 +18,7 @@ import {
   ReviewWorkerModal,
   PermanentDeleteModal,
   AddAdminModal,
+  AdminJobDetailsModal,
 } from '@/features/admin'
 
 export default function AdminDashboard() {
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
 
       {/* Read-Only Admin Job 360 Details */}
       {admin.selectedJobId && (
-        <AdminJobDetails
+        <AdminJobDetailsModal
           bookingId={admin.selectedJobId}
           onClose={() => admin.setSelectedJobId(null)}
         />

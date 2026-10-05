@@ -62,7 +62,7 @@ export function getBottomTabs(
       { id: 'home', label: t('nav.home', 'Home'), path: '/', icon: Home },
       { id: 'categories', label: t('nav.category', 'Category'), path: '/categories', icon: Grid },
       { id: 'alerts', label: t('nav.alerts', 'Alerts'), path: '/login', icon: Bell },
-      { id: 'ai', label: 'AI Help', icon: Bot, action: openAiHelp },
+      { id: 'ai', label: 'AI Help', path: '/login', icon: Bot },
       { id: 'account', label: t('nav.login', 'Account'), path: '/login', icon: LogIn },
     ]
   }

@@ -12,6 +12,7 @@ import {
   type BookingQuoteRequest,
   fetchCustomerQuoteData,
 } from '@/services/quotes'
+import { sanitizeErrorMessage } from '@/utils/errors'
 import type { BookingRow, BookingTab, CustomerBookingReview, WorkerDirectoryRow } from '../types'
 
 interface UseCustomerBookingsProps {
@@ -154,7 +155,7 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
         setQuoteWorkers(new Map())
       }
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Unable to load bookings')
+      setLoadError(sanitizeErrorMessage(error, 'Unable to load bookings'))
     } finally {
       setIsLoading(false)
     }

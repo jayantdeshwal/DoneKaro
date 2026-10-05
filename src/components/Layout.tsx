@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import NetworkStatus from './NetworkStatus'
 import PWAInstallPrompt from './PWAInstallPrompt'
-import AiAssistantModal from './ai/AiAssistantModal'
+import { AiAssistantModal } from '@/features/ai-support'
 import { CareSupportModal } from '@/features/support'
 import {
   AppHeader,

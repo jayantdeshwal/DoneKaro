@@ -17,6 +17,7 @@ import { useSupport } from '@/features/support'
 import { getSupabaseClient } from '@/lib/supabase'
 import ContactModal from '@/components/ContactModal'
 import { buildCustomerToWorkerWhatsAppMessage } from '@/utils/contact'
+import { sanitizeErrorMessage } from '@/utils/errors'
 import { submitBookingReview } from '@/services/reviews'
 import {
   type BookingChangeRequest,
@@ -168,7 +169,7 @@ export default function Bookings() {
       await loadBookings()
     } catch (error) {
       setChangeRequestError(
-        error instanceof Error ? error.message : 'Unable to update the additional-charge request'
+        sanitizeErrorMessage(error, 'Unable to update the additional-charge request')
       )
     } finally {
       setDecidingRequestId(null)
@@ -251,7 +252,7 @@ export default function Bookings() {
       await cancelBookingQuoteRequest(request.id, 'Customer no longer wants to wait')
       await loadBookings()
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Unable to cancel quote request')
+      setLoadError(sanitizeErrorMessage(error, 'Unable to cancel quote request'))
     } finally {
       setQuoteActionId(null)
     }
@@ -264,7 +265,7 @@ export default function Bookings() {
       setActionSuccess('Quote accepted. Your booking has been created.')
       await loadBookings()
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'Unable to accept quote')
+      setLoadError(sanitizeErrorMessage(error, 'Unable to accept quote'))
     } finally {
       setQuoteActionId(null)
     }
@@ -301,7 +302,7 @@ export default function Bookings() {
       setActionSuccess('Thank you! Your review has been submitted successfully.')
       setTimeout(() => setActionSuccess(''), 4000)
     } catch (err) {
-      setReviewError(err instanceof Error ? err.message : 'Unable to submit review')
+      setReviewError(sanitizeErrorMessage(err, 'Unable to submit review'))
     } finally {
       setIsSubmittingReview(false)
     }
@@ -362,7 +363,7 @@ export default function Bookings() {
       setActionSuccess(t('bookings.cancelSuccess', 'Booking cancelled successfully'))
       setTimeout(() => setActionSuccess(''), 4000)
     } catch (err) {
-      setCancelError(err instanceof Error ? err.message : 'Unable to cancel booking')
+      setCancelError(sanitizeErrorMessage(err, 'Unable to cancel booking'))
     } finally {
       setIsCancelling(false)
     }

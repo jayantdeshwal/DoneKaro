@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, Star } from 'lucide-react'
@@ -22,9 +23,8 @@ export const WorkerMetricsStrip: React.FC<WorkerMetricsStripProps> = ({
 
   return (
     <div
-      className={`grid-cols-4 gap-2 mb-6 p-3 rounded-2xl bg-surface-100 border border-semantic-border-light text-center ${
-        isLeadsTab ? 'hidden md:grid' : 'grid'
-      }`}
+      className={`grid-cols-4 gap-2 mb-6 p-3 rounded-2xl bg-surface-100 border border-semantic-border-light text-center ${isLeadsTab ? 'hidden md:grid' : 'grid'
+        }`}
     >
       <button
         type="button"

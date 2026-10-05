@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
+import { useSupport } from '@/features/support'
 import { Button } from '@kaamgar/ui'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, ShieldAlert } from 'lucide-react'
 
 export function GuestActionBar() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
+  const { openSupport } = useSupport()
   const navigate = useNavigate()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('kaamgar_guest_mode') === 'true'
 
@@ -26,6 +28,14 @@ export function GuestActionBar() {
           <span className="truncate">{t('guestBar.exploringAsGuest', 'Exploring in Guest Mode')}</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => openSupport()}
+            className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-2.5 py-1 rounded-lg border border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-colors"
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>{i18n.language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}</span>
+          </button>
           <button
             type="button"
             onClick={handleBackToLogin}

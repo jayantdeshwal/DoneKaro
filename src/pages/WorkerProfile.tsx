@@ -8,7 +8,7 @@ import { motion } from 'framer-motion'
 import { fetchApprovedWorker } from '@/services/workers'
 import { fetchWorkerReviews, ReviewItem } from '@/services/reviews'
 import { useAuth } from '@/context/AuthContext'
-import { useAiAssistant } from '@/context/AiAssistantContext'
+import { useAiAssistant } from '@/features/ai-support'
 import { getSupabaseClient } from '@/lib/supabase'
 
 const iconComponents = {
@@ -135,6 +135,16 @@ export default function WorkerProfile() {
 
   const navigateToBooking = (draft?: { date: string; time: string; pincode: string }) => {
     const effectiveServiceId = selectedServiceId || (worker?.categories?.length === 1 ? worker.categories[0] : '')
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: {
+          returnTo: `/worker/${worker.id}`,
+          bookingDraft: draft || bookingDraft,
+          serviceId: effectiveServiceId,
+        },
+      })
+      return
+    }
     navigate(`/booking/${worker.id}`, {
       state: {
         bookingDraft: draft || bookingDraft,
@@ -434,7 +444,9 @@ export default function WorkerProfile() {
                     disabled={!worker.available}
                     onClick={() => navigateToBooking(bookingDraft)}
                   >
-                    {worker.available ? t('booking.confirmBooking') : t('workerProfile.unavailable', 'Currently Unavailable')}
+                    {worker.available
+                      ? (isAuthenticated ? t('booking.confirmBooking') : t('booking.signInToBook', 'Sign In to Book'))
+                      : t('workerProfile.unavailable', 'Currently Unavailable')}
                   </Button>
                 </div>
               </Card>
@@ -458,10 +470,18 @@ export default function WorkerProfile() {
                 <Button
                   variant="primary"
                   className="w-full flex items-center justify-center gap-2 cursor-pointer"
-                  onClick={() => openAssistant('customer_booking')}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate('/login', { state: { returnTo: `/worker/${worker.id}` } })
+                    } else {
+                      openAssistant('customer_booking')
+                    }
+                  }}
                 >
                   <Zap className="w-4 h-4 mr-1" />
-                  {t('workerProfile.askBookingHelp', 'Ask Booking Help')}
+                  {isAuthenticated
+                    ? t('workerProfile.askBookingHelp', 'Ask Booking Help')
+                    : t('workerProfile.signInForAi', 'Sign In for Booking Help')}
                 </Button>
               </Card>
             </motion.div>
