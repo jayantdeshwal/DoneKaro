@@ -25,24 +25,34 @@ export function HomeHeroSection() {
             <span>{t('home.heroBadge')}</span>
           </motion.div>
 
-          {/* Main Headline */}
+          {/* 1. MAIN HERO HEADING */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 350, damping: 24, delay: 0.05 }}
-            className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-3 sm:mb-4 drop-shadow-xs"
+            className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-tight drop-shadow-xs"
           >
-            {t('home.heroTitle')}
+            {t('home.heroTitle', 'Socho Mat. DoneKaro.')}
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* 2. SUPPORTING PUNCHLINE */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 350, damping: 24, delay: 0.1 }}
-            className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-xl lg:text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-400 mt-2.5 sm:mt-3.5"
           >
-            {t('home.heroSubtitle')}
+            {t('home.heroPunchline', 'Find. Book. Done.')}
+          </motion.p>
+
+          {/* 3. BRAND/VALUE LINE */}
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 24, delay: 0.15 }}
+            className="text-sm sm:text-base md:text-lg font-medium text-slate-600 dark:text-zinc-400 mt-2 sm:mt-2.5 max-w-xl mx-auto leading-relaxed"
+          >
+            {t('home.heroTagline', 'Ghar Ka Har Kaam, DoneKaro Ke Naam.')}
           </motion.p>
         </div>
       </div>

@@ -93,7 +93,9 @@
     "verified": "Verified"
   },
   "home": {
-    "heroTitle": "DoneKaro",
+    "heroTitle": "Socho Mat. DoneKaro.",
+    "heroPunchline": "Find. Book. Done.",
+    "heroTagline": "Ghar Ka Har Kaam, DoneKaro Ke Naam.",
     "heroSubtitle": "Connect directly with verified electricians, plumbers, AC technicians & salon experts in Muzaffarnagar. Transparent rates, zero middleman commission, scheduled local service.",
     "searchPlaceholder": "What service do you need?",
     "searchButton": "Find Workers",
