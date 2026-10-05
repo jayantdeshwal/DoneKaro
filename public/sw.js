@@ -1,5 +1,5 @@
 // DoneKaro - Progressive Web App Service Worker
-const CACHE_NAME = 'donekaro-pwa-v1.0.0'
+const CACHE_NAME = 'donekaro-pwa-v1.1.0'
 
 const PRECACHE_ASSETS = [
   '/',
@@ -15,11 +15,17 @@ const PRECACHE_ASSETS = [
   '/apple-touch-icon.png'
 ]
 
-// 1. Install: Precache app shell and offline fallback
+// 1. Install: Precache app shell and offline fallback with cache: reload for HTML
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(PRECACHE_ASSETS)
+    caches.open(CACHE_NAME).then(async cache => {
+      const requests = PRECACHE_ASSETS.map(url => {
+        if (url === '/' || url === '/index.html') {
+          return new Request(url, { cache: 'reload' })
+        }
+        return new Request(url)
+      })
+      await cache.addAll(requests)
     }).then(() => {
       return self.skipWaiting()
     })
