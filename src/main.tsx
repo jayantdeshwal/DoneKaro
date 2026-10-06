@@ -19,6 +19,27 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
+// Coordinated Vite preload-error recovery listener
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', () => {
+    let alreadyReloaded = false
+    try {
+      alreadyReloaded = !!sessionStorage.getItem('donekaro_chunk_reload')
+    } catch {
+      alreadyReloaded = false
+    }
+
+    if (!alreadyReloaded) {
+      try {
+        sessionStorage.setItem('donekaro_chunk_reload', String(Date.now()))
+      } catch {
+        // Ignore storage access failures
+      }
+      window.location.reload()
+    }
+  })
+}
+
 // Register PWA Service Worker
 if ('serviceWorker' in navigator && typeof window !== 'undefined') {
   window.addEventListener('load', () => {

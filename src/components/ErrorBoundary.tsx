@@ -33,10 +33,20 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReload = () => {
+    try {
+      sessionStorage.removeItem('donekaro_chunk_reload')
+    } catch {
+      // Ignore storage access failures
+    }
     window.location.reload()
   }
 
   private handleGoHome = () => {
+    try {
+      sessionStorage.removeItem('donekaro_chunk_reload')
+    } catch {
+      // Ignore storage access failures
+    }
     window.location.href = '/'
   }
 
@@ -148,14 +158,29 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Route
   }
 
   private handleRetry = () => {
+    try {
+      sessionStorage.removeItem('donekaro_chunk_reload')
+    } catch {
+      // Ignore storage access failures
+    }
     this.setState({ hasError: false, error: null })
   }
 
   private handleReload = () => {
+    try {
+      sessionStorage.removeItem('donekaro_chunk_reload')
+    } catch {
+      // Ignore storage access failures
+    }
     window.location.reload()
   }
 
   private handleGoHome = () => {
+    try {
+      sessionStorage.removeItem('donekaro_chunk_reload')
+    } catch {
+      // Ignore storage access failures
+    }
     window.location.href = '/'
   }
 
