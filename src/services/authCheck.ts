@@ -39,15 +39,6 @@ export async function checkPhoneRegistration(rawPhone: string): Promise<PhoneChe
   }
 }
 
-// Clean up any legacy localStorage cache on device if present
-if (typeof window !== 'undefined') {
-  try {
-    localStorage.removeItem('kaamgar_registered_phones_cache')
-  } catch {
-    // Ignore in non-browser environments
-  }
-}
-
 /**
  * @deprecated Legacy no-op cache writer. Kept for backwards-compatibility.
  */

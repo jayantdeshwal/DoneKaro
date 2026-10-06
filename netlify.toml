@@ -1,4 +1,4 @@
-# Netlify Configuration for Muzaffarnagar Kaamgar
+# Netlify Configuration for DoneKaro
 
 [build]
   command = "npm run build"

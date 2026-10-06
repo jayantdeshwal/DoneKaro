@@ -31,14 +31,13 @@ export default function Home() {
   const navigate = useNavigate()
   const aiAssistant = useAiAssistant()
   const { isAuthenticated } = useAuth()
-  const isGuestMode = !isAuthenticated || (typeof window !== 'undefined' && (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true'))
+  const isGuestMode = !isAuthenticated || (typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true')
 
   // Top viewport scroll progress
   const { scrollYProgress } = useScroll()
 
   const handleBackToLogin = () => {
     sessionStorage.removeItem('donekaro_guest_mode')
-    sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
   }

@@ -12,12 +12,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 const THEME_STORAGE_KEY = 'donekaro_theme'
-const LEGACY_THEME_STORAGE_KEY = 'kaamgar_theme'
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const saved = (localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem(LEGACY_THEME_STORAGE_KEY)) as Theme
+      const saved = localStorage.getItem(THEME_STORAGE_KEY) as Theme
       if (saved === 'light' || saved === 'dark') {
         return saved
       }

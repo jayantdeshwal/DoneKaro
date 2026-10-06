@@ -11,12 +11,11 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 const LANGUAGE_STORAGE_KEY = 'donekaro_language'
-const LEGACY_LANGUAGE_STORAGE_KEY = 'kaamgar-language'
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
-      const saved = (localStorage.getItem(LANGUAGE_STORAGE_KEY) || localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY)) as Language
+      const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language
       if (saved && (saved === 'en' || saved === 'hi')) return saved
       return (i18n.language === 'en' ? 'en' : 'hi') as Language
     }
@@ -26,7 +25,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang)
-    localStorage.setItem(LEGACY_LANGUAGE_STORAGE_KEY, lang)
     document.documentElement.lang = lang
     void i18n.changeLanguage(lang)
   }

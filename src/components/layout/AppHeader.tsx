@@ -31,7 +31,6 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
 
   const handleBackToLogin = () => {
     sessionStorage.removeItem('donekaro_guest_mode')
-    sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
   }

@@ -210,7 +210,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
               {isHindi ? 'संबंधित बुकिंग' : 'Associated Booking'}:
             </span>
             <span className="font-mono font-semibold text-slate-900 dark:text-zinc-200">
-              #JUG-{createdComplaint.booking_id.slice(0, 8).toUpperCase()}
+              #DK-{createdComplaint.booking_id.slice(0, 8).toUpperCase()}
             </span>
           </div>
 
@@ -279,7 +279,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
               </span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">
-                  #JUG-{bookingContext.bookingId.slice(0, 8).toUpperCase()}
+                  #DK-{bookingContext.bookingId.slice(0, 8).toUpperCase()}
                 </span>
                 <button
                   type="button"
@@ -453,7 +453,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
                     {b.categoryName}
                   </span>
                   <span className="font-mono text-[10px] bg-slate-200 dark:bg-zinc-700 px-1.5 py-0.5 rounded text-slate-700 dark:text-zinc-300">
-                    #JUG-{b.bookingId.slice(0, 8).toUpperCase()}
+                    #DK-{b.bookingId.slice(0, 8).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-slate-500 dark:text-zinc-400 text-[11px]">

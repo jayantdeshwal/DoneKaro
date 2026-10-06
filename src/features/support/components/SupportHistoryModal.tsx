@@ -166,7 +166,7 @@ export const SupportHistoryModal: React.FC<SupportHistoryModalProps> = ({
                     <span>
                       {isHindi ? 'बुकिंग ID' : 'Booking'}:{' '}
                       <span className="font-mono text-slate-700 dark:text-zinc-300 font-medium">
-                        #JUG-{item.booking_id.slice(0, 8).toUpperCase()}
+                        #DK-{item.booking_id.slice(0, 8).toUpperCase()}
                       </span>
                     </span>
                     <span>

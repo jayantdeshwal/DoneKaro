@@ -25,7 +25,7 @@ export const ComplaintList: React.FC<ComplaintListProps> = ({
       if (!searchTerm.trim()) return true
       const term = searchTerm.toLowerCase()
       const refToken = `cmp-${c.id.slice(0, 8)}`.toLowerCase()
-      const bookingToken = `jug-${c.booking_id.slice(0, 8)}`.toLowerCase()
+      const bookingToken = `dk-${c.booking_id.slice(0, 8)}`.toLowerCase()
       const opener = (c.opened_by_user?.full_name || '').toLowerCase()
       const against = (c.against_user_profile?.full_name || '').toLowerCase()
       const reason = c.reason.toLowerCase()
@@ -130,7 +130,7 @@ export const ComplaintList: React.FC<ComplaintListProps> = ({
                       #CMP-{c.id.slice(0, 8).toUpperCase()}
                     </span>
                     <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">
-                      #JUG-{c.booking_id.slice(0, 8).toUpperCase()}
+                      #DK-{c.booking_id.slice(0, 8).toUpperCase()}
                     </span>
                   </div>
                   <SupportStatusBadge status={c.status} />

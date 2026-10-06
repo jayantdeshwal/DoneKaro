@@ -292,7 +292,6 @@ export default function Login() {
 
   const handleExploreAsGuest = () => {
     sessionStorage.setItem('donekaro_guest_mode', 'true')
-    sessionStorage.setItem('kaamgar_guest_mode', 'true')
     window.dispatchEvent(new Event('storage'))
     navigate('/')
   }

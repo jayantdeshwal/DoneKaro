@@ -86,7 +86,7 @@ function WorkerRoute({ children }: { children: React.ReactNode }) {
 
 function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
-  const isGuestMode = typeof window !== 'undefined' && (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true')
+  const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
     return <PageLoader />
@@ -101,7 +101,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 
 function RootRoute() {
   const { isAuthenticated, isLoading } = useAuth()
-  const isGuestMode = typeof window !== 'undefined' && (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true')
+  const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
     return <PageLoader />

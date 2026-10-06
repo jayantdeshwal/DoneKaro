@@ -211,7 +211,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
                     {isHindi ? 'संबंधित बुकिंग' : 'Associated Booking'}:
                   </span>
                   <span className="font-mono font-semibold text-slate-900 dark:text-zinc-200">
-                    #JUG-{createdComplaint.booking_id.slice(0, 8).toUpperCase()}
+                    #DK-{createdComplaint.booking_id.slice(0, 8).toUpperCase()}
                   </span>
                 </div>
 
@@ -278,7 +278,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
                       {bookingContext.categoryName}
                     </span>
                     <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">
-                      #JUG-{bookingContext.bookingId.slice(0, 8).toUpperCase()}
+                      #DK-{bookingContext.bookingId.slice(0, 8).toUpperCase()}
                     </span>
                   </div>
 

@@ -109,7 +109,6 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     sessionStorage.setItem('donekaro_pwa_dismissed_session', 'true')
-    sessionStorage.setItem('kaamgar_pwa_dismissed_session', 'true')
     setIsExpanded(false)
   }
 

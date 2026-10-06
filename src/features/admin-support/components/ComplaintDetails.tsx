@@ -126,7 +126,7 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
               Booking Reference
             </span>
             <span className="font-mono font-bold text-slate-900 dark:text-white">
-              #JUG-{complaint.booking_id.slice(0, 8).toUpperCase()}
+              #DK-{complaint.booking_id.slice(0, 8).toUpperCase()}
             </span>
           </div>
           {complaint.booking && (

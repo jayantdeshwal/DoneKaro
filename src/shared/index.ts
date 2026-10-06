@@ -6,10 +6,10 @@ export type JobId = string
 
 /** Deterministic human-readable reference for an existing booking UUID. */
 export function formatJobReference(jobId: JobId): string {
-  return jobId ? `#JUG-${jobId.slice(0, 8).toUpperCase()}` : ''
+  return jobId ? `#DK-${jobId.slice(0, 8).toUpperCase()}` : ''
 }
 
-/** Canonical alias for formatJobReference, preserving stable #JUG- format. */
+/** Canonical alias for formatJobReference, preserving stable #DK- format. */
 export const formatJobId = formatJobReference
 
 export interface User {

@@ -74,7 +74,7 @@ serve(async (req: Request) => {
     }
 
     const formattedPhone = `+91${cleanDigits}`
-    const canonicalEmail = personalEmail || `${cleanDigits}@phone.jugnu.in`
+    const canonicalEmail = personalEmail || `${cleanDigits}@phone.donekaro.local`
 
     // 2. Server-side verification of MSG91 widget access token
     console.log('[verify-phone-auth] Verifying token with MSG91 for phone:', cleanDigits)

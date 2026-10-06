@@ -125,7 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Filter out internal synthetic email domains from personal email display
     const rawEmail = profile?.email || authUser.email || ''
     const isSyntheticEmail =
-      rawEmail.includes('@phone.kaamgar.local') || rawEmail.includes('@phone.jugnu.in')
+      rawEmail.includes('@phone.donekaro.local') ||
+      rawEmail.includes('@phone.kaamgar.local') ||
+      rawEmail.includes('@phone.jugnu.in')
     const cleanEmail = isSyntheticEmail ? null : rawEmail || null
 
     const resolvedUser: User = {
@@ -150,7 +152,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('donekaro_guest_mode')
-      sessionStorage.removeItem('kaamgar_guest_mode')
     }
     try {
       const supabase = getSupabaseClient()

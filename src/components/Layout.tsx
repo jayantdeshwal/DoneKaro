@@ -26,7 +26,7 @@ export default function Layout() {
 
   const isGuestMode =
     typeof window !== 'undefined' &&
-    (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true')
+    sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   const isAuthPage =
     location.pathname === '/login' ||

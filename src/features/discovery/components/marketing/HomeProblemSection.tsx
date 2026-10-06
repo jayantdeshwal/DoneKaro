@@ -96,7 +96,7 @@ export function HomeProblemSection() {
             </div>
           </motion.div>
 
-          {/* The Kaamgar Standard */}
+          {/* The DoneKaro Standard */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}

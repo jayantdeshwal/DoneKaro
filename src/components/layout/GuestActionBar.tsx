@@ -10,13 +10,12 @@ export function GuestActionBar() {
   const { isAuthenticated } = useAuth()
   const { openSupport } = useSupport()
   const navigate = useNavigate()
-  const isGuestMode = typeof window !== 'undefined' && (sessionStorage.getItem('donekaro_guest_mode') === 'true' || sessionStorage.getItem('kaamgar_guest_mode') === 'true')
+  const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isAuthenticated || !isGuestMode) return null
 
   const handleBackToLogin = () => {
     sessionStorage.removeItem('donekaro_guest_mode')
-    sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
   }

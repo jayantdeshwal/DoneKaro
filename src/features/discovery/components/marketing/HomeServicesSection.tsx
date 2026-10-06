@@ -52,7 +52,7 @@ export function HomeServicesSection({
 
           {/* Grid of 6 Clean Cards with Motion Micro-Interactions */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-            {/* Card 1: InstaHelp (Emergency Kaamgar) */}
+            {/* Card 1: InstaHelp (Emergency Worker) */}
             <motion.div
               whileHover={{ y: -4, scale: 1.02 }}
               whileTap={{ scale: 0.97 }}

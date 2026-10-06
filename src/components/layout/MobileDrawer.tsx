@@ -30,7 +30,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
   const handleBackToLogin = () => {
     sessionStorage.removeItem('donekaro_guest_mode')
-    sessionStorage.removeItem('kaamgar_guest_mode')
     window.dispatchEvent(new Event('storage'))
     onClose()
     navigate('/login')
