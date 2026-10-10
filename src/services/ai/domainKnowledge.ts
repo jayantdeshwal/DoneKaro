@@ -11,7 +11,7 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
     badgeHi: '⚡ बुकिंग सहायता',
     avatar: '🛠️',
     greetingEn: 'Namaste! I am Booking Help, your Muzaffarnagar service guide. What household repair or service can I help you find today?',
-    greetingHi: 'नमस्ते! मैं बुकिंग सहायता हूँ, आपका मुज़फ़्फ़रनगर सेवा मार्गदर्शक। आज आपको घर में किस मरम्मत या सेवा के लिए कारीगर चाहिए?',
+    greetingHi: 'नमस्ते! मैं बुकिंग सहायता हूँ, आपका मुज़फ़्फ़रनगर सेवा मार्गदर्शक। आज आपको घर में किस मरम्मत या सेवा के लिए कामगार चाहिए?',
     chips: [
       {
         id: 'cb_mcb',
@@ -62,8 +62,8 @@ export const ASSISTANT_CONFIGS: Record<AssistantPersona, AssistantConfig> = {
     id: 'worker_sarathi',
     nameEn: 'Work Advice',
     nameHi: 'काम व सेवा सलाह',
-    roleTitleEn: 'Artisan Business & Work Advice',
-    roleTitleHi: 'कारीगर कार्य व सेवा सलाह',
+    roleTitleEn: 'Worker Business & Work Advice',
+    roleTitleHi: 'कामगार कार्य व सेवा सलाह',
     badgeEn: '💼 Work Advice',
     badgeHi: '💼 सेवा सलाह',
     avatar: '💼',

@@ -101,8 +101,12 @@ export default function Login() {
         const timer = setTimeout(() => navigate('/worker/dashboard'), 500)
         return () => clearTimeout(timer)
       } else if (user.phone && user.phone.trim().length >= 10) {
-        const timer = setTimeout(() => navigate('/'), 500)
-        return () => clearTimeout(timer)
+        if (user.role === 'customer' && user.registration_completed === false) {
+          navigate('/register?incomplete=true')
+        } else {
+          const timer = setTimeout(() => navigate('/'), 500)
+          return () => clearTimeout(timer)
+        }
       }
     }
   }, [user, navigate])
@@ -134,8 +138,12 @@ export default function Login() {
         identifier: cleanPhone,
         onSuccess: async (accessToken: string) => {
           try {
-            await verifyAndLoginWithOtp(cleanPhone, accessToken)
-            navigate('/')
+            const authResult = await verifyAndLoginWithOtp(cleanPhone, accessToken)
+            if (authResult.user.role === 'customer' && authResult.user.registration_completed === false) {
+              navigate('/register?incomplete=true')
+            } else {
+              navigate('/')
+            }
           } catch (err) {
             setCustomerError(sanitizeErrorMessage(err, 'Sign in failed after OTP verification.'))
           } finally {
@@ -520,7 +528,7 @@ export default function Login() {
                 <Truck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
                   <strong className="text-slate-900 dark:text-white block font-semibold mb-0.5">
-                    {t('loginPage.workerPortalTitle', 'Artisan & Worker Portal')}
+                    {t('loginPage.workerPortalTitle', 'Worker Partner Portal')}
                   </strong>
                   {t('loginPage.workerPortalDesc', 'Sign in with your verified mobile number to access your worker dashboard and manage customer bookings.')}
                 </div>
@@ -628,7 +636,8 @@ export default function Login() {
               onClick={handleExploreAsGuest}
               className="text-xs text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
             >
-              Want to browse services first? <span className="underline font-medium">Explore as Guest</span>
+              {t('auth.browseFirst', 'Want to browse services first?')}{' '}
+              <span className="underline font-medium">{t('auth.exploreAsGuest', 'Explore as Guest')}</span>
             </button>
           </div>
         </Card>

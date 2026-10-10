@@ -175,3 +175,61 @@ export async function getProblemImageSignedUrl(storagePath: string, expiresInSec
   }
   return data.signedUrl
 }
+
+/**
+ * Uploads a sensitive customer address-proof document to the private 'customer-documents' bucket.
+ * Uses an opaque, non-PII storage path based on the authenticated customer ID and a random UUID.
+ * Returns the storage path reference for secure signed access.
+ */
+export async function uploadCustomerAddressProof(file: File, userId: string): Promise<string> {
+  const validation = validateFile(file, { maxSizeMb: 10, allowedTypes: DEFAULT_DOCUMENT_TYPES })
+  if (!validation.valid) throw new Error(validation.error)
+  if (!userId) throw new Error('An authenticated customer ID is required to upload address proof')
+
+  const supabase = getSupabaseClient()
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const filePath = `${userId}/address-proof-${crypto.randomUUID()}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('customer-documents')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type,
+    })
+
+  if (uploadError) {
+    throw new Error(`Failed to upload address proof: ${uploadError.message}`)
+  }
+
+  return filePath
+}
+
+/**
+ * Generates a short-lived signed URL for an administrator or document owner
+ * to securely view a private document from the 'customer-documents' bucket.
+ */
+export async function getCustomerAddressProofSignedUrl(
+  pathOrUrl: string,
+  expiresInSeconds: number = 3600
+): Promise<string | null> {
+  if (!pathOrUrl) return null
+
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+    if (pathOrUrl.includes('token=')) return pathOrUrl
+  }
+
+  const supabase = getSupabaseClient()
+  const cleanPath = pathOrUrl.replace(/^.*\/customer-documents\//, '')
+
+  const { data, error } = await supabase.storage
+    .from('customer-documents')
+    .createSignedUrl(cleanPath, expiresInSeconds)
+
+  if (error) {
+    console.warn('Error generating signed URL for customer document:', error.message)
+    return null
+  }
+
+  return data.signedUrl
+}

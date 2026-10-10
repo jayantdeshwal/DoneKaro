@@ -314,7 +314,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
                   onChange={e => setReason(e.target.value)}
                   placeholder={
                     isHindi
-                      ? 'समस्या का कारण लिखें (उदा. बिना ऐप स्वीकृति के अतिरिक्त नकद माँगा गया, काम अधूरा छोड़ा गया, या कारीगर समय पर नहीं आया)...'
+                      ? 'समस्या का कारण लिखें (उदा. बिना ऐप स्वीकृति के अतिरिक्त नकद माँगा गया, काम अधूरा छोड़ा गया, या कामगार समय पर नहीं आया)...'
                       : 'Please describe what happened (e.g. unapproved offline cash demands, incomplete repair work, no-show, or safety concerns)...'
                   }
                   rows={4}

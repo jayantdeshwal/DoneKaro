@@ -8,6 +8,7 @@ import {
   Power,
   Briefcase,
   Bot,
+  MapPin,
 } from 'lucide-react'
 
 interface ProfileQuickActionsProps {
@@ -19,6 +20,7 @@ interface ProfileQuickActionsProps {
   onToggleAvailability: () => void
   onOpenSupport: () => void
   onOpenAssistant: (persona: 'worker_sarathi' | 'customer_booking') => void
+  onOpenAddressModal?: () => void
 }
 
 export function ProfileQuickActions({
@@ -30,6 +32,7 @@ export function ProfileQuickActions({
   onToggleAvailability,
   onOpenSupport,
   onOpenAssistant,
+  onOpenAddressModal,
 }: ProfileQuickActionsProps) {
   const { t } = useTranslation()
 
@@ -109,26 +112,26 @@ export function ProfileQuickActions({
         </>
       ) : (
         <>
-          {/* Card 1: My Bookings */}
+          {/* Card 1: My Bookings / Orders */}
           <button
             type="button"
-            onClick={() => onNavigate('/bookings')}
-            className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-amber-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+            onClick={() => onNavigate(isWorker ? '/worker/dashboard' : '/bookings')}
+            className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-amber-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95 cursor-pointer"
           >
             <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 group-hover:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-brand-400 mb-2 transition-colors">
-              <ClipboardList className="w-5 h-5" />
+              {isWorker ? <Briefcase className="w-5 h-5 text-amber-600 dark:text-brand-400" /> : <ClipboardList className="w-5 h-5" />}
             </div>
             <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 leading-tight">
-              {t('profile.myBookings', 'My bookings')}
+              {isWorker ? t('nav.workerDashboard', 'Worker Dashboard') : t('profile.myBookings', 'My bookings')}
             </span>
           </button>
 
-          {/* Card 2: Worker Mode / Become a Worker */}
+          {/* Card 2: Manage Addresses (Customer) OR Availability Toggle (Worker) */}
           {isWorker ? (
             <button
               type="button"
               onClick={onToggleAvailability}
-              className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-emerald-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+              className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-emerald-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95 cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2">
                 <Power className={`w-5 h-5 ${isAvailable ? 'animate-pulse text-emerald-600 dark:text-emerald-400' : 'text-amber-500'}`} />
@@ -140,19 +143,19 @@ export function ProfileQuickActions({
           ) : (
             <button
               type="button"
-              onClick={() => onNavigate('/register/worker')}
-              className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-emerald-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+              onClick={() => onOpenAddressModal ? onOpenAddressModal() : onNavigate('/profile')}
+              className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-amber-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95 cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2">
-                <Briefcase className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 group-hover:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-brand-400 mb-2 transition-colors">
+                <MapPin className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 leading-tight">
-                {t('profile.becomeWorker', 'Earn with DoneKaro')}
+              <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 leading-tight">
+                {t('profile.manageAddresses', 'Addresses')}
               </span>
             </button>
           )}
 
-          {/* Card 3: Support */}
+          {/* Card 3: Care & Support (Customer) OR Sarathi AI (Worker) */}
           <button
             type="button"
             onClick={() => {
@@ -162,7 +165,7 @@ export function ProfileQuickActions({
                 onOpenSupport()
               }
             }}
-            className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95"
+            className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex flex-col items-center justify-center text-center group shadow-xs active:scale-95 cursor-pointer"
           >
             <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 group-hover:bg-blue-500/15 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2 transition-colors">
               {isWorker ? (

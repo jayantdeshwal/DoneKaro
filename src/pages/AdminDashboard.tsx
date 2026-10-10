@@ -43,6 +43,7 @@ export default function AdminDashboard() {
         {/* Top Executive Header Banner */}
         <AdminHeaderBanner
           user={user}
+          isSuperAdmin={isSuperAdmin}
           activeTab={admin.activeTab}
           setActiveTab={admin.setActiveTab}
           setSearchParams={admin.setSearchParams}

@@ -118,6 +118,7 @@ export default function Profile() {
           phone={formData.phone}
           isWorker={isWorker}
           isAdmin={isAdmin}
+          workerApprovalStatus={workerDetails?.approval_status}
           saveSuccessMsg={saveSuccessMsg}
           saveErrorMsg={saveErrorMsg}
           onBack={() => navigate(-1)}
@@ -134,6 +135,7 @@ export default function Profile() {
           onToggleAvailability={handleToggleAvailability}
           onOpenSupport={openSupport}
           onOpenAssistant={openAssistant}
+          onOpenAddressModal={() => setShowAddressModal(true)}
         />
 
         {/* Divider line */}

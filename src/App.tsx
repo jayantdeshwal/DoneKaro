@@ -26,6 +26,7 @@ const Notifications = lazyWithRetry(() => import('./pages/Notifications'))
 const WorkerDashboard = lazyWithRetry(() => import('./pages/WorkerDashboard'))
 const WorkerReviews = lazyWithRetry(() => import('./pages/WorkerReviews'))
 const CategoryPage = lazyWithRetry(() => import('./pages/CategoryPage'))
+const Terms = lazyWithRetry(() => import('./pages/Terms'))
 const AdminSupportPage = lazyWithRetry(() =>
   import('./features/admin-support').then((m) => ({ default: m.AdminSupportPage }))
 )
@@ -66,12 +67,15 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) {
     return <PageLoader />
   }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+  if (user?.role === 'customer' && user?.registration_completed === false) {
+    return <Navigate to="/register?incomplete=true" replace />
   }
   return <>{children}</>
 }
@@ -85,11 +89,15 @@ function WorkerRoute({ children }: { children: React.ReactNode }) {
 }
 
 function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
     return <PageLoader />
+  }
+
+  if (user?.role === 'customer' && user?.registration_completed === false) {
+    return <Navigate to="/register?incomplete=true" replace />
   }
 
   if (isAuthenticated || isGuestMode) {
@@ -100,11 +108,15 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RootRoute() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
     return <PageLoader />
+  }
+
+  if (user?.role === 'customer' && user?.registration_completed === false) {
+    return <Navigate to="/register?incomplete=true" replace />
   }
 
   if (isAuthenticated || isGuestMode) {
@@ -139,6 +151,9 @@ function AppRoutes() {
         <Route path="worker/reviews" element={lazyElement(<WorkerRoute><WorkerReviews /></WorkerRoute>)} />
         <Route path="admin" element={lazyElement(<AdminRoute><AdminDashboard /></AdminRoute>)} />
         <Route path="admin/support" element={lazyElement(<AdminRoute><AdminSupportPage /></AdminRoute>)} />
+        <Route path="terms" element={lazyElement(<Terms />)} />
+        <Route path="terms-and-conditions" element={<Navigate to="/terms" replace />} />
+        <Route path="legal/terms" element={<Navigate to="/terms" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

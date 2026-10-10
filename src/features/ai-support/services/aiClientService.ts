@@ -188,7 +188,7 @@ function extractContextualActions(
     actions.push({
       id: 'act_worker_dash',
       labelEn: 'Open Worker Dashboard',
-      labelHi: 'कारीगर डैशबोर्ड खोलें',
+      labelHi: 'कामगार डैशबोर्ड खोलें',
       type: 'navigate',
       payload: '/worker/dashboard',
       icon: 'Briefcase',

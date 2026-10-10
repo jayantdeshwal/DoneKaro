@@ -119,15 +119,23 @@ export default function WorkerProfile() {
   }, [id])
 
   if (isLoading) {
-    return <div className="min-h-screen bg-semantic-bg-secondary flex items-center justify-center text-semantic-text-secondary">Loading worker profile...</div>
+    return (
+      <div className="min-h-screen bg-semantic-bg-secondary flex items-center justify-center text-semantic-text-secondary">
+        {t('workerProfile.loading', 'Loading worker profile...')}
+      </div>
+    )
   }
 
   if (error || !worker) {
     return (
       <div className="min-h-screen bg-semantic-bg-secondary flex items-center justify-center px-4">
         <Card className="max-w-md w-full p-8 text-center">
-          <h1 className="text-xl font-semibold text-semantic-text-primary">{error || 'Worker profile not found'}</h1>
-          <Link to="/search" className="mt-5 inline-flex text-brand-500 hover:text-brand-400">Back to Search</Link>
+          <h1 className="text-xl font-semibold text-semantic-text-primary">
+            {error || t('errors.notFound', 'Worker profile not found')}
+          </h1>
+          <Link to="/search" className="mt-5 inline-flex text-brand-500 hover:text-brand-400">
+            {t('common.backToSearch', 'Back to Search')}
+          </Link>
         </Card>
       </div>
     )
@@ -285,7 +293,9 @@ export default function WorkerProfile() {
                         </Chip>
                       )
                     }) : (
-                      <p className="text-sm text-semantic-text-secondary">No registered services available.</p>
+                      <p className="text-sm text-semantic-text-secondary">
+                        {t('workerProfile.noRegisteredServices', 'No registered services available.')}
+                      </p>
                     )}
                   </div>
                 </Card>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, Input, Modal } from '@kaamgar/ui'
 import { AlertCircle, Mail } from 'lucide-react'
 
@@ -15,6 +16,7 @@ export function EmailUpdateModal({
   onClose,
   onUpdateEmail,
 }: EmailUpdateModalProps) {
+  const { t } = useTranslation()
   const [emailModalInput, setEmailModalInput] = useState(initialEmail || '')
   const [isSavingEmail, setIsSavingEmail] = useState(false)
   const [emailModalError, setEmailModalError] = useState('')
@@ -49,8 +51,8 @@ export function EmailUpdateModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Email / Gmail Address"
-      description="Link your email to receive official receipts and job notifications."
+      title={t('profile.emailModalTitle', 'Email / Gmail Address')}
+      description={t('profile.emailModalDesc', 'Link your email to receive official receipts and job notifications.')}
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
         {emailModalError && (
@@ -60,7 +62,7 @@ export function EmailUpdateModal({
           </div>
         )}
         <Input
-          label="Email Address"
+          label={t('profile.emailLabel', 'Email Address')}
           type="email"
           value={emailModalInput}
           onChange={e => setEmailModalInput(e.target.value)}
@@ -75,10 +77,10 @@ export function EmailUpdateModal({
             variant="secondary"
             onClick={handleClose}
           >
-            Cancel
+            {t('common.cancel', 'Cancel')}
           </Button>
           <Button type="submit" variant="primary" loading={isSavingEmail}>
-            Save Email
+            {t('profile.saveEmail', 'Save Email')}
           </Button>
         </div>
       </form>

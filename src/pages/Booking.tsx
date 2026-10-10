@@ -317,10 +317,17 @@ export default function Booking() {
             <div className="w-20 h-20 mx-auto mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center">
               <Check className="w-10 h-10 text-emerald-400" />
             </div>
-            <h2 className="text-2xl font-bold text-semantic-text-primary mb-2">Quote Requested</h2>
-            <p className="text-semantic-text-secondary mb-6">Your request was sent to {worker.name}. A booking will be created only after you accept the provider's quote.</p>
+            <h2 className="text-2xl font-bold text-semantic-text-primary mb-2">
+              {t('booking.quoteRequestedTitle', 'Quote Requested')}
+            </h2>
+            <p className="text-semantic-text-secondary mb-6">
+              {t('booking.quoteRequestedDesc', {
+                name: worker.name,
+                defaultValue: "Your request was sent to {{name}}. A booking will be created only after you accept the provider's quote.",
+              })}
+            </p>
             <Button variant="primary" className="w-full sm:w-auto" onClick={() => navigate('/bookings')}>
-              View Quote Requests
+              {t('booking.viewQuoteRequests', 'View Quote Requests')}
             </Button>
           </div>
         ) : (
@@ -490,7 +497,7 @@ export default function Booking() {
                   disabled={worker.available === false} 
                   className="flex-1"
                 >
-                  Request Quote
+                  {t('booking.requestQuote', 'Request Quote')}
                 </Button>
               </div>
             </form>
@@ -540,15 +547,17 @@ export default function Booking() {
           </div>
 
           <div>
-            <label className="label text-semantic-text-secondary">Provider response deadline</label>
+            <label className="label text-semantic-text-secondary">
+              {t('booking.providerResponseDeadline', 'Provider response deadline')}
+            </label>
             <select
               value={responseHours}
               onChange={event => setResponseHours(event.target.value)}
               className="input w-full bg-surface-200 border-semantic-border-light text-semantic-text-primary"
             >
-              <option value="24">24 hours</option>
-              <option value="48">48 hours</option>
-              <option value="72">72 hours</option>
+              <option value="24">{t('booking.hours24', '24 hours')}</option>
+              <option value="48">{t('booking.hours48', '48 hours')}</option>
+              <option value="72">{t('booking.hours72', '72 hours')}</option>
             </select>
           </div>
           
@@ -557,7 +566,7 @@ export default function Booking() {
               {t('common.cancel')}
             </Button>
             <Button variant="primary" onClick={confirmBooking} loading={isSubmitting} className="flex-1">
-              Request Quote
+              {t('booking.requestQuote', 'Request Quote')}
             </Button>
           </div>
         </div>

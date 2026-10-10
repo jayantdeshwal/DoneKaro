@@ -157,7 +157,7 @@ export default function WorkerDashboard() {
   const primaryCategoryObj = CATEGORIES.find(c => categoriesList.includes(c.id))
   const primaryCategoryName = primaryCategoryObj
     ? getCategoryName(primaryCategoryObj, i18n.language === 'hi' ? 'hi' : 'en')
-    : t('workerDashboard.artisanSpecialist', 'Artisan Specialist')
+    : t('workerDashboard.artisanSpecialist', 'Service Specialist')
 
   const activeJob = bookings.find(
     b => b.status === 'accepted' || b.status === 'in_progress' || b.status === 'payment_pending'

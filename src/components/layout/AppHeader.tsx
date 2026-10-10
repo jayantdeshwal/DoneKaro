@@ -73,7 +73,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
               title="AI Support Assistant"
             >
               <Bot className="w-3.5 h-3.5 text-slate-950 animate-bounce" />
-              <span className="tracking-tight">AI Support</span>
+              <span className="tracking-tight">{t('nav.aiSupport', 'AI Support')}</span>
             </button>
           )}
         </div>

@@ -22,7 +22,7 @@ export function QuoteRequestsSection({
   onAcceptQuote,
   onCancelQuoteRequest,
 }: QuoteRequestsSectionProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   if (quoteRequests.length === 0) return null
 
@@ -81,7 +81,7 @@ export function QuoteRequestsSection({
                   loading={quoteActionId === quote.id}
                   onClick={() => void onAcceptQuote(quote)}
                 >
-                  Accept Quote
+                  {t('quotes.acceptQuote', 'Accept Quote')}
                 </Button>
               </div>
             )}
@@ -94,13 +94,15 @@ export function QuoteRequestsSection({
                   loading={quoteActionId === request.id}
                   onClick={() => void onCancelQuoteRequest(request)}
                 >
-                  Cancel Request
+                  {t('quotes.cancelRequest', 'Cancel Request')}
                 </Button>
               </div>
             )}
             {(request.status === 'cancelled' || request.status === 'expired' || request.status === 'rejected') && service && (
               <Link to={`/search?category=${encodeURIComponent(service.category_id)}`} className="inline-block mt-3">
-                <Button variant="secondary" size="sm">Choose Another Provider</Button>
+                <Button variant="secondary" size="sm">
+                  {t('quotes.chooseAnotherProvider', 'Choose Another Provider')}
+                </Button>
               </Link>
             )}
           </Card>

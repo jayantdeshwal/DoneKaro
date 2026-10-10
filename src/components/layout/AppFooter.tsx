@@ -67,6 +67,12 @@ export function AppFooter() {
                   <span>{t('nav.loginSignup', 'Login / Sign Up')}</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/terms" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                  <span>{t('footer.terms', 'Terms & Conditions')}</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -132,9 +138,15 @@ export function AppFooter() {
           </div>
         </div>
 
-        {/* Bottom Bar: Copyright, Made with love, Disclaimers */}
+        {/* Bottom Bar: Copyright, Terms, Made with love */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-500">
-          <p>{t('footer.copyright')}</p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p>{t('footer.copyright')}</p>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors underline-offset-2 hover:underline">
+              {t('footer.terms', 'Terms & Conditions')}
+            </Link>
+          </div>
           <div className="flex items-center gap-1 text-slate-600 dark:text-zinc-400">
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500/20" />
             <span>{t('footer.madeWith')}</span>

@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FileText, IdCard, Image, Info, X } from 'lucide-react'
 import type { RegistrationFormData } from '../../types'
+import { TermsModal } from '@/components/legal/TermsModal'
 
 interface DocumentsStepProps {
   formData: RegistrationFormData
@@ -31,6 +33,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
   onAvatarChange,
 }) => {
   const { t } = useTranslation()
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -207,19 +210,54 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
 
       {/* Terms and conditions agreement */}
       <div className="mt-6">
-        <label className="flex items-start gap-3 rounded-xl border border-semantic-border-light p-3.5 text-sm text-semantic-text-secondary cursor-pointer">
+        <label className="flex items-start gap-3 rounded-xl border border-semantic-border-light p-3.5 text-sm text-semantic-text-secondary cursor-pointer bg-surface-200/30">
           <input
             type="checkbox"
             checked={termsAccepted}
-            onChange={e => setTermsAccepted(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-emerald-500"
+            onChange={e => {
+              if (e.target.checked) {
+                setIsTermsModalOpen(true)
+              } else {
+                setTermsAccepted(false)
+              }
+            }}
+            className="mt-0.5 h-5 w-5 accent-emerald-500 cursor-pointer"
           />
-          <span>
-            {t('auth.workerRegistration.termsAcceptance', 'I agree to the Terms & Conditions')}
-          </span>
+          <div className="flex-1">
+            <span>
+              {t('auth.workerRegistration.termsAcceptancePrefix', 'I agree to the')}{' '}
+              <button
+                type="button"
+                onClick={e => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsTermsModalOpen(true)
+                }}
+                className="font-semibold text-emerald-500 hover:underline inline cursor-pointer"
+              >
+                {t('auth.workerRegistration.termsAcceptanceLink', 'Terms & Conditions')}
+              </button>
+            </span>
+            {!termsAccepted && (
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400/90 mt-1">
+                {t(
+                  'registerPage.termsReviewPrompt',
+                  'Click to read and accept the full Terms & Conditions'
+                )}
+              </p>
+            )}
+          </div>
         </label>
         {errors.terms && <p className="mt-1 text-xs text-red-400">{errors.terms}</p>}
       </div>
+
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+        onAccept={() => {
+          setTermsAccepted(true)
+        }}
+      />
     </div>
   )
 }

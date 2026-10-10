@@ -192,7 +192,7 @@ export function DiscoverySearchBar({
             {/* Selected Category Pill */}
             {selectedCategory && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 border border-blue-500/30 text-blue-800 dark:text-blue-300">
-                <span>Service: {getCategoryDisplayName(selectedCategory)}</span>
+                <span>{t('common.service', 'Service')}: {getCategoryDisplayName(selectedCategory)}</span>
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('')}
@@ -207,7 +207,7 @@ export function DiscoverySearchBar({
             {/* Selected Area Pill */}
             {selectedArea && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300">
-                <span>Area: {selectedArea}</span>
+                <span>{t('common.area', 'Area')}: {selectedArea}</span>
                 <button
                   type="button"
                   onClick={() => setSelectedArea('')}
@@ -225,7 +225,7 @@ export function DiscoverySearchBar({
               onClick={clearAllSearchAndFilters}
               className="text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 ml-auto transition-colors cursor-pointer"
             >
-              Clear all
+              {t('common.clearAll', 'Clear all')}
             </button>
           </div>
         )}

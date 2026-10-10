@@ -1,3 +1,4 @@
+
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -53,7 +54,7 @@ export function DiscoveryResults({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                   <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>{t('home.verifiedArtisans', 'Verified Artisans')}</span>
+                    <span>{t('home.verifiedArtisans', 'Verified Workers')}</span>
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                       {matchingWorkers.length} {t('home.found', 'Found')}
                     </span>
@@ -112,7 +113,7 @@ export function DiscoveryResults({
                                 <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
                                   {worker.name}
                                 </h3>
-                                <span title={t('home.verifiedArtisan', 'Verified Artisan')}>
+                                <span title={t('home.verifiedArtisan', 'Verified Worker')}>
                                   <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                                 </span>
                               </div>
@@ -207,7 +208,7 @@ export function DiscoveryResults({
                       onClick={onClearFilters}
                       className="text-xs font-bold"
                     >
-                      Reset All Filters
+                      {t('common.resetFilters', 'Reset All Filters')}
                     </Button>
                     <Button
                       variant="primary"

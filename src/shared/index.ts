@@ -20,6 +20,8 @@ export interface User {
   role: UserRole
   language: Language
   avatar_url?: string | null
+  address_proof_url?: string | null
+  registration_completed?: boolean
   created_at?: string
 }
 

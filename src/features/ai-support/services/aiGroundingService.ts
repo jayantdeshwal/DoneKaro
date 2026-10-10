@@ -49,7 +49,7 @@ export function buildGroundedAction(
       return {
         id: 'act_worker_dash_' + Date.now(),
         labelEn: 'Open Worker Dashboard',
-        labelHi: 'कारीगर डैशबोर्ड खोलें',
+        labelHi: 'कामगार डैशबोर्ड खोलें',
         type: 'navigate',
         payload: '/worker/dashboard',
         icon: 'Briefcase',

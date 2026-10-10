@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle, AlertCircle, Clock } from 'lucide-react'
 
 interface ProfileHeaderProps {
   name: string
   phone: string
   isWorker: boolean
   isAdmin: boolean
+  workerApprovalStatus?: string
   saveSuccessMsg: string
   saveErrorMsg: string
   onBack: () => void
@@ -17,15 +18,17 @@ export function ProfileHeader({
   phone,
   isWorker,
   isAdmin,
+  workerApprovalStatus,
   saveSuccessMsg,
   saveErrorMsg,
   onBack,
   onEditClick,
 }: ProfileHeaderProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isHindi = i18n.language === 'hi'
 
   const isProfileComplete = Boolean(name && phone)
-  const userDisplayName = name || (isWorker ? 'Verified Partner' : 'Verified Customer')
+  const userDisplayName = name || (isWorker ? (isHindi ? 'सेवा साथी' : 'Service Partner') : (isHindi ? 'नागरिक' : 'Customer'))
   const userDisplayPhone = phone
     ? (phone.startsWith('+91') ? phone : `+91 ${phone}`)
     : 'No phone number set'
@@ -75,14 +78,31 @@ export function ProfileHeader({
                 <span>{t('profile.incompleteProfile', 'Incomplete profile')}</span>
               </span>
             ) : isWorker ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                <CheckCircle className="w-3 h-3" />
-                <span>{t('profile.verifiedWorker', 'Verified Partner')}</span>
-              </span>
+              workerApprovalStatus === 'approved' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>{isHindi ? 'सत्यापित कामगार' : 'Verified Partner'}</span>
+                </span>
+              ) : workerApprovalStatus === 'rejected' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/30">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>{isHindi ? 'सत्यापन अस्वीकृत' : 'Verification Rejected'}</span>
+                </span>
+              ) : workerApprovalStatus === 'pending' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">
+                  <Clock className="w-3 h-3" />
+                  <span>{isHindi ? 'जांच चल रही है' : 'Verification In Review'}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-zinc-700">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>{isHindi ? 'सेवा साथी' : 'Service Partner'}</span>
+                </span>
+              )
             ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 <CheckCircle className="w-3 h-3" />
-                <span>{t('profile.verifiedCustomer', 'Verified Customer')}</span>
+                <span>{isHindi ? 'सक्रिय खाता' : 'Active Account'}</span>
               </span>
             )}
 

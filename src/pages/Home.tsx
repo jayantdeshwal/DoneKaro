@@ -25,6 +25,7 @@ import {
   HomeReviewGuarantee,
   HomeDualAudienceCta,
 } from '@/features/discovery'
+import { HomepageSafetyNotice } from '@/components/safety/HomepageSafetyNotice'
 
 export default function Home() {
   const { t, i18n } = useTranslation()
@@ -174,6 +175,9 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* 5-Point Informational Safety Notice for Authenticated Sessions */}
+      <HomepageSafetyNotice />
 
       {/* Sticky Search Bar & Filter Drawer */}
       <DiscoverySearchBar

@@ -15,6 +15,7 @@ import type { AdminTabType } from '../types'
 
 interface AdminHeaderBannerProps {
   user: { name?: string | null; email?: string | null } | null
+  isSuperAdmin?: boolean
   activeTab: AdminTabType
   setActiveTab: (tab: AdminTabType) => void
   setSearchParams: (params: { tab: string }) => void
@@ -34,6 +35,7 @@ interface AdminHeaderBannerProps {
 
 export function AdminHeaderBanner({
   user,
+  isSuperAdmin,
   activeTab,
   setActiveTab,
   setSearchParams,
@@ -81,11 +83,11 @@ export function AdminHeaderBanner({
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
                   <Sparkles className="w-3 h-3 text-amber-500" />
-                  Super Admin Console
+                  {isSuperAdmin ? 'Super Admin Console' : 'Administrator Console'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  2FA Verified Active
+                  Authoritative Session
                 </span>
               </div>
 

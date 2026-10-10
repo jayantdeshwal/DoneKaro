@@ -85,17 +85,17 @@ export function BookingCard({
           )}
           {booking.status === 'pending' && (
             <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-              {t('bookings.pendingMsg', 'Waiting for artisan to confirm...')}
+              {t('bookings.pendingMsg', 'Waiting for worker to confirm...')}
             </p>
           )}
           {booking.status === 'accepted' && (
             <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-              {t('bookings.acceptedMsg', 'Artisan has confirmed your booking.')}
+              {t('bookings.acceptedMsg', 'Worker has confirmed your booking.')}
             </p>
           )}
           {booking.status === 'in_progress' && (
             <p className="mt-1 text-xs text-indigo-600 dark:text-indigo-400">
-              {t('bookings.inProgressMsg', 'Artisan is currently working on this service.')}
+              {t('bookings.inProgressMsg', 'Worker is currently working on this service.')}
             </p>
           )}
           {booking.status === 'completed' && (
@@ -189,16 +189,26 @@ export function BookingCard({
       {booking.changeRequests?.map(request => (
         <div key={request.id} className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">Additional charge requested</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">
+              {t('bookings.additionalChargeRequested', 'Additional charge requested')}
+            </p>
             <Badge variant={request.status === 'pending' ? 'warning' : request.status === 'approved' ? 'success' : 'default'}>
-              {request.status === 'pending' ? 'Pending approval' : request.status[0].toUpperCase() + request.status.slice(1)}
+              {request.status === 'pending'
+                ? t('bookings.pendingApproval', 'Pending approval')
+                : request.status === 'approved'
+                ? t('bookings.approved', 'Approved')
+                : t('bookings.rejected', 'Rejected')}
             </Badge>
           </div>
           <p className="mt-2 text-xs text-slate-600 dark:text-zinc-400">
-            Job {jobReference} • {new Date(request.created_at).toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')}
+            {t('bookings.jobPrefix', 'Job')} {jobReference} • {new Date(request.created_at).toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')}
           </p>
-          <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">Reason: {request.reason}</p>
-          <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">Additional amount: ₹{request.amount.toFixed(2)}</p>
+          <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
+            {t('bookings.reasonLabel', 'Reason')}: {request.reason}
+          </p>
+          <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+            {t('bookings.additionalAmountLabel', 'Additional amount')}: ₹{request.amount.toFixed(2)}
+          </p>
           {request.status === 'pending' && (
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
@@ -207,7 +217,7 @@ export function BookingCard({
                 loading={decidingRequestId === request.id}
                 onClick={() => void onChangeRequestDecision(request, 'approved')}
               >
-                Approve
+                {t('common.approve', 'Approve')}
               </Button>
               <Button
                 variant="secondary"
@@ -215,7 +225,7 @@ export function BookingCard({
                 disabled={Boolean(decidingRequestId)}
                 onClick={() => void onChangeRequestDecision(request, 'rejected')}
               >
-                Reject
+                {t('common.reject', 'Reject')}
               </Button>
             </div>
           )}

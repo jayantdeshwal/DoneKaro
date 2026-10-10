@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.donekaro.app",
+      "sha256_cert_fingerprints": [
+        "DE:A9:95:DD:05:75:CC:38:79:FC:F0:79:21:EB:51:59:68:15:5E:D0:AB:45:53:EA:67:A3:39:1C:31:F8:E2:D3"
+      ]
+    }
+  }
+]

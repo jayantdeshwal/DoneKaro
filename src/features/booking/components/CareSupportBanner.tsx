@@ -22,8 +22,8 @@ export function CareSupportBanner({ upcomingBookingId }: CareSupportBannerProps)
           </h3>
           <p className="text-[11px] text-slate-500 dark:text-zinc-400">
             {i18n.language === 'hi'
-              ? 'बुकिंग में देरी, सवाल या कारीगर से संपर्क में तुरंत मदद पाएं'
-              : 'Get quick assistance with booking status, artisan contact, or scheduling'}
+              ? 'बुकिंग में देरी, सवाल या कामगार से संपर्क में तुरंत मदद पाएं'
+              : 'Get quick assistance with booking status, worker contact, or scheduling'}
           </p>
         </div>
       </div>

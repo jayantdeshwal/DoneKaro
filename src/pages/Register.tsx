@@ -1,3 +1,5 @@
+
+
 import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -17,8 +19,12 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import { openOtpWidget } from '@/services/otp'
 import { checkPhoneRegistration } from '@/services/authCheck'
+import { uploadCustomerAddressProof } from '@/services/storage'
+import { getSupabaseClient } from '@/lib/supabase'
 import { sanitizeErrorMessage } from '@/utils/errors'
 import { normalizeIndianPhone, tryNormalizeIndianPhone, sanitizePhoneInput } from '@/utils/phone'
+import { TermsModal } from '@/components/legal/TermsModal'
+import { CustomerAddressProofUpload } from '@/components/customer/CustomerAddressProofUpload'
 
 export default function Register() {
   const { t } = useTranslation()
@@ -27,7 +33,7 @@ export default function Register() {
   const initialRole = searchParams.get('role') === 'worker' ? 'worker' : 'customer'
   const [activeTab, setActiveTab] = useState<'customer' | 'worker'>(initialRole)
 
-  const { verifyAndLoginWithOtp } = useAuth()
+  const { user, updateUser, verifyAndLoginWithOtp } = useAuth()
 
   const queryPhone = tryNormalizeIndianPhone(searchParams.get('phone') || '') ?? ''
 
@@ -35,9 +41,30 @@ export default function Register() {
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState(queryPhone)
   const [customerEmail, setCustomerEmail] = useState('')
+  const [customerAddressProof, setCustomerAddressProof] = useState<File | null>(null)
   const [customerTermsAccepted, setCustomerTermsAccepted] = useState(false)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [customerLoading, setCustomerLoading] = useState(false)
   const [customerError, setCustomerError] = useState('')
+  const [uploadStatusMsg, setUploadStatusMsg] = useState('')
+  const [pendingCustomerId, setPendingCustomerId] = useState<string | null>(null)
+
+  const isIncompleteCustomer =
+    searchParams.get('incomplete') === 'true' ||
+    (user?.role === 'customer' && user?.registration_completed === false) ||
+    Boolean(pendingCustomerId)
+
+  // Sync incomplete customer state if user lands here with incomplete registration
+  useState(() => {
+    if (user?.role === 'customer' && user.registration_completed === false) {
+      if (user.name) setCustomerName(user.name)
+      if (user.phone) {
+        const clean = tryNormalizeIndianPhone(user.phone)
+        if (clean) setCustomerPhone(clean)
+      }
+      setCustomerTermsAccepted(true)
+    }
+  })
 
   // ---------------- Already Registered Notice ----------------
   const [alreadyRegisteredNotice, setAlreadyRegisteredNotice] = useState<{
@@ -49,10 +76,65 @@ export default function Register() {
   const handleCustomerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setCustomerError('')
+    setUploadStatusMsg('')
     setAlreadyRegisteredNotice(null)
 
     if (!customerTermsAccepted) {
       setCustomerError(t('registerPage.termsRequired', 'Please accept the Terms & Conditions before continuing.'))
+      return
+    }
+
+    if (!customerAddressProof) {
+      setCustomerError(
+        t('registerPage.addressProofRequired', 'Address proof document is mandatory for customer registration.')
+      )
+      return
+    }
+
+    // 1. If this customer is already authenticated but registration is incomplete,
+    // directly retry address-proof upload without requesting OTP again!
+    const targetUserId =
+      pendingCustomerId ||
+      (user?.role === 'customer' && user.registration_completed === false ? user.id : null)
+
+    if (targetUserId) {
+      setCustomerLoading(true)
+      setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
+      try {
+        const addressProofPath = await uploadCustomerAddressProof(customerAddressProof, targetUserId)
+        const supabase = getSupabaseClient()
+        const { error: rpcErr } = await (supabase as any).rpc('complete_customer_registration', {
+          p_address_proof_path: addressProofPath,
+        })
+        if (rpcErr) {
+          const fnMissing =
+            rpcErr.code === '42883' ||
+            rpcErr.message?.toLowerCase().includes('does not exist') ||
+            rpcErr.message?.toLowerCase().includes('not found')
+          if (fnMissing) {
+            await (supabase.from('profiles') as any).update({
+              address_proof_url: addressProofPath,
+              registration_completed: true,
+              updated_at: new Date().toISOString(),
+            }).eq('id', targetUserId)
+          } else {
+            throw new Error(rpcErr.message || 'Registration completion failed')
+          }
+        }
+
+        updateUser({ address_proof_url: addressProofPath, registration_completed: true })
+        navigate('/')
+      } catch (err) {
+        setCustomerError(
+          sanitizeErrorMessage(
+            err,
+            'Address proof upload failed. Please verify the document format (JPG, PNG, PDF up to 10MB) and retry.'
+          )
+        )
+      } finally {
+        setCustomerLoading(false)
+        setUploadStatusMsg('')
+      }
       return
     }
 
@@ -85,21 +167,60 @@ export default function Register() {
         identifier: cleanPhone,
         onSuccess: async (accessToken: string) => {
           try {
-            await verifyAndLoginWithOtp(
+            setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
+
+            // 1. Authoritative OTP login/signup creating authentic Supabase session
+            const authResult = await verifyAndLoginWithOtp(
               cleanPhone,
               accessToken,
               cleanName,
               customerEmail.trim() || undefined
             )
+
+            const customerId = authResult.user.id
+            setPendingCustomerId(customerId)
+
+            // 2. Upload mandatory customer address proof to private bucket
+            const addressProofPath = await uploadCustomerAddressProof(customerAddressProof, customerId)
+
+            // 3. Update profile authoritatively with address_proof_url reference and registration_completed: true
+            const supabase = getSupabaseClient()
+            const { error: rpcErr } = await (supabase as any).rpc('complete_customer_registration', {
+              p_address_proof_path: addressProofPath,
+            })
+            if (rpcErr) {
+              const fnMissing =
+                rpcErr.code === '42883' ||
+                rpcErr.message?.toLowerCase().includes('does not exist') ||
+                rpcErr.message?.toLowerCase().includes('not found')
+              if (fnMissing) {
+                await (supabase.from('profiles') as any).update({
+                  address_proof_url: addressProofPath,
+                  registration_completed: true,
+                  updated_at: new Date().toISOString(),
+                }).eq('id', customerId)
+              } else {
+                throw new Error(rpcErr.message || 'Registration completion failed')
+              }
+            }
+
+            updateUser({ address_proof_url: addressProofPath, registration_completed: true })
             navigate('/')
           } catch (err) {
-            setCustomerError(sanitizeErrorMessage(err, 'Sign up failed after OTP verification.'))
+            setCustomerError(
+              sanitizeErrorMessage(
+                err,
+                'Mobile verification succeeded, but address proof upload failed. Please click below to retry uploading your document.'
+              )
+            )
           } finally {
             setCustomerLoading(false)
+            setUploadStatusMsg('')
           }
         },
         onFailure: (err) => {
           setCustomerLoading(false)
+          setUploadStatusMsg('')
           if (err && typeof err === 'object' && (err as any).cancelled) return
           const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please verify to complete sign up.'
           setCustomerError(msg)
@@ -154,11 +275,10 @@ export default function Register() {
                 setAlreadyRegisteredNotice(null)
                 setCustomerError('')
               }}
-              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'customer'
+              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'customer'
                   ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               <User className="w-4 h-4" />
               <span className="text-left leading-tight">
@@ -173,11 +293,10 @@ export default function Register() {
                 setSearchParams({ role: 'worker' })
                 setAlreadyRegisteredNotice(null)
               }}
-              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'worker'
+              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'worker'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               <Truck className="w-4 h-4" />
               <span className="text-left leading-tight">
@@ -223,19 +342,39 @@ export default function Register() {
                 </div>
               )}
 
-              {/* Passwordless benefits notice */}
-              <div className="p-3.5 bg-brand-500/10 border border-brand-500/25 rounded-xl mb-5 flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
-                <div className="text-xs text-brand-200 leading-relaxed">
-                  <strong className="text-white block font-semibold mb-0.5">
-                    {t('registerPage.passwordlessNoticeTitle', '100% Passwordless & Secure')}
-                  </strong>
-                  {t(
-                    'registerPage.passwordlessNoticeDesc',
-                    'Verify your mobile number via OTP once. Your session stays permanently saved on this device—no passwords to remember or reset!'
-                  )}
+              {/* Incomplete registration recovery banner */}
+              {isIncompleteCustomer && (
+                <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2.5 text-xs text-amber-300">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+                  <div>
+                    <p className="font-semibold text-amber-300 mb-0.5">
+                      {t('registerPage.incompleteNoticeTitle', 'Registration Incomplete: Address Verification Required')}
+                    </p>
+                    <p className="text-amber-200/90 leading-relaxed">
+                      {t(
+                        'registerPage.incompleteNoticeDesc',
+                        'Your mobile number is verified. Please upload your mandatory address proof below to complete registration and access DoneKaro.'
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Passwordless benefits notice */}
+              {!isIncompleteCustomer && (
+                <div className="p-3.5 bg-brand-500/10 border border-brand-500/25 rounded-xl mb-5 flex items-start gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-brand-200 leading-relaxed">
+                    <strong className="text-white block font-semibold mb-0.5">
+                      {t('registerPage.passwordlessNoticeTitle', '100% Passwordless & Secure')}
+                    </strong>
+                    {t(
+                      'registerPage.passwordlessNoticeDesc',
+                      'Verify your mobile number via OTP once. Your session stays permanently saved on this device—no passwords to remember or reset!'
+                    )}
+                  </div>
+                </div>
+              )}
 
               <form onSubmit={handleCustomerSubmit} className="space-y-4">
                 <Input
@@ -245,6 +384,7 @@ export default function Register() {
                   placeholder="e.g. Amit Kumar"
                   required
                   autoFocus
+                  disabled={isIncompleteCustomer && !!customerName}
                 />
 
                 <div>
@@ -255,10 +395,13 @@ export default function Register() {
                     placeholder="9876543210"
                     leftIcon={<span className="text-sm font-semibold text-slate-500 dark:text-zinc-400">+91</span>}
                     required
+                    disabled={isIncompleteCustomer && !!customerPhone}
                   />
-                  <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-500">
-                    {t('registerPage.otpNotice', 'A 6-digit OTP will be dispatched to this number to verify your account.')}
-                  </p>
+                  {!isIncompleteCustomer && (
+                    <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-500">
+                      {t('registerPage.otpNotice', 'A 6-digit OTP will be dispatched to this number to verify your account.')}
+                    </p>
+                  )}
                 </div>
 
                 <Input
@@ -268,17 +411,67 @@ export default function Register() {
                   onChange={e => setCustomerEmail(e.target.value)}
                   placeholder="name@gmail.com"
                   leftIcon={<Mail className="w-4 h-4 text-slate-400 dark:text-zinc-500" />}
+                  disabled={isIncompleteCustomer && !!customerEmail}
                 />
 
-                <label className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-zinc-700 p-3.5 text-sm text-slate-700 dark:text-zinc-200 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={customerTermsAccepted}
-                    onChange={e => setCustomerTermsAccepted(e.target.checked)}
-                    className="mt-0.5 h-5 w-5 accent-amber-500"
-                  />
-                  <span>{t('registerPage.termsAcceptance', 'I agree to the Terms & Conditions')}</span>
-                </label>
+                <CustomerAddressProofUpload
+                  selectedFile={customerAddressProof}
+                  onFileSelect={file => {
+                    setCustomerAddressProof(file)
+                    if (customerError && !file) {
+                      setCustomerError('')
+                    }
+                  }}
+                  disabled={customerLoading}
+                />
+
+                <div className="rounded-xl border border-slate-200 dark:border-zinc-700 p-3.5 bg-slate-50/50 dark:bg-zinc-800/30">
+                  <label className="flex items-start gap-3 text-sm text-slate-700 dark:text-zinc-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={customerTermsAccepted}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          // Force reading the terms
+                          setIsTermsModalOpen(true)
+                        } else {
+                          setCustomerTermsAccepted(false)
+                        }
+                      }}
+                      className="mt-0.5 h-5 w-5 accent-amber-500 cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <span>
+                        {t('registerPage.termsAcceptancePrefix', 'I agree to the')}{' '}
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            setIsTermsModalOpen(true)
+                          }}
+                          className="font-semibold text-amber-600 dark:text-amber-400 hover:underline inline"
+                        >
+                          {t('registerPage.termsAcceptanceLink', 'Terms & Conditions')}
+                        </button>
+                      </span>
+                      {!customerTermsAccepted && (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-400/90 mt-1">
+                          {t(
+                            'registerPage.termsReviewPrompt',
+                            'Click to read and accept the full Terms & Conditions'
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {uploadStatusMsg && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 animate-pulse text-center font-medium">
+                    {uploadStatusMsg}
+                  </p>
+                )}
 
                 <Button
                   type="submit"
@@ -288,9 +481,21 @@ export default function Register() {
                   loading={customerLoading}
                 >
                   <ShieldCheck className="w-4 h-4 mr-2" />
-                  {t('registerPage.customerSubmitBtn', 'Verify Mobile via OTP & Create Account')}
+                  {isIncompleteCustomer
+                    ? t('registerPage.retryUploadBtn', 'Upload Address Proof & Complete Registration')
+                    : t('registerPage.customerSubmitBtn', 'Verify Mobile via OTP & Create Account')}
                 </Button>
               </form>
+
+              {/* Authoritative Terms Reading Modal */}
+              <TermsModal
+                isOpen={isTermsModalOpen}
+                onClose={() => setIsTermsModalOpen(false)}
+                onAccept={() => {
+                  setCustomerTermsAccepted(true)
+                  setCustomerError('')
+                }}
+              />
 
               <div className="mt-6 text-center text-xs text-slate-500 dark:text-zinc-400">
                 <span>{t('registerPage.haveAccount', 'Already have an account?')} </span>
@@ -310,24 +515,26 @@ export default function Register() {
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-left space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span>Become a Verified DoneKaro Artisan / Service Provider</span>
+                  <span>{t('auth.workerRegistration.becomeVerifiedPartner', 'Become a Verified DoneKaro Service Partner')}</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
-                  Join Muzaffarnagar's premier network of skilled local technicians and service experts.
-                  Register in 3 simple steps:
+                  {t(
+                    'auth.workerRegistration.joinNetworkDesc',
+                    "Join Muzaffarnagar's premier network of skilled local technicians and service experts. Register in 3 simple steps:"
+                  )}
                 </p>
                 <ul className="text-xs space-y-1.5 text-slate-600 dark:text-zinc-300 pl-2">
                   <li className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">1</span>
-                    <span>Verify your mobile number via OTP (no passwords required)</span>
+                    <span>{t('auth.workerRegistration.step1Short', 'Verify your mobile number via OTP (no passwords required)')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">2</span>
-                    <span>Select 1 or 2 trade services and your service areas in Muzaffarnagar</span>
+                    <span>{t('auth.workerRegistration.step2Short', 'Select 1 or 2 trade services and your service areas in Muzaffarnagar')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">3</span>
-                    <span>Upload government ID proof for fast admin verification</span>
+                    <span>{t('auth.workerRegistration.step3Short', 'Upload government ID proof for fast admin verification')}</span>
                   </li>
                 </ul>
               </div>
@@ -336,17 +543,17 @@ export default function Register() {
                 to={`/register/worker${customerPhone ? `?phone=${customerPhone}` : ''}`}
                 className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
               >
-                <span>Proceed to Artisan Registration</span>
+                <span>{t('auth.workerRegistration.proceedToRegistration', 'Proceed to Service Partner Registration')}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
               <div className="text-xs text-slate-500 dark:text-zinc-400">
-                <span>Already registered as an artisan? </span>
+                <span>{t('auth.workerRegistration.alreadyRegisteredWorker', 'Already registered as a service provider?')} </span>
                 <Link
                   to="/login?role=worker"
                   className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
-                  Sign in to Worker Dashboard
+                  {t('auth.workerRegistration.signInWorkerDashboard', 'Sign in to Worker Dashboard')}
                 </Link>
               </div>
             </div>

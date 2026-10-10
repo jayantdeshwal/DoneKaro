@@ -329,7 +329,7 @@ export default function CategoryPage() {
                 {t('categoryPage.selectService', 'Select Service')}
               </p>
               <span className="text-[11px] text-slate-400 dark:text-zinc-500">
-                Tap any service to find verified workers
+                {t('categoryPage.tapHint', 'Tap any service to find verified workers')}
               </span>
             </div>
 

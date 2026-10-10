@@ -145,7 +145,7 @@ export default function Bookings() {
 
     setContactModalData({
       isOpen: true,
-      name: booking.worker?.name || t('bookings.artisan', 'Artisan'),
+      name: booking.worker?.name || t('bookings.artisan', 'Worker'),
       phone: booking.worker?.phone,
       avatar: booking.worker?.avatar,
       roleLabel: t('bookings.serviceProfessional', 'Service Professional'),
@@ -493,7 +493,7 @@ export default function Bookings() {
                     <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mb-5">
                       {t(
                         'bookings.noActiveDesc',
-                        'Ready to get things fixed? Discover our verified local artisans and book your service in seconds.'
+                        'Ready to get things fixed? Discover our verified local workers and book your service in seconds.'
                       )}
                     </p>
                     <Link to="/categories">

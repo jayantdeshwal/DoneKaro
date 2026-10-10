@@ -214,6 +214,7 @@ serve(async (req: Request) => {
         phone: formattedPhone,
         email: personalEmail || null,
         role: 'customer',
+        registration_completed: false,
         updated_at: new Date().toISOString(),
       })
     }
@@ -232,6 +233,7 @@ serve(async (req: Request) => {
         phone: formattedPhone,
         email: personalEmail || null,
         role: 'customer',
+        registration_completed: false,
         updated_at: new Date().toISOString(),
       })
     } else if (!currentProfile.phone) {

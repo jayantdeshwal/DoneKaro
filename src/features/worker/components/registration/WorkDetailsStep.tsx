@@ -101,7 +101,7 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
                       </h4>
                       {isCategoryActive && (
                         <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-brand-500/30 text-brand-300 border border-brand-500/40">
-                          Selected
+                          {t('common.selected', 'Selected')}
                         </span>
                       )}
                     </div>
@@ -157,22 +157,22 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-semantic-border-light">
                   <div>
                     <h4 className="text-sm font-bold text-semantic-text-primary flex items-center gap-2">
-                      <span>Services in {categoryPrimary}:</span>
+                      <span>{t('auth.workerRegistration.servicesInCategory', 'Services in {{category}}:', { category: categoryPrimary })}</span>
                       <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                        {selectedServices.length} / 2 Selected
+                        {t('auth.workerRegistration.servicesSelectedCount', '{{count}} / 2 Selected', { count: selectedServices.length })}
                       </span>
                     </h4>
                     <p className="text-xs text-semantic-text-tertiary mt-0.5">
                       {selectedServices.length === 0
-                        ? 'Select 1 or 2 services you provide (Maximum 2)'
+                        ? t('auth.workerRegistration.selectServicesPrompt', 'Select 1 or 2 services you provide (Maximum 2)')
                         : selectedServices.length === 1
-                        ? '✓ 1 service selected. You can select 1 more service from this list.'
-                        : '✓ Maximum 2 services selected.'}
+                        ? t('auth.workerRegistration.oneServiceSelectedPrompt', '✓ 1 service selected. You can select 1 more service from this list.')
+                        : t('auth.workerRegistration.maxServicesSelectedPrompt', '✓ Maximum 2 services selected.')}
                     </p>
                   </div>
 
                   <span className="text-[11px] font-semibold text-amber-400/90 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 self-start sm:self-auto">
-                    Max 2 services allowed
+                    {t('auth.workerRegistration.maxTwoServicesBadge', 'Max 2 services allowed')}
                   </span>
                 </div>
 

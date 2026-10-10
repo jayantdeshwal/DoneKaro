@@ -50,7 +50,7 @@ export function EditProfileModal({
       isOpen={isOpen}
       onClose={onClose}
       title={t('profile.editProfile', 'Edit Profile Details')}
-      description="Update your personal details, contact information, and preferences."
+      description={t('profile.editProfileDesc', 'Update your personal details, contact information, and preferences.')}
     >
       <div className="space-y-4 pt-2 max-h-[75vh] overflow-y-auto px-1">
         {/* Avatar Photo Upload */}
@@ -67,7 +67,7 @@ export function EditProfileModal({
               onClick={() => avatarInputRef.current?.click()}
               disabled={isUploadingAvatar}
               className="absolute -bottom-1 -right-1 p-1.5 bg-amber-500 text-slate-950 rounded-full shadow hover:bg-amber-400 cursor-pointer"
-              title="Change photo"
+              title={t('profile.changePhoto', 'Change photo')}
             >
               {isUploadingAvatar ? (
                 <UploadCloud className="w-3.5 h-3.5 animate-bounce" />
@@ -84,7 +84,7 @@ export function EditProfileModal({
             />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">Profile Photo</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{t('profile.photo', 'Profile Photo')}</p>
             <p className="text-[11px] text-slate-500 dark:text-zinc-400">PNG, JPG or WebP (Max 5MB)</p>
           </div>
         </div>
@@ -96,12 +96,12 @@ export function EditProfileModal({
         {/* Full Name */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-            Full Name
+            {t('profile.name', 'Full Name')}
           </label>
           <Input
             value={formData.name}
             onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Your full name"
+            placeholder={t('profile.namePlaceholder', 'Your full name')}
             required
           />
         </div>
@@ -109,7 +109,7 @@ export function EditProfileModal({
         {/* Phone Number */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-            Phone Number
+            {t('profile.phone', 'Phone Number')}
           </label>
           <Input
             value={formData.phone}
@@ -122,7 +122,7 @@ export function EditProfileModal({
         {/* Email / Gmail */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-            Email / Gmail Address
+            {t('profile.emailLabel', 'Email / Gmail Address')}
           </label>
           <Input
             type="email"
@@ -136,15 +136,15 @@ export function EditProfileModal({
         {/* Language Preference */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-            Language Preference
+            {t('profile.languageLabel', 'Language Preference')}
           </label>
           <select
             value={formData.language}
             onChange={e => setFormData(prev => ({ ...prev, language: e.target.value as 'en' | 'hi' }))}
             className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 text-sm text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-amber-500"
           >
-            <option value="en">English</option>
-            <option value="hi">हिंदी (Hindi)</option>
+            <option value="en">{t('common.english', 'English')}</option>
+            <option value="hi">{t('common.hindi', 'हिंदी (Hindi)')}</option>
           </select>
         </div>
 
@@ -152,19 +152,19 @@ export function EditProfileModal({
         {isWorker && (
           <div className="pt-3 border-t border-slate-200 dark:border-zinc-800 space-y-3">
             <h4 className="font-bold text-xs text-amber-600 dark:text-brand-400 uppercase tracking-wider">
-              Worker Trade & Details
+              {t('profile.workerTradeDetails', 'Worker Trade & Details')}
             </h4>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-                Primary Trade
+                {t('profile.primaryTrade', 'Primary Trade')}
               </label>
               <select
                 value={formData.category}
                 onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 text-sm text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-amber-500 capitalize"
               >
-                <option value="">Select Primary Trade</option>
+                <option value="">{t('profile.selectPrimaryTrade', 'Select Primary Trade')}</option>
                 {CATEGORIES.map(cat => (
                   <option key={cat.id} value={cat.id}>
                     {getCategoryName(cat, formData.language === 'hi' ? 'hi' : 'en')}
@@ -175,7 +175,7 @@ export function EditProfileModal({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-                Years of Experience
+                {t('profile.yearsExperience', 'Years of Experience')}
               </label>
               <Input
                 type="number"
@@ -189,21 +189,21 @@ export function EditProfileModal({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-                About your work (Bio)
+                {t('profile.bioLabel', 'About your work (Bio)')}
               </label>
               <textarea
                 value={formData.bio}
                 onChange={e => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                 rows={3}
                 className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl p-2.5 text-sm text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-amber-500"
-                placeholder="Describe your skills, tools, and specialty..."
+                placeholder={t('profile.bioPlaceholder', 'Describe your skills, tools, and specialty...')}
               />
             </div>
 
             {/* ID Proof upload */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase mb-1">
-                ID Proof Document (Aadhaar / Voter ID)
+                {t('profile.idProofLabel', 'ID Proof Document (Aadhaar / Voter ID)')}
               </label>
               <div className="flex items-center gap-2">
                 <Button
@@ -215,7 +215,7 @@ export function EditProfileModal({
                   className="text-xs"
                 >
                   <UploadCloud className="w-3.5 h-3.5 mr-1 text-amber-600 dark:text-brand-400" />
-                  {formData.id_proof_url ? 'Replace Document' : 'Upload ID Proof'}
+                  {formData.id_proof_url ? t('profile.replaceDoc', 'Replace Document') : t('profile.uploadIdProof', 'Upload ID Proof')}
                 </Button>
                 <input
                   type="file"
@@ -226,7 +226,7 @@ export function EditProfileModal({
                 />
                 {formData.id_proof_url && (
                   <span className="text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-1 font-semibold">
-                    <Check className="w-3 h-3" /> Attached
+                    <Check className="w-3 h-3" /> {t('profile.attached', 'Attached')}
                   </span>
                 )}
               </div>
@@ -242,7 +242,7 @@ export function EditProfileModal({
             className="flex-1 text-xs"
             disabled={isSaving}
           >
-            Cancel
+            {t('common.cancel', 'Cancel')}
           </Button>
           <Button
             variant="primary"
@@ -250,7 +250,7 @@ export function EditProfileModal({
             loading={isSaving}
             className="flex-1 text-xs font-bold"
           >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? t('common.saving', 'Saving...') : t('common.saveChanges', 'Save Changes')}
           </Button>
         </div>
       </div>

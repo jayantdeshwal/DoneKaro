@@ -427,8 +427,8 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
             </p>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
               {isHindi
-                ? 'शिकायत केवल उन बुकिंग पर दर्ज की जा सकती है जिनमें कारीगर/ग्राहक असाइन हो चुका हो। यदि आपको सामान्य प्लेटफ़ॉर्म सुझाव देना है, तो कृपया सुझाव टैब का उपयोग करें।'
-                : 'Complaints can only be filed against bookings with an assigned artisan or customer. For general feedback, please use the Suggestion tab.'}
+                ? 'शिकायत केवल उन बुकिंग पर दर्ज की जा सकती है जिनमें कामगार/ग्राहक असाइन हो चुका हो। यदि आपको सामान्य प्लेटफ़ॉर्म सुझाव देना है, तो कृपया सुझाव टैब का उपयोग करें।'
+                : 'Complaints can only be filed against bookings with an assigned worker or customer. For general feedback, please use the Suggestion tab.'}
             </p>
           </div>
           <button

@@ -35,6 +35,8 @@ interface ProfileRow {
   role: UserRole
   language: 'en' | 'hi'
   avatar_url: string | null
+  address_proof_url?: string | null
+  registration_completed?: boolean | null
   created_at: string | null
 }
 
@@ -48,6 +50,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const loadSession = async () => {
       try {
+        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+          const testSessionRaw = sessionStorage.getItem('donekaro_test_session')
+          if (testSessionRaw) {
+            try {
+              const testUser = JSON.parse(testSessionRaw)
+              if (testUser && testUser.id && isMounted) {
+                setUser(testUser)
+                setIsLoading(false)
+                return
+              }
+            } catch {
+              // ignore parse errors
+            }
+          }
+        }
+
         const supabase = getSupabaseClient()
         const { data, error } = await supabase.auth.getSession()
         if (error) throw error
@@ -94,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getSupabaseClient()
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, email, role, language, avatar_url, created_at')
+      .select('id, full_name, phone, email, role, language, avatar_url, address_proof_url, registration_completed, created_at')
       .eq('id', authUser.id)
       .maybeSingle()
 
@@ -140,18 +158,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: role ?? 'customer',
       language: profile?.language ?? 'en',
       avatar_url: profile?.avatar_url ?? (authUser.user_metadata?.avatar_url as string) ?? null,
+      address_proof_url: profile?.address_proof_url ?? null,
+      registration_completed: profile?.registration_completed ?? true,
       created_at: profile?.created_at ?? authUser.created_at,
     }
     setUser(resolvedUser)
+    if (typeof window !== 'undefined') {
+      if (!sessionStorage.getItem('donekaro_auth_session_event')) {
+        sessionStorage.setItem('donekaro_auth_session_event', `auth_${Date.now()}`)
+      }
+    }
   }
 
   const login = (userData: User) => {
     setUser(userData)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('donekaro_auth_session_event', `auth_${Date.now()}`)
+    }
   }
 
   const logout = async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('donekaro_guest_mode')
+      sessionStorage.removeItem('donekaro_auth_session_event')
+      sessionStorage.removeItem('donekaro_safety_notice_dismissed')
+      sessionStorage.removeItem('donekaro_test_session')
     }
     try {
       const supabase = getSupabaseClient()
@@ -243,6 +274,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: (data.role as UserRole) || 'customer',
       language: 'en',
       avatar_url: null,
+      address_proof_url: data.user.address_proof_url ?? null,
+      registration_completed: data.isNewUser ? false : (data.user.registration_completed ?? true),
       created_at: new Date().toISOString(),
     }
 

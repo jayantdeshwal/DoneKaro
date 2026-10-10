@@ -71,7 +71,7 @@ export function HomeSocialProof({ workerCount }: HomeSocialProofProps) {
                 <Users className="w-4 h-4" />
               </div>
               <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                {workerCount > 0 ? `${workerCount}+ ${t('home.verifiedArtisans', 'Verified Artisans')}` : t('home.statHyperlocal')}
+                {workerCount > 0 ? `${workerCount}+ ${t('home.verifiedArtisans', 'Verified Workers')}` : t('home.statHyperlocal')}
               </span>
               <span className="text-[10px] text-slate-500 dark:text-zinc-400">
                 {t('home.dedicatedPincodes', 'Dedicated to 251001 & 251002')}

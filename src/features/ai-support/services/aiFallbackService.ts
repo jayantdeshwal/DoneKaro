@@ -91,8 +91,8 @@ function matchBookingRule(query: string): FallbackResult {
   if (query.includes('ac') || query.includes('cool') || query.includes('fridge') || query.includes('एसी')) {
     return {
       sourceType: 'jugnu_rule',
-      textEn: `❄️ **AC & Appliance Repair**\n\n- **Services**: Split/Window AC servicing, filter cleaning, cooling diagnostics, and gas pressure checks.\n- **Pricing**: Artisans quote according to the work required (inspection vs full servicing).\n- **Area coverage**: Available across Civil Lines, New Mandi, and nearby localities.`,
-      textHi: `❄️ **AC और उपकरण मरम्मत**\n\n- **सेवाएँ**: स्प्लिट/विंडो AC सर्विसिंग, फिल्टर सफाई, कूलिंग जाँच और गैस प्रेशर चेकिंग।\n- **दरें**: आवश्यक कार्य के आधार पर कारीगर सीधे कोटेशन देते हैं।\n- **क्षेत्र**: सिविल लाइन्स, नई मंडी और आसपास के क्षेत्रों में उपलब्ध।`,
+      textEn: `❄️ **AC & Appliance Repair**\n\n- **Services**: Split/Window AC servicing, filter cleaning, cooling diagnostics, and gas pressure checks.\n- **Pricing**: Workers quote according to the work required (inspection vs full servicing).\n- **Area coverage**: Available across Civil Lines, New Mandi, and nearby localities.`,
+      textHi: `❄️ **AC और उपकरण मरम्मत**\n\n- **सेवाएँ**: स्प्लिट/विंडो AC सर्विसिंग, फिल्टर सफाई, कूलिंग जाँच और गैस प्रेशर चेकिंग।\n- **दरें**: आवश्यक कार्य के आधार पर कामगार सीधे कोटेशन देते हैं।\n- **क्षेत्र**: सिविल लाइन्स, नई मंडी और आसपास के क्षेत्रों में उपलब्ध।`,
       actions: [
         {
           id: 'act_find_ac',
@@ -128,8 +128,8 @@ function matchBookingRule(query: string): FallbackResult {
   // 5. Default General Booking Guide
   return {
     sourceType: 'general_guidance',
-    textEn: `🛠️ **DoneKaro Booking Help**\n\n- DoneKaro connects you with verified local artisans in Muzaffarnagar (PIN 251001 & 251002).\n- **How the quote marketplace works**:\n  1. Select a service category and post your requirement.\n  2. Available local artisans review your request and submit quotes.\n  3. You review quotes and choose the provider you prefer.\n  4. Pay directly in Cash after the work is completed and verified.\n- Browse available categories or search to get started.`,
-    textHi: `🛠️ **DoneKaro बुकिंग सहायता**\n\n- DoneKaro आपको मुज़फ़्फ़रनगर (पिन 251001 और 251002) के सत्यापित स्थानीय कारीगरों से जोड़ता है।\n- **कोटेशन प्रणाली कैसे काम करती है**:\n  1. सेवा श्रेणी चुनें और अपनी समस्या दर्ज करें।\n  2. उपलब्ध कारीगर आपका अनुरोध देखकर कोटेशन भेजते हैं।\n  3. आप कोटेशन देखकर अपनी पसंद का कारीगर चुनते हैं।\n  4. काम पूरा और सत्यापित होने पर सीधे नकद (Cash) में भुगतान करें।`,
+    textEn: `🛠️ **DoneKaro Booking Help**\n\n- DoneKaro connects you with verified local workers in Muzaffarnagar (PIN 251001 & 251002).\n- **How the quote marketplace works**:\n  1. Select a service category and post your requirement.\n  2. Available local workers review your request and submit quotes.\n  3. You review quotes and choose the provider you prefer.\n  4. Pay directly in Cash after the work is completed and verified.\n- Browse available categories or search to get started.`,
+    textHi: `🛠️ **DoneKaro बुकिंग सहायता**\n\n- DoneKaro आपको मुज़फ़्फ़रनगर (पिन 251001 और 251002) के सत्यापित स्थानीय कामगारों से जोड़ता है।\n- **कोटेशन प्रणाली कैसे काम करती है**:\n  1. सेवा श्रेणी चुनें और अपनी समस्या दर्ज करें।\n  2. उपलब्ध कामगार आपका अनुरोध देखकर कोटेशन भेजते हैं।\n  3. आप कोटेशन देखकर अपनी पसंद का कामगार चुनते हैं।\n  4. काम पूरा और सत्यापित होने पर सीधे नकद (Cash) में भुगतान करें।`,
     actions: [
       {
         id: 'act_browse_categories',
@@ -156,7 +156,7 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
         {
           id: 'act_worker_dash',
           labelEn: 'Open Worker Dashboard',
-          labelHi: 'कारीगर डैशबोर्ड खोलें',
+          labelHi: 'कामगार डैशबोर्ड खोलें',
           type: 'navigate',
           payload: '/worker/dashboard',
           icon: 'Briefcase',
@@ -179,8 +179,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
     if (pb?.activeComplaint) {
       return {
         sourceType: 'application_data',
-        textEn: `🛡️ **Support Request on Record**\n\n- **Service**: ${pb.categoryName} (#DK-${pb.id.slice(0, 8).toUpperCase()})\n- **Complaint Reference**: #CMP-${pb.activeComplaint.id.slice(0, 8).toUpperCase()}\n- **Status**: ${pb.activeComplaint.status.toUpperCase()}\n- **Filed On**: ${new Date(pb.activeComplaint.createdAt).toLocaleString('en-IN')}\n\nOur administration team reviews all disputes between artisans and customers. AI Support is read-only and cannot alter complaint statuses. You can review your submitted requests in Support History.`,
-        textHi: `🛡️ **दर्ज सहायता अनुरोध विवरण**\n\n- **सेवा**: ${pb.categoryName} (#DK-${pb.id.slice(0, 8).toUpperCase()})\n- **शिकायत संदर्भ संख्या**: #CMP-${pb.activeComplaint.id.slice(0, 8).toUpperCase()}\n- **वर्तमान स्थिति**: ${pb.activeComplaint.status.toUpperCase()}\n- **दर्ज दिनांक**: ${new Date(pb.activeComplaint.createdAt).toLocaleString('hi-IN')}\n\nहमारी व्यवस्थापक टीम कारीगरों व ग्राहकों के बीच विवादों की समीक्षा करती है। AI सहायक स्वतः कोई बदलाव नहीं कर सकता। आप शिकायत इतिहास में अपने अनुरोध देख सकते हैं।`,
+        textEn: `🛡️ **Support Request on Record**\n\n- **Service**: ${pb.categoryName} (#DK-${pb.id.slice(0, 8).toUpperCase()})\n- **Complaint Reference**: #CMP-${pb.activeComplaint.id.slice(0, 8).toUpperCase()}\n- **Status**: ${pb.activeComplaint.status.toUpperCase()}\n- **Filed On**: ${new Date(pb.activeComplaint.createdAt).toLocaleString('en-IN')}\n\nOur administration team reviews all disputes between workers and customers. AI Support is read-only and cannot alter complaint statuses. You can review your submitted requests in Support History.`,
+        textHi: `🛡️ **दर्ज सहायता अनुरोध विवरण**\n\n- **सेवा**: ${pb.categoryName} (#DK-${pb.id.slice(0, 8).toUpperCase()})\n- **शिकायत संदर्भ संख्या**: #CMP-${pb.activeComplaint.id.slice(0, 8).toUpperCase()}\n- **वर्तमान स्थिति**: ${pb.activeComplaint.status.toUpperCase()}\n- **दर्ज दिनांक**: ${new Date(pb.activeComplaint.createdAt).toLocaleString('hi-IN')}\n\nहमारी व्यवस्थापक टीम कामगारों व ग्राहकों के बीच विवादों की समीक्षा करती है। AI सहायक स्वतः कोई बदलाव नहीं कर सकता। आप शिकायत इतिहास में अपने अनुरोध देख सकते हैं।`,
         actions: [
           {
             id: 'act_view_history',
@@ -193,7 +193,7 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
           {
             id: 'act_worker_dash',
             labelEn: 'Worker Dashboard',
-            labelHi: 'कारीगर डैशबोर्ड',
+            labelHi: 'कामगार डैशबोर्ड',
             type: 'navigate',
             payload: '/worker/dashboard',
             icon: 'Briefcase',
@@ -219,7 +219,7 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
           {
             id: 'act_worker_dash',
             labelEn: 'Worker Dashboard',
-            labelHi: 'कारीगर डैशबोर्ड',
+            labelHi: 'कामगार डैशबोर्ड',
             type: 'navigate',
             payload: '/worker/dashboard',
             icon: 'Briefcase',
@@ -233,8 +233,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   if (query.includes('quote') || query.includes('rate') || query.includes('price') || query.includes('कोट') || query.includes('रेट')) {
     return {
       sourceType: 'jugnu_rule',
-      textEn: `💼 **Artisan Quoting Guidelines**\n\n- **Competitive Quotes**: Customers see quotes from up to 2 providers in active slots. Quoting accurately and promptly improves acceptance rates.\n- **Clear Breakdown**: When quoting, consider diagnostic effort, required tools, and estimated labor time.\n- **Transparency**: Never quote unrealistically low to get the job and then demand unexpected cash on-site.`,
-      textHi: `💼 **कारीगर कोटेशन दिशानिर्देश**\n\n- **सटीक कोटेशन**: ग्राहक सक्रिय स्लॉट में 2 कारीगरों के कोटेशन देखते हैं। समय पर और उचित कोटेशन देने से काम मिलने की संभावना बढ़ती है।\n- **स्पष्टता**: कोटेशन में आवश्यक समय, मेहनत और उपकरणों का ध्यान रखें।\n- **पारदर्शिता**: काम पाने के लिए बहुत कम कोटेशन देकर बाद में अधिक नकद न माँगें।`,
+      textEn: `💼 **Worker Quoting Guidelines**\n\n- **Competitive Quotes**: Customers see quotes from up to 2 providers in active slots. Quoting accurately and promptly improves acceptance rates.\n- **Clear Breakdown**: When quoting, consider diagnostic effort, required tools, and estimated labor time.\n- **Transparency**: Never quote unrealistically low to get the job and then demand unexpected cash on-site.`,
+      textHi: `💼 **कामगार कोटेशन दिशानिर्देश**\n\n- **सटीक कोटेशन**: ग्राहक सक्रिय स्लॉट में 2 कामगारों के कोटेशन देखते हैं। समय पर और उचित कोटेशन देने से काम मिलने की संभावना बढ़ती है।\n- **स्पष्टता**: कोटेशन में आवश्यक समय, मेहनत और उपकरणों का ध्यान रखें।\n- **पारदर्शिता**: काम पाने के लिए बहुत कम कोटेशन देकर बाद में अधिक नकद न माँगें।`,
       actions: [],
     }
   }
@@ -253,15 +253,15 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   if (query.includes('whatsapp') || query.includes('message') || query.includes('template') || query.includes('मैसेज')) {
     return {
       sourceType: 'general_guidance',
-      textEn: `💬 **Polite Customer Message Template**\n\n"नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- Tip: Clear, polite communication builds strong ratings and repeat customers.`,
-      textHi: `💬 **सम्मानजनक ग्राहक मैसेज टेम्पलेट**\n\n"नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- सुझाव: समय पर और स्पष्ट बातचीत से अच्छी रेटिंग और दोबारा काम मिलता है।`,
+      textEn: `💬 **Polite Customer Message Template**\n\n"नमस्ते! मैं DoneKaro से आपका कामगार बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- Tip: Clear, polite communication builds strong ratings and repeat customers.`,
+      textHi: `💬 **सम्मानजनक ग्राहक मैसेज टेम्पलेट**\n\n"नमस्ते! मैं DoneKaro से आपका कामगार बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है। मैं काम के लिए प्रस्थान कर रहा हूँ और जल्द ही आपके पते पर पहुँच रहा हूँ। धन्यवाद।"\n\n- सुझाव: समय पर और स्पष्ट बातचीत से अच्छी रेटिंग और दोबारा काम मिलता है।`,
       actions: [
         {
           id: 'act_copy_template',
           labelEn: 'Copy Message Template',
           labelHi: 'मैसेज कॉपी करें',
           type: 'copy_text',
-          payload: 'नमस्ते! मैं DoneKaro से आपका कारीगर बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है और मैं आपके पते पर पहुँच रहा हूँ।',
+          payload: 'नमस्ते! मैं DoneKaro से आपका कामगार बोल रहा हूँ। मुझे आपकी बुकिंग प्राप्त हुई है और मैं आपके पते पर पहुँच रहा हूँ।',
           icon: 'Copy',
         },
       ],
@@ -272,8 +272,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   if (query.includes('verify') || query.includes('badge') || query.includes('गोल्ड') || query.includes('वेरिफ')) {
     return {
       sourceType: 'jugnu_rule',
-      textEn: `⭐ **Artisan Verification**\n\n- To build trust, ensure your profile has your full name, trade categories, and government ID uploaded.\n- Verification documents are reviewed by our team as soon as they are submitted.\n- Verified artisans receive priority in customer service matching.`,
-      textHi: `⭐ **कारीगर सत्यापन (Verification)**\n\n- ग्राहक विश्वास बढ़ाने के लिए अपने प्रोफ़ाइल में पूरा नाम, कार्य श्रेणी और पहचान पत्र सही दर्ज रखें।\n- सत्यापन दस्तावेज़ जमा होने के बाद हमारी टीम द्वारा जाँचे जाते हैं।\n- सत्यापित कारीगरों को ग्राहकों द्वारा प्राथमिकता दी जाती है।`,
+      textEn: `⭐ **Worker Verification**\n\n- To build trust, ensure your profile has your full name, trade categories, and government ID uploaded.\n- Verification documents are reviewed by our team as soon as they are submitted.\n- Verified workers receive priority in customer service matching.`,
+      textHi: `⭐ **कामगार सत्यापन (Verification)**\n\n- ग्राहक विश्वास बढ़ाने के लिए अपने प्रोफ़ाइल में पूरा नाम, कार्य श्रेणी और पहचान पत्र सही दर्ज रखें।\n- सत्यापन दस्तावेज़ जमा होने के बाद हमारी टीम द्वारा जाँचे जाते हैं।\n- सत्यापित कामगारों को ग्राहकों द्वारा प्राथमिकता दी जाती है।`,
       actions: [],
     }
   }
@@ -281,8 +281,8 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
   // 5. Default Work Advice response
   return {
     sourceType: 'general_guidance',
-    textEn: `💼 **DoneKaro Work Advice**\n\n- Welcome to DoneKaro Artisan Support. Here to help you build a reputable local service business in Muzaffarnagar.\n- Keep your status active during your working hours to receive local job quote requests.\n- Receive 100% of customer payments directly in Cash upon verified job completion.`,
-    textHi: `💼 **DoneKaro काम व सेवा सलाह**\n\n- DoneKaro कारीगर सहायता में आपका स्वागत है। मुज़फ़्फ़रनगर में एक सफल सेवा व्यवसाय बनाने में हम आपके साथी हैं।\n- काम के समय अपनी ड्यूटी चालू रखें ताकि नए कोटेशन अनुरोध मिल सकें।\n- काम पूरा होने पर सीधे नकद (Cash) में पूरा भुगतान प्राप्त करें।`,
+    textEn: `💼 **DoneKaro Work Advice**\n\n- Welcome to DoneKaro Worker Support. Here to help you build a reputable local service business in Muzaffarnagar.\n- Keep your status active during your working hours to receive local job quote requests.\n- Receive 100% of customer payments directly in Cash upon verified job completion.`,
+    textHi: `💼 **DoneKaro काम व सेवा सलाह**\n\n- DoneKaro कामगार सहायता में आपका स्वागत है। मुज़फ़्फ़रनगर में एक सफल सेवा व्यवसाय बनाने में हम आपके साथी हैं।\n- काम के समय अपनी ड्यूटी चालू रखें ताकि नए कोटेशन अनुरोध मिल सकें।\n- काम पूरा होने पर सीधे नकद (Cash) में पूरा भुगतान प्राप्त करें।`,
     actions: [],
   }
 }

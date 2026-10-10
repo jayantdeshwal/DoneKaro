@@ -58,14 +58,14 @@ export function ProfileMenuList({
   // Native share / WhatsApp referral
   const handleShareApp = () => {
     const shareText = language === 'hi'
-      ? 'DoneKaro: बिना किसी कमीशन के सीधे मुजफ्फरनगर के सत्यापित इलेक्ट्रीशियन, प्लंबर व एसी कारीगर बुक करें! देखें: https://donekaro.app'
+      ? 'DoneKaro: बिना किसी कमीशन के सीधे मुजफ्फरनगर के सत्यापित इलेक्ट्रीशियन, प्लंबर व एसी कामगार बुक करें! देखें: https://donekaro.app'
       : 'DoneKaro: Hire verified local Electricians, Plumbers, Cleaning & AC technicians with 0% commission! Visit: https://donekaro.app'
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
         title: 'DoneKaro',
         text: shareText,
-        url: window.location.origin,
+        url: 'https://donekaro.app',
       }).catch(() => {})
     } else {
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank')
@@ -219,218 +219,266 @@ export function ProfileMenuList({
             </div>
           </>
         ) : (
-          /* Customer & Worker Menu Rows */
+          /* Customer & Worker Menu Rows with Logical Grouping (Reference 21.jpeg) */
           <>
-            {/* Row: My Bookings / Orders */}
-            <div
-              onClick={() => onNavigate('/bookings')}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <Calendar className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {t('profile.myBookings', 'My bookings')}
-                </span>
+            {/* Section 1: Bookings & Activity */}
+            <div className="pt-1 pb-1">
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
+                {language === 'hi' ? 'बुकिंग व गतिविधियाँ' : 'Bookings & Activity'}
+              </p>
+
+              {/* Row: My Bookings / Orders */}
+              <div
+                onClick={() => onNavigate('/bookings')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Calendar className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                    {t('profile.myBookings', 'My bookings')}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+
+              {/* Row: Worker Dashboard (Worker only) */}
+              {isWorker && (
+                <div
+                  onClick={() => onNavigate('/worker/dashboard')}
+                  className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <Briefcase className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                      {t('nav.workerDashboard', 'Worker Dashboard')}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              )}
+
+              {/* Row: My Rating & Reviews (Worker only) */}
+              {isWorker && (
+                <div
+                  onClick={() => onNavigate('/worker/reviews')}
+                  className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <Star className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {t('profile.reviewsRatings', 'My rating & reviews')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {workerDetails && workerDetails.rating > 0 && (
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                        ★ {workerDetails.rating.toFixed(1)}
+                      </span>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Row: Worker Dashboard (Worker only) */}
-            {isWorker && (
-              <div
-                onClick={() => onNavigate('/worker/dashboard')}
-                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <Briefcase className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                    {t('nav.workerDashboard', 'Worker Dashboard')}
-                  </span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all" />
-              </div>
-            )}
+            <div className="border-t border-slate-100 dark:border-zinc-800/80 my-2" />
 
-            {/* Row: My Rating & Reviews (Worker only) */}
-            {isWorker && (
+            {/* Section 2: Account & Localities */}
+            <div className="pt-1 pb-1">
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
+                {language === 'hi' ? 'खाता एवं पता' : 'Account & Localities'}
+              </p>
+
+              {/* Row: Manage Addresses & Localities */}
               <div
-                onClick={() => onNavigate('/worker/reviews')}
+                onClick={onOpenAddressModal}
                 className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
               >
                 <div className="flex items-center gap-3.5">
-                  <Star className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                  <MapPin className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
                   <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                    {t('profile.reviewsRatings', 'My rating & reviews')}
+                    {t('profile.manageAddresses', 'Manage addresses & localities')}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  {workerDetails && workerDetails.rating > 0 && (
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                      ★ {workerDetails.rating.toFixed(1)}
-                    </span>
-                  )}
+                <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400">
+                  <span>Muzaffarnagar</span>
                   <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
-            )}
 
-            {/* Row: Manage Addresses & Localities */}
-            <div
-              onClick={onOpenAddressModal}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <MapPin className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {t('profile.manageAddresses', 'Manage addresses & localities')}
-                </span>
-              </div>
-              <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400">
-                <span>Muzaffarnagar</span>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-              </div>
-            </div>
-
-            {/* Row: Email & Notifications */}
-            <div
-              onClick={onOpenEmailModal}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <Mail className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {t('profile.emailReceipts', 'Email & notifications')}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-slate-500 dark:text-zinc-400 truncate max-w-[130px]">
-                  {email || 'Add Email'}
-                </span>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-              </div>
-            </div>
-
-            {/* Row: App Language Toggle */}
-            <div
-              onClick={onToggleLanguage}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <Globe className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {language === 'en' ? 'App Language' : 'ऐप की भाषा'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="brand" size="sm" className="font-semibold">
-                  {language === 'en' ? 'English' : 'हिंदी'}
-                </Badge>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-              </div>
-            </div>
-
-            {/* Row: Dedicated PWA Install Button */}
-            <div
-              onClick={() => triggerPWAInstall()}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <Smartphone className="w-5 h-5 text-amber-600 dark:text-brand-400" />
-                <span className="text-sm font-semibold text-amber-700 dark:text-brand-400">
-                  {t('pwa.installApp', 'Install Mobile App')}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] bg-amber-500/15 text-amber-800 dark:text-brand-300 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
-                  Fast & Offline
-                </span>
-                <ChevronRight className="w-4 h-4 text-amber-600 dark:text-brand-400 group-hover:translate-x-0.5 transition-all" />
-              </div>
-            </div>
-
-            {/* Row: Care & Support (Formal Complaints & Suggestions) */}
-            <div
-              onClick={() => onOpenSupport()}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <ShieldAlert className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-colors" />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                    {language === 'hi' ? 'केयर एवं सहायता (शिकायत / सुझाव)' : 'Care & Support (Complaint / Suggestion)'}
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-                    {language === 'hi' ? 'आधिकारिक समस्या समाधान व सुझाव दर्ज करें' : 'Official issue resolution & feedback'}
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all" />
-            </div>
-
-            {/* Row: My Support Requests */}
-            <div
-              onClick={() => onOpenSupport({ defaultTab: 'history' })}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <FileText className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <div className="flex flex-col">
+              {/* Row: Email & Notifications */}
+              <div
+                onClick={onOpenEmailModal}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Mail className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
                   <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                    {language === 'hi' ? 'मेरे सहायता अनुरोध' : 'My Support Requests'}
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-                    {language === 'hi' ? 'शिकायतों की लाइव स्थिति और टोकन जांचें' : 'View status of your submitted requests'}
+                    {t('profile.emailReceipts', 'Email & notifications')}
                   </span>
                 </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-slate-500 dark:text-zinc-400 truncate max-w-[130px]">
+                    {email || 'Add Email'}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+                </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-            </div>
 
-            {/* Row: Help Center & AI Assistant */}
-            <div
-              onClick={() => onOpenAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <HelpCircle className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <div className="flex flex-col">
+              {/* Row: App Language Toggle */}
+              <div
+                onClick={onToggleLanguage}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Globe className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
                   <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                    {t('profile.faqsHelp', 'Help Center & FAQs')}
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-                    {language === 'hi' ? 'AI सहायक से प्रश्न पूछें' : 'Ask questions with AI Assistant'}
+                    {language === 'en' ? 'App Language' : 'ऐप की भाषा'}
                   </span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="brand" size="sm" className="font-semibold">
+                    {language === 'en' ? 'English' : 'हिंदी'}
+                  </Badge>
+                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+                </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+
+              {/* Row: Dedicated PWA Install Button */}
+              <div
+                onClick={() => triggerPWAInstall()}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Smartphone className="w-5 h-5 text-amber-600 dark:text-brand-400" />
+                  <span className="text-sm font-semibold text-amber-700 dark:text-brand-400">
+                    {t('pwa.installApp', 'Install Mobile App')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] bg-amber-500/15 text-amber-800 dark:text-brand-300 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                    Fast & Offline
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-amber-600 dark:text-brand-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </div>
             </div>
 
-            {/* Row: About DoneKaro */}
-            <div
-              onClick={() => onNavigate('/')}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <Info className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                  {t('profile.aboutApp', 'About DoneKaro')}
-                </span>
+            <div className="border-t border-slate-100 dark:border-zinc-800/80 my-2" />
+
+            {/* Section 3: Care, Support & AI */}
+            <div className="pt-1 pb-1">
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
+                {language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}
+              </p>
+
+              {/* Row: Care & Support (Formal Complaints & Suggestions) */}
+              <div
+                onClick={() => onOpenSupport()}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <ShieldAlert className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-colors" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                      {language === 'hi' ? 'केयर एवं सहायता (शिकायत / सुझाव)' : 'Care & Support (Complaint / Suggestion)'}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'आधिकारिक समस्या समाधान व सुझाव दर्ज करें' : 'Official issue resolution & feedback'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+
+              {/* Row: My Support Requests */}
+              <div
+                onClick={() => onOpenSupport({ defaultTab: 'history' })}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <FileText className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {language === 'hi' ? 'मेरे सहायता अनुरोध' : 'My Support Requests'}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'शिकायतों की लाइव स्थिति और टोकन जांचें' : 'View status of your submitted requests'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              {/* Row: Help Center & AI Assistant */}
+              <div
+                onClick={() => onOpenAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <HelpCircle className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {t('profile.faqsHelp', 'Help Center & FAQs')}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      {language === 'hi' ? 'AI सहायक से प्रश्न पूछें' : 'Ask questions with AI Assistant'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
             </div>
 
-            {/* Row: Log Out */}
-            <div
-              onClick={onOpenLogoutModal}
-              className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-rose-50 dark:hover:bg-red-500/10 cursor-pointer transition-colors group"
-            >
-              <div className="flex items-center gap-3.5">
-                <LogOut className="w-5 h-5 text-rose-500 dark:text-red-400" />
-                <span className="text-sm font-medium text-rose-600 dark:text-red-400">
-                  {t('nav.logout', 'Log out')}
-                </span>
+            <div className="border-t border-slate-100 dark:border-zinc-800/80 my-2" />
+
+            {/* Section 4: About & Sign Out */}
+            <div className="pt-1 pb-1">
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
+                {language === 'hi' ? 'संस्था व नियम' : 'About & Legal'}
+              </p>
+
+              {/* Row: About DoneKaro */}
+              <div
+                onClick={() => onNavigate('/')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Info className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                    {t('profile.aboutApp', 'About DoneKaro')}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <ChevronRight className="w-4 h-4 text-rose-400/60 group-hover:translate-x-0.5 transition-all" />
+
+              {/* Row: Terms & Conditions */}
+              <div
+                onClick={() => onNavigate('/terms')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <FileText className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                    {language === 'hi' ? 'नियम एवं शर्तें (Terms & Conditions)' : 'Terms & Conditions'}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              {/* Row: Log Out */}
+              <div
+                onClick={onOpenLogoutModal}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-rose-50 dark:hover:bg-red-500/10 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <LogOut className="w-5 h-5 text-rose-500 dark:text-red-400" />
+                  <span className="text-sm font-medium text-rose-600 dark:text-red-400">
+                    {t('nav.logout', 'Log out')}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-rose-400/60 group-hover:translate-x-0.5 transition-all" />
+              </div>
             </div>
           </>
         )}

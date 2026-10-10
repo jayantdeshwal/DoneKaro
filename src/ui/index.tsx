@@ -30,39 +30,52 @@ export function Input({ label, error, helperText, leftIcon, rightIcon, className
   )
 }
 
-export function Card({ className = '', children, ...props }: HTMLAttributes<HTMLDivElement> & { padding?: 'none' | 'sm' | 'md' | 'lg'; variant?: string; hover?: boolean }) {
-  return <div className={`rounded-2xl border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-all ${className}`} {...props}>{children}</div>
+export function Card({ className = '', padding = 'md', hover, children, ...props }: HTMLAttributes<HTMLDivElement> & { padding?: 'none' | 'sm' | 'md' | 'lg'; variant?: string; hover?: boolean }) {
+  const paddings = {
+    none: '',
+    sm: 'p-3 sm:p-4',
+    md: 'p-4 sm:p-6',
+    lg: 'p-6 sm:p-8',
+  }
+  return (
+    <div
+      className={`rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-[0_2px_14px_-3px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-200 ${hover ? 'hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700' : ''} ${paddings[padding]} ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 }
-export function CardHeader(props: HTMLAttributes<HTMLDivElement>) { return <div className={`mb-3 ${props.className || ''}`} {...props} /> }
-export function CardTitle(props: HTMLAttributes<HTMLHeadingElement>) { return <h3 className={`text-base font-bold text-slate-900 dark:text-zinc-100 ${props.className || ''}`} {...props} /> }
-export function CardDescription(props: HTMLAttributes<HTMLParagraphElement>) { return <p className={`mt-0.5 text-xs text-slate-500 dark:text-zinc-400 ${props.className || ''}`} {...props} /> }
+export function CardHeader(props: HTMLAttributes<HTMLDivElement>) { return <div className={`mb-3.5 ${props.className || ''}`} {...props} /> }
+export function CardTitle(props: HTMLAttributes<HTMLHeadingElement>) { return <h3 className={`text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-zinc-100 ${props.className || ''}`} {...props} /> }
+export function CardDescription(props: HTMLAttributes<HTMLParagraphElement>) { return <p className={`mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed ${props.className || ''}`} {...props} /> }
 export function CardContent(props: HTMLAttributes<HTMLDivElement>) { return <div {...props} /> }
-export function CardFooter(props: HTMLAttributes<HTMLDivElement>) { return <div className={`mt-4 border-t border-slate-200 dark:border-zinc-800 pt-4 ${props.className || ''}`} {...props} /> }
+export function CardFooter(props: HTMLAttributes<HTMLDivElement>) { return <div className={`mt-5 border-t border-slate-100 dark:border-zinc-800/80 pt-4 ${props.className || ''}`} {...props} /> }
 
 export function Avatar({ src, name, alt, size = 'md', className = '' }: { src?: string | null; name?: string; alt?: string; size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'; className?: string }) {
   const sizes = { sm: 'h-8 w-8 text-xs', md: 'h-10 w-10 text-sm', lg: 'h-12 w-12 text-base', xl: 'h-16 w-16 text-lg', '2xl': 'h-20 w-20 text-xl' }
   const initials = name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || '?'
-  return src ? <img className={`rounded-full object-cover ${sizes[size]} ${className}`} src={src} alt={alt || name || 'Avatar'} /> : <span className={`inline-flex items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 font-bold text-amber-700 dark:text-amber-300 ${sizes[size]} ${className}`}>{initials}</span>
+  return src ? <img className={`rounded-full object-cover shadow-xs ${sizes[size]} ${className}`} src={src} alt={alt || name || 'Avatar'} /> : <span className={`inline-flex items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 font-bold text-amber-700 dark:text-amber-300 shadow-xs ${sizes[size]} ${className}`}>{initials}</span>
 }
 export function AvatarGroup({ children, className = '' }: { children: ReactNode; className?: string }) { return <div className={`flex -space-x-2 ${className}`}>{children}</div> }
 
 export function Badge({ variant = 'default', size = 'md', dot, className = '', children, ...props }: HTMLAttributes<HTMLSpanElement> & { variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'primary' | 'brand' | 'outline'; size?: 'sm' | 'md' | 'lg'; dot?: boolean }) {
   const colors = {
-    default: 'bg-slate-100 text-slate-700 border border-slate-200/80 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
-    success: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/50',
-    warning: 'bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/50',
-    danger: 'bg-rose-50 text-rose-700 border border-rose-200/80 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/50',
-    info: 'bg-sky-50 text-sky-700 border border-sky-200/80 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/50',
-    primary: 'bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/50',
-    brand: 'bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/50',
+    default: 'bg-slate-100 text-slate-700 border border-slate-200/90 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
+    success: 'bg-emerald-50 text-emerald-700 border border-emerald-200/90 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/50',
+    warning: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',
+    danger: 'bg-rose-50 text-rose-700 border border-rose-200/90 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/50',
+    info: 'bg-sky-50 text-sky-700 border border-sky-200/90 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/50',
+    primary: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',
+    brand: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',
     outline: 'border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 bg-transparent',
   }
   const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-1',
-    lg: 'text-sm px-3 py-1.5',
+    sm: 'text-[11px] px-2 py-0.5',
+    md: 'text-xs px-2.5 py-1',
+    lg: 'text-sm px-3.5 py-1.5',
   }
-  return <span className={`inline-flex items-center rounded-full font-semibold ${sizeClasses[size]} ${colors[variant]} ${className}`} {...props}>{dot && <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />}{children}</span>
+  return <span className={`inline-flex items-center rounded-full font-semibold transition-colors ${sizeClasses[size]} ${colors[variant]} ${className}`} {...props}>{dot && <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />}{children}</span>
 }
 
 export function Chip({ selected, variant, className = '', children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { selected?: boolean; variant?: string }) {

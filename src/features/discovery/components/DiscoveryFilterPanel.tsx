@@ -213,7 +213,7 @@ export function DiscoveryFilterPanel({
                     {t('categories.all', 'All Services')}
                   </p>
                   <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
-                    View all
+                    {t('common.viewAll', 'View all')}
                   </p>
                 </div>
               </button>

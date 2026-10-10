@@ -27,7 +27,10 @@
     "securelySignOut": "Securely sign out",
     "roleAdmin": "Admin",
     "roleWorker": "Worker",
-    "roleCustomer": "Customer"
+    "roleCustomer": "Customer",
+    "aiSupport": "AI Support",
+    "preferences": "Options & Preferences",
+    "account": "Account"
   },
   "common": {
     "search": "Search",
@@ -90,7 +93,22 @@
     "clearFilters": "Clear Filters",
     "loadingWorkers": "Loading verified workers...",
     "refresh": "Refresh",
-    "verified": "Verified"
+    "verified": "Verified",
+    "contact": "Contact",
+    "exit": "Exit Guest",
+    "welcome": "Welcome!",
+    "guestMode": "Exploring as Guest",
+    "service": "Service",
+    "services": "services",
+    "clearAll": "Clear all",
+    "resetFilters": "Reset All Filters",
+    "approve": "Approve",
+    "reject": "Reject",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "backToSearch": "Back to Search",
+    "selected": "Selected",
+    "all": "All"
   },
   "home": {
     "heroTitle": "Socho Mat. DoneKaro.",
@@ -154,7 +172,7 @@
     "statCommission": "0% Commission (First 3 Months)",
     "statDirect": "Direct WhatsApp / Call",
     "statHyperlocal": "Muzaffarnagar Dedicated",
-    "servicesSubtitle": "Browse skilled professionals available for same-day and scheduled service in Muzaffarnagar",
+    "servicesSubtitle": "Book verified local technicians with 0% commission",
     "workerCountAvailable": "{{count}} Active Worker",
     "workerCountAvailablePlural": "{{count}} Active Workers",
     "workerTakingReg": "Accepting Registrations",
@@ -203,12 +221,12 @@
     "popularCar": "Car Repair & Service",
     "verified": "Verified",
     "sameDay": "Same-day",
-    "verifiedArtisans": "Verified Artisans",
+    "verifiedArtisans": "Verified Workers",
     "found": "Found",
     "resultsSubtitle": "Direct phone & WhatsApp connection • 0% platform fee • Aadhaar & Police verified",
     "clearResults": "Clear Results",
     "fullDirectory": "Full Directory",
-    "verifiedArtisan": "Verified Artisan",
+    "verifiedArtisan": "Verified Worker",
     "noRatings": "No ratings yet",
     "yearsShort": "yrs exp",
     "areas": "Areas",
@@ -219,7 +237,6 @@
     "noMatchingArtisans": "No matching verified artisans found",
     "noApprovedMatch": "No approved artisans match the selected category or area filters.",
     "tryCategories": "Try one of our active categories:",
-    "servicesSubtitle": "Book verified local technicians with 0% commission",
     "fastestArrival": "Verified Technicians",
     "personalCare": "Personal Care",
     "furnitureFix": "Furniture Fix",
@@ -236,7 +253,8 @@
     "askAi": "Ask AI →",
     "askAiAssistant": "Ask AI Assistant",
     "directWhatsapp": "Direct WhatsApp & Call",
-    "dedicatedPincodes": "Dedicated to 251001 & 251002"
+    "dedicatedPincodes": "Dedicated to 251001 & 251002",
+    "filterPanelTitle": "Filter Services & Local Areas"
   },
   "categories": {
     "home_repair": "Home Repair & Work",
@@ -279,11 +297,13 @@
     "servicesCount": "{{count}} Services",
     "selectService": "Select Service",
     "selectServicePrompt": "Select a service to find verified workers",
+    "tapHint": "Tap any service to find verified workers",
     "exploreAll": "Explore All Services",
     "backToHome": "Back to Home",
     "allCategories": "All 5 Categories",
     "allCategoriesBtn": "← All Categories",
-    "tapToExpand": "Tap to expand services"
+    "tapToExpand": "Tap to expand services",
+    "availableWorkers": "Available Workers"
   },
   "workerCard": {
     "experience": "{{years}} years exp",
@@ -297,29 +317,25 @@
     "unavailable": "Unavailable"
   },
   "workerProfile": {
-    "about": "About",
-    "services": "Services Offered",
-    "serviceAreas": "Service Areas",
-    "reviews": "Customer Reviews",
-    "noReviews": "No reviews yet",
-    "bookNow": "Book This Worker",
-    "callWorker": "Call",
-    "experience": "Years of Experience",
-    "bio": "Bio",
+    "previouslyHired": "Previously Hired",
+    "previouslyHiredByYou": "Previously Hired by You",
     "unavailable": "Currently Unavailable",
-    "unavailableWarning": "This worker is currently off-duty and cannot accept new bookings.",
-    "servicesCount": "{{count}} Services",
-    "singleReview": "1 Review",
+    "loading": "Loading worker profile...",
+    "noRatings": "No ratings yet",
     "multipleReviews": "{{count}} Reviews",
+    "singleReview": "1 Review",
+    "noReviews": "No reviews yet",
+    "bookNow": "Book Now",
+    "about": "About",
+    "services": "Services",
+    "reviews": "Reviews",
+    "servicesCount": "{{count}} Services",
+    "noRegisteredServices": "No registered services available.",
     "beFirstReview": "Be the first customer to book and share your feedback for this worker!",
     "needHelp": "Need Help?",
-    "helpSubtitle": "Get guided assistance with your booking",
     "helpSubtitleAi": "Get guided assistance with your booking",
-    "callSupport": "Ask Booking Help",
     "askBookingHelp": "Ask Booking Help",
-    "completedJobs": "Completed Jobs",
-    "responseRate": "Response Rate",
-    "avgResponse": "Avg Response",
+    "signInForAi": "Sign In for Booking Help",
     "directContactTitle": "Direct Contact & Booking",
     "directContactDesc": "Worker privacy & verified connections",
     "directContactNote": "To protect local service professionals from unsolicited calls, direct phone numbers and WhatsApp links are provided immediately once a booking request is made.",
@@ -453,7 +469,21 @@
         "receipt-created": "Receipt generated",
         "review-created": "Review submitted"
       }
-    }
+    },
+    "selectServiceRequired": "Please select a specific service to continue booking.",
+    "quoteRequestedTitle": "Quote Requested",
+    "quoteRequestedDesc": "Your request has been sent to the worker. You will receive an estimate soon.",
+    "viewQuoteRequests": "View Quote Requests",
+    "selectService": "Select Service",
+    "chooseServicePlaceholder": "-- Choose a service --",
+    "chooseService": "Choose a service...",
+    "service": "Service",
+    "requestQuote": "Request Quote",
+    "providerResponseDeadline": "Provider response deadline",
+    "hours24": "24 hours",
+    "hours48": "48 hours",
+    "hours72": "72 hours",
+    "signInToBook": "Sign In to Book"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -478,6 +508,8 @@
       "title": "Register as Worker",
       "titleHi": "कामगार के रूप में पंजीकरण करें",
       "termsAcceptance": "I agree to the Terms & Conditions",
+      "termsAcceptancePrefix": "I agree to the",
+      "termsAcceptanceLink": "Terms & Conditions",
       "termsRequired": "Please accept the Terms & Conditions before submitting.",
       "step1": "Personal Info",
       "step2": "Work Details",
@@ -540,7 +572,40 @@
       "summaryAreas": "Service Areas",
       "summaryIdProof": "ID Proof: Securely uploaded for verification",
       "summaryPhoto": "Profile Photo: Uploaded",
-      "goToDashboard": "Go to Worker Dashboard"
+      "goToDashboard": "Go to Worker Dashboard",
+      "servicesInCategory": "Services in {{category}}:",
+      "servicesSelectedCount": "{{count}} / 2 Selected",
+      "selectServicesPrompt": "Select 1 or 2 services you provide (Maximum 2)",
+      "oneServiceSelectedPrompt": "✓ 1 service selected. You can select 1 more service from this list.",
+      "maxServicesSelectedPrompt": "✓ Maximum 2 services selected.",
+      "maxTwoServicesBadge": "Max 2 services allowed",
+      "maxTwoServicesError": "You can select a maximum of 2 services within this category. Please remove one service first to select another.",
+      "categorySwitchedReset": "Trade category changed. Please choose up to 2 services for your new category.",
+      "nameRequired": "Full Name is required",
+      "phoneVerifyRequired": "Please verify your mobile number with OTP before continuing",
+      "categoryRequired": "Please select a trade category",
+      "serviceRequired": "Please select at least 1 service (maximum 2)",
+      "validExperience": "Please enter a valid number of years (0–50)",
+      "selectArea": "Please select at least one service area in Muzaffarnagar",
+      "idProofRequired": "Government ID proof is required for verification",
+      "loginRequiredToSubmit": "You must be signed in to submit. Please verify your phone number in Step 1.",
+      "uploadingId": "Uploading Government ID proof securely...",
+      "uploadingAvatar": "Uploading profile photo...",
+      "savingProfile": "Submitting your registration...",
+      "submissionFailed": "Registration submission failed. Please try again.",
+      "appSubmitted": "Application Submitted!",
+      "appSubmittedDesc": "Thank you for registering. Our team will review your ID document and activate your profile within 24 hours. You can already explore your worker dashboard.",
+      "stepCounter": "Step {{current}} of {{total}}",
+      "googlePrefillNotice": "Already have a Google account? Sign in with Google to prefill your name and email instantly.",
+      "signInWithGoogle": "Sign in with Google (Fast Track)",
+      "becomeVerifiedPartner": "Become a Verified DoneKaro Service Partner",
+      "joinNetworkDesc": "Join Muzaffarnagar's premier network of skilled local technicians and service experts. Register in 3 simple steps:",
+      "step1Short": "Verify your mobile number via OTP (no passwords required)",
+      "step2Short": "Select 1 or 2 trade services and your service areas in Muzaffarnagar",
+      "step3Short": "Upload government ID proof for fast admin verification",
+      "proceedToRegistration": "Proceed to Service Partner Registration",
+      "alreadyRegisteredWorker": "Already registered as a service provider?",
+      "signInWorkerDashboard": "Sign in to Worker Dashboard"
     },
     "notRegisteredTitle": "Account Not Registered",
     "notRegisteredCustomerDesc": "No account found with mobile number +91 {{phone}}. You are not registered yet. Please sign up to create your DoneKaro account first.",
@@ -553,7 +618,12 @@
     "goToCustomerLogin": "Sign In to Customer Account",
     "goToWorkerLogin": "Sign In to Worker Dashboard",
     "customerAccountDetected": "Customer Account Detected",
-    "customerAccountWorkerNotice": "Mobile +91 {{phone}} is registered as a Customer. Please sign in under Customer login, or register this number as a Worker."
+    "customerAccountWorkerNotice": "Mobile +91 {{phone}} is registered as a Customer. Please sign in under Customer login, or register this number as a Worker.",
+    "errors": {
+      "invalidPhone": "Please enter a valid 10-digit Indian mobile number"
+    },
+    "browseFirst": "Want to browse services first?",
+    "exploreAsGuest": "Explore as Guest"
   },
   "bookings": {
     "title": "My Bookings",
@@ -572,7 +642,9 @@
     "service": "Service",
     "serviceProfessional": "Service Professional",
     "scheduled": "Scheduled For",
-    "status": "Status",
+    "status": {
+      "paid": "Paid"
+    },
     "rateWorker": "Rate Worker",
     "leaveReview": "Leave a Review",
     "reviewSubmitted": "Review Submitted!",
@@ -610,84 +682,92 @@
     "callWorker": "Call Artisan",
     "chatWorker": "WhatsApp",
     "instructions": "Special Instructions",
-    "serviceLocation": "Service Location"
-    ,"paymentSummary": "Payment Summary"
-    ,"initialServiceCharge": "Initial service charge"
-    ,"approvedAdditionalCharges": "Approved additional charges"
-    ,"finalPayableAmount": "Final payable amount"
-    ,"currentPayableAmount": "Current payable amount"
-    ,"pendingAdditionalCharges": "Additional charges are awaiting approval."
-    ,"finalAmountAfterCompletion": "The final amount will be shown after the service is completed."
-    ,"paymentPending": "Payment Pending"
-    ,"paymentStatus": "Payment status"
-    ,"paymentStatuses": {
+    "serviceLocation": "Service Location",
+    "paymentSummary": "Payment Summary",
+    "initialServiceCharge": "Initial service charge",
+    "approvedAdditionalCharges": "Approved additional charges",
+    "finalPayableAmount": "Final payable amount",
+    "currentPayableAmount": "Current payable amount",
+    "pendingAdditionalCharges": "Additional charges are awaiting approval.",
+    "finalAmountAfterCompletion": "The final amount will be shown after the service is completed.",
+    "paymentPending": "Payment Pending",
+    "paymentStatus": "Payment status",
+    "paymentStatuses": {
       "unpaid": "Unpaid",
       "pending": "Confirmation pending",
       "paid": "Paid",
       "failed": "Payment failed",
       "cancelled": "Payment cancelled"
-    }
-    ,"paymentRequired": "Payment Required"
-    ,"amountToPay": "Amount to Pay"
-    ,"paymentMethod": "Payment Method"
-    ,"paymentMethodCash": "Cash"
-    ,"cashPaymentTitle": "Cash Payment"
-    ,"cashPaymentInstructions": "Pay this amount directly to the worker."
-    ,"iHavePaidCash": "I Have Paid Cash"
-    ,"waitingForWorkerConfirmation": "Waiting for worker confirmation"
-    ,"workerConfirmationRequired": "The worker needs to confirm that the cash was received."
-    ,"customerCashConfirmed": "Customer says the cash was paid."
-    ,"confirmCashReceived": "Confirm Cash Received"
-    ,"cashPaymentCompleted": "Cash payment confirmed. Booking completed."
-    ,"paymentPaid": "Payment Paid"
-    ,"receiptNumber": "Receipt"
-    ,"jobId": "Job ID"
-    ,"paidAt": "Paid at"
-    ,"paymentActionFailed": "Unable to update the payment. Please try again."
-    ,"openInGoogleMaps": "Open in Google Maps"
-    ,"customerLocationUnavailable": "Customer location is not available for this booking."
-    ,"serviceCompleted": "Service Completed"
-    ,"paymentSuccessful": "Payment Successful"
-    ,"payWithCash": "Pay with Cash"
-    ,"payWorkerInCash": "Pay the worker the amount shown above in cash."
-    ,"ivePaidCash": "I've Paid Cash"
-    ,"cashPaymentSubmitted": "Cash Payment Submitted"
-    ,"cashPaymentSubmittedMsg": "Cash payment submitted. Waiting for worker confirmation."
-    ,"waitingForWorkerConfirmationDesc": "Waiting for worker confirmation. Your receipt will appear once the payment is confirmed."
-    ,"viewReceipt": "View Receipt"
-    ,"paymentReceipt": "Payment Receipt"
-    ,"officialReceipt": "Official Cash Payment Receipt"
-    ,"workerQuote": "Worker Quote"
-    ,"initialQuote": "Initial Quote"
-    ,"totalPaid": "Total Paid"
-    ,"printReceipt": "Print / Save Receipt"
-    ,"verifiedCashPayment": "Verified Cash Payment"
-    ,"receiptFooterNote": "This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by DoneKaro."
-    ,"onlinePaymentComingSoon": "Online payment (UPI / Cards) coming soon"
-    ,"receiptNotAvailableYet": "Receipt is being generated. Please refresh in a moment."
-    ,"viewDetails": "View Details"
-    ,"completedJobDetails": "Completed Service Details"
-    ,"previouslyHired": "Previously Hired"
-    ,"previouslyHiredByYou": "Previously Hired by You"
-    ,"serviceNotes": "Customer Request Notes"
-    ,"yourReview": "Your Rating & Feedback"
-    ,"notReviewedYet": "Not reviewed yet"
-    ,"noComment": "Rated without comment"
-    ,"reviewed": "Reviewed"
-    ,"bookAgainTitle": "Book This Service Again"
-    ,"previousArtisan": "Previous Artisan"
-    ,"bookAgainPrompt": "How would you like to book this service? You can request a quote from the same artisan or browse other verified artisans in Muzaffarnagar."
-    ,"rehireWorker": "Re-hire {{name}}"
-    ,"rehireWorkerDesc": "Book directly with your previous artisan. Address and service are prefilled."
-    ,"browseAllArtisans": "Browse All Artisans"
-    ,"browseAllArtisansDesc": "Explore and compare all available verified artisans for this service category."
+    },
+    "paymentRequired": "Payment Required",
+    "amountToPay": "Amount to Pay",
+    "paymentMethod": "Payment Method",
+    "paymentMethodCash": "Cash",
+    "cashPaymentTitle": "Cash Payment",
+    "cashPaymentInstructions": "Pay this amount directly to the worker.",
+    "iHavePaidCash": "I Have Paid Cash",
+    "waitingForWorkerConfirmation": "Waiting for worker confirmation",
+    "workerConfirmationRequired": "The worker needs to confirm that the cash was received.",
+    "customerCashConfirmed": "Customer says the cash was paid.",
+    "confirmCashReceived": "Confirm Cash Received",
+    "cashPaymentCompleted": "Cash payment confirmed. Booking completed.",
+    "paymentPaid": "Payment Paid",
+    "receiptNumber": "Receipt",
+    "jobId": "Job ID",
+    "paidAt": "Paid at",
+    "paymentActionFailed": "Unable to update the payment. Please try again.",
+    "openInGoogleMaps": "Open in Google Maps",
+    "customerLocationUnavailable": "Customer location is not available for this booking.",
+    "serviceCompleted": "Service Completed",
+    "paymentSuccessful": "Payment Successful",
+    "payWithCash": "Pay with Cash",
+    "payWorkerInCash": "Pay the worker the amount shown above in cash.",
+    "ivePaidCash": "I've Paid Cash",
+    "cashPaymentSubmitted": "Cash Payment Submitted",
+    "cashPaymentSubmittedMsg": "Cash payment submitted. Waiting for worker confirmation.",
+    "waitingForWorkerConfirmationDesc": "Waiting for worker confirmation. Your receipt will appear once the payment is confirmed.",
+    "viewReceipt": "View Receipt",
+    "paymentReceipt": "Payment Receipt",
+    "officialReceipt": "Official Cash Payment Receipt",
+    "workerQuote": "Worker Quote",
+    "initialQuote": "Initial Quote",
+    "totalPaid": "Total Paid",
+    "printReceipt": "Print / Save Receipt",
+    "verifiedCashPayment": "Verified Cash Payment",
+    "receiptFooterNote": "This receipt confirms direct cash payment received by the artisan for service in Muzaffarnagar. Verified by DoneKaro.",
+    "onlinePaymentComingSoon": "Online payment (UPI / Cards) coming soon",
+    "receiptNotAvailableYet": "Receipt is being generated. Please refresh in a moment.",
+    "viewDetails": "View Details",
+    "completedJobDetails": "Completed Service Details",
+    "previouslyHired": "Previously Hired",
+    "previouslyHiredByYou": "Previously Hired by You",
+    "serviceNotes": "Customer Request Notes",
+    "yourReview": "Your Rating & Feedback",
+    "notReviewedYet": "Not reviewed yet",
+    "noComment": "Rated without comment",
+    "reviewed": "Reviewed",
+    "bookAgainTitle": "Book This Service Again",
+    "previousArtisan": "Previous Artisan",
+    "bookAgainPrompt": "How would you like to book this service? You can request a quote from the same artisan or browse other verified artisans in Muzaffarnagar.",
+    "rehireWorker": "Re-hire {{name}}",
+    "rehireWorkerDesc": "Book directly with your previous artisan. Address and service are prefilled.",
+    "browseAllArtisans": "Browse All Artisans",
+    "browseAllArtisansDesc": "Explore and compare all available verified artisans for this service category.",
+    "pendingMsg": "Waiting for worker to confirm...",
+    "cancelledMsg": "This booking has been cancelled.",
+    "disputedMsg": "This booking is currently disputed.",
+    "artisan": "Worker",
+    "verifiedArtisan": "Verified DoneKaro Worker",
+    "additionalChargeRequested": "Additional charge requested",
+    "pendingApproval": "Pending approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "jobPrefix": "Job",
+    "reasonLabel": "Reason",
+    "additionalAmountLabel": "Additional amount"
   },
   "search": {
     "previouslyHired": "Previously Hired"
-  },
-  "workerProfile": {
-    "previouslyHired": "Previously Hired",
-    "previouslyHiredByYou": "Previously Hired by You"
   },
   "workerDashboard": {
     "title": "Worker Dashboard",
@@ -793,7 +873,6 @@
     "accepted": "Accepted",
     "muzaffarnagar": "Muzaffarnagar",
     "whatsappCall": "WhatsApp / Call",
-    "call": "Call",
     "additionalChargeRequest": "Additional charge request",
     "pendingCustomerApproval": "Pending customer approval",
     "requestAdditionalCharge": "Request Additional Charge",
@@ -810,34 +889,35 @@
     "supportTitle": "Artisan Support & Coordination",
     "supportDescription": "Connect with our administrator team for verification, payment queries, or assistance.",
     "whatsappDesk": "WhatsApp Artisan Desk",
-    "directSupport": "Direct support for Muzaffarnagar artisans"
-    ,"paymentRequiredFromCustomer": "Payment Required from Customer"
-    ,"waitingForCustomerPaymentConfirmation": "Waiting for customer payment confirmation. The customer needs to confirm the cash handover."
-    ,"cashPaymentAwaitingConfirmation": "Cash Payment Awaiting Confirmation"
-    ,"pendingConfirmation": "Confirmation Pending"
-    ,"customerCashConfirmedDesc": "Customer has confirmed cash payment handover."
-    ,"confirmCashReceived": "Confirm Cash Received"
-    ,"confirmCashReceivedTitle": "Confirm Cash Received"
-    ,"confirmCashReceivedNotice": "By confirming, you verify that you have received this exact cash amount from the customer. The job will be marked as completed and an official receipt will be generated."
-    ,"paymentReceivedJobCompleted": "Payment Received — Job Completed"
-    ,"paymentReceivedSuccess": "Cash payment confirmed and job completed successfully!"
-    ,"paymentAlreadyPaid": "Payment is already confirmed."
-    ,"viewReceipt": "View Receipt"
-    ,"businessSummary": "Business Summary"
-    ,"completedJobs": "Completed Jobs"
-    ,"paymentsReceived": "Payments Received"
-    ,"paymentsReceivedDesc": "Total cash collected from completed jobs (0% commission)"
-    ,"thisMonthPayments": "This Month"
-    ,"averagePayment": "Avg. per Job"
-    ,"repeatCustomer": "Repeat Customer"
-    ,"viewDetails": "View Details"
-    ,"completedJobDetails": "Completed Job Details"
-    ,"customerReview": "Customer Feedback"
-    ,"noReviewYet": "No review yet"
-    ,"customerReviews": "Customer Reviews"
-    ,"viewAllReviews": "View All Reviews"
-    ,"zeroCommissionNotice": "0% platform commission — 100% of cash earnings are yours"
-    ,"ratedOn": "Rated on {{date}}"
+    "directSupport": "Direct support for Muzaffarnagar artisans",
+    "paymentRequiredFromCustomer": "Payment Required from Customer",
+    "waitingForCustomerPaymentConfirmation": "Waiting for customer payment confirmation. The customer needs to confirm the cash handover.",
+    "cashPaymentAwaitingConfirmation": "Cash Payment Awaiting Confirmation",
+    "pendingConfirmation": "Confirmation Pending",
+    "customerCashConfirmedDesc": "Customer has confirmed cash payment handover.",
+    "confirmCashReceived": "Confirm Cash Received",
+    "confirmCashReceivedTitle": "Confirm Cash Received",
+    "confirmCashReceivedNotice": "By confirming, you verify that you have received this exact cash amount from the customer. The job will be marked as completed and an official receipt will be generated.",
+    "paymentReceivedJobCompleted": "Payment Received — Job Completed",
+    "paymentReceivedSuccess": "Cash payment confirmed and job completed successfully!",
+    "paymentAlreadyPaid": "Payment is already confirmed.",
+    "viewReceipt": "View Receipt",
+    "businessSummary": "Business Summary",
+    "completedJobs": "Completed Jobs",
+    "paymentsReceived": "Payments Received",
+    "paymentsReceivedDesc": "Total cash collected from completed jobs (0% commission)",
+    "thisMonthPayments": "This Month",
+    "averagePayment": "Avg. per Job",
+    "repeatCustomer": "Repeat Customer",
+    "viewDetails": "View Details",
+    "completedJobDetails": "Completed Job Details",
+    "customerReview": "Customer Feedback",
+    "noReviewYet": "No review yet",
+    "customerReviews": "Customer Reviews",
+    "viewAllReviews": "View All Reviews",
+    "zeroCommissionNotice": "0% platform commission — 100% of cash earnings are yours",
+    "ratedOn": "Rated on {{date}}",
+    "reason": "Reason"
   },
   "review": {
     "title": "Rate Your Experience",
@@ -876,8 +956,8 @@
     "profileAdminRole": "Platform Administrator",
     "profileAdminDesc": "Administrator accounts do not place or receive bookings. Use the administrative portal to review worker registrations, verify ID documents, and manage platform operations.",
     "reviewPendingWorkers": "Review Worker Registrations",
-    "viewAlerts": "Verification & ID Alerts"
-    ,"bookingStatus": {
+    "viewAlerts": "Verification & ID Alerts",
+    "bookingStatus": {
       "pending": "Pending",
       "accepted": "Accepted",
       "rejected": "Rejected",
@@ -886,6 +966,100 @@
       "completed": "Completed",
       "cancelled": "Cancelled",
       "disputed": "Disputed"
+    },
+    "jobDetails": {
+      "title": "Job details",
+      "close": "Close",
+      "loading": "Loading Job history...",
+      "loadError": "Unable to load Job details",
+      "summary": "Current state summary",
+      "customer": "Customer",
+      "worker": "Worker",
+      "scheduled": "Scheduled",
+      "immediate": "Immediate dispatch",
+      "amount": "Amount",
+      "unavailable": "Information unavailable",
+      "customerSection": "Customer",
+      "workerSection": "Worker",
+      "name": "Name",
+      "phone": "Phone",
+      "approval": "Approval",
+      "workerServices": "Services / Categories",
+      "noCategories": "No categories assigned",
+      "bookingRelationship": "Relationship",
+      "bookingCustomer": "Booking customer",
+      "assignedWorker": "Assigned worker",
+      "customerUnavailable": "Customer information unavailable",
+      "workerUnavailable": "Worker information unavailable",
+      "sourceRequest": "Original service request",
+      "sourceUnavailable": "Source request unavailable",
+      "requestId": "Request ID",
+      "requestStatus": "Request status",
+      "area": "Area / pincode",
+      "requestedFor": "Requested for",
+      "created": "Created",
+      "updated": "Last updated",
+      "description": "Description / notes",
+      "address": "Address",
+      "viewAttachment": "View attachment",
+      "quoteHistory": "Quote history",
+      "quotesUnavailable": "Quote history unavailable",
+      "noQuotes": "No quote history",
+      "noQuoteSubmitted": "No quote submitted",
+      "acceptedQuote": "Accepted quote",
+      "requested": "Requested",
+      "additionalCharges": "Additional charges",
+      "chargesUnavailable": "Additional-charge history unavailable",
+      "noCharges": "No additional charges",
+      "approvedTotal": "Approved additions",
+      "payment": "Payment",
+      "paymentUnavailable": "Payment details unavailable",
+      "paymentNotCreated": "Payment not created yet",
+      "status": "Status",
+      "method": "Method",
+      "customerConfirmed": "Customer confirmed",
+      "workerConfirmed": "Worker confirmed",
+      "paidAt": "Paid at",
+      "receipt": "Receipt",
+      "receiptUnavailable": "Receipt details unavailable",
+      "receiptNotGenerated": "Receipt not generated",
+      "receiptNumber": "Receipt number",
+      "paymentReference": "Payment reference",
+      "review": "Review",
+      "reviewUnavailable": "Review details unavailable",
+      "noReview": "No review yet",
+      "timeline": "Job timeline",
+      "noTimeline": "No authoritative timeline events available",
+      "viewJob": "View Job",
+      "statusValues": {
+        "open": "Open",
+        "fulfilled": "Fulfilled",
+        "closed": "Closed",
+        "cancelled": "Cancelled",
+        "pending": "Pending",
+        "quoted": "Quoted",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "expired": "Expired",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "unpaid": "Unpaid",
+        "paid": "Paid",
+        "failed": "Failed",
+        "cash": "Cash",
+        "—": "—"
+      },
+      "events": {
+        "service-request-created": "Service request created",
+        "booking-created": "Booking created",
+        "quote-submitted": "Quote submitted",
+        "quote-accepted": "Quote accepted",
+        "customer-cash-confirmed": "Customer cash confirmation",
+        "worker-cash-confirmed": "Worker cash confirmation",
+        "payment-paid": "Payment paid",
+        "receipt-created": "Receipt generated",
+        "review-created": "Review submitted"
+      }
     }
   },
   "notifications": {
@@ -904,7 +1078,9 @@
     "subtitle": "Stay updated with your bookings and account activity",
     "adminSubtitle": "Stay updated with worker registrations and verification alerts",
     "markRead": "Mark as read",
-    "noNotificationsDesc": "You'll see real-time alerts here when booking requests, status changes, or account approvals occur."
+    "noNotificationsDesc": "You'll see real-time alerts here when booking requests, status changes, or account approvals occur.",
+    "viewQuoteRequests": "View Quote Requests",
+    "viewQuotes": "View Quote Requests"
   },
   "errors": {
     "required": "This field is required",
@@ -918,82 +1094,63 @@
     "otpExpired": "OTP expired. Request a new one.",
     "phoneExists": "This phone number is already registered",
     "workerNotApproved": "Worker not yet approved",
-    "bookingExpired": "Booking request expired"
+    "bookingExpired": "Booking request expired",
+    "nameMinLength": "Name must be at least 2 characters long"
   },
   "profile": {
-    "title": "Profile",
-    "subtitle": "Manage your personal details, preferences, and account",
+    "title": "My Account",
+    "subtitle": "Personal details, service options & preferences",
+    "verifiedCustomer": "Verified Customer",
+    "verifiedWorker": "Verified Partner",
+    "incompleteProfile": "Incomplete Profile",
+    "completeProfile": "Complete",
     "editProfile": "Edit Profile",
-    "editingMode": "Editing Mode",
-    "exitEditMode": "Exit Edit Mode",
-    "closeEdit": "Close Edit",
-    "saveSuccess": "Profile changes saved successfully!",
-    "avatarUpdated": "Profile photo updated successfully!",
-    "idUploaded": "ID proof document uploaded securely (Private for Admin review)",
-    "noPhone": "No phone set",
+    "myBookings": "My bookings",
+    "workerMode": "Worker Mode",
+    "becomeWorker": "Earn with DoneKaro",
+    "helpSupport": "Help & support",
+    "manageAddresses": "Manage addresses & localities",
+    "manageAddressesDesc": "Muzaffarnagar pincodes (251001 & 251002)",
+    "emailReceipts": "Email & notifications",
+    "reviewsRatings": "My ratings & reviews",
+    "aboutApp": "About DoneKaro",
+    "faqsHelp": "Help Center & FAQs",
+    "referTitle": "Refer & earn / Share DoneKaro",
+    "referDesc": "Help your friends and family find verified local electricians, plumbers, and technicians without middlemen.",
+    "referNow": "Refer now",
+    "completed": "Completed",
     "availableForJobs": "Available for Jobs",
     "offlineUnavailable": "Offline / Unavailable",
-    "goOffline": "Go Offline",
-    "goOnline": "Go Online",
-    "rating": "Rating",
-    "reviews": "Reviews",
-    "completed": "Completed",
-    "quickActions": "Quick Actions",
-    "workerDashboard": "Worker Dashboard",
-    "myBookings": "My Bookings",
-    "notifications": "Notifications",
-    "switchToHindi": "हिंदी में बदलें (Hindi)",
-    "switchToEnglish": "Switch to English",
-    "logout": "Logout",
-    "accountDetails": "Account Details",
-    "editHint": "Update your personal and work details below, then click Save Changes.",
-    "viewHint": "Your personal information and DoneKaro preferences.",
-    "fullName": "Full Name",
-    "phoneLabel": "Phone Number",
-    "noPhoneSpecified": "No phone specified",
-    "languagePreference": "Language Preference",
-    "workDetailsTitle": "Work & Service Details",
-    "primaryCategory": "Primary Category",
-    "selectCategory": "Select Category",
-    "experienceYears": "Experience (Years)",
-    "serviceAreasTitle": "Service Area Pincodes",
-    "areasHint": "Select all pincodes where you can travel to provide services.",
-    "noneAssigned": "None assigned",
-    "noneSpecified": "None specified",
-    "bioTitle": "Professional Bio / Specialties",
-    "bioPlaceholder": "Describe your specialties, tools, and background...",
-    "noBio": "No bio written yet. Click Edit Profile to add one.",
-    "idProofTitle": "ID Proof Document (Aadhaar / Voter ID / License)",
-    "idDocOnFile": "ID Document on File",
-    "noIdDoc": "No ID Document Uploaded Yet",
-    "encryptedPrivate": "Encrypted & Private",
-    "privateDocNote": "Stored in private storage. Visible only to verified administrators.",
-    "uploadIdProof": "Upload ID Proof",
-    "replaceDoc": "Replace Document",
-    "uploading": "Uploading...",
     "saveChanges": "Save Changes",
-    "cancel": "Cancel",
-    "recentBookings": "Recent Booking Activity",
-    "platformBookingsTitle": "Recent Platform Bookings",
-    "noRecentBookings": "No recent booking activity recorded yet.",
-    "noRecentBookingsDesc": "Bookings you place or receive will be listed here.",
-    "noPlatformBookings": "No platform bookings recorded yet.",
-    "noPlatformBookingsDesc": "New customer bookings across Muzaffarnagar will appear here in real time.",
-    "goToAdminPortal": "Go to Admin Portal",
-    "recordedOn": "Recorded on",
     "logoutModalTitle": "Logout Confirmation",
     "logoutModalDesc": "Are you sure you want to sign out of your account?",
     "confirmLogout": "Confirm Logout",
-    "status": {
-      "approved": "Verified & Approved",
-      "pending": "Under Review",
-      "rejected": "Needs Changes"
-    },
-    "roles": {
-      "admin": "ADMIN",
-      "worker": "WORKER",
-      "customer": "CUSTOMER"
-    }
+    "editProfileDesc": "Update your personal details, contact information, and preferences.",
+    "changePhoto": "Change photo",
+    "photo": "Profile Photo",
+    "name": "Full Name",
+    "namePlaceholder": "Your full name",
+    "phone": "Phone Number",
+    "emailLabel": "Email / Gmail Address",
+    "languageLabel": "Language Preference",
+    "workerTradeDetails": "Worker Trade & Details",
+    "primaryTrade": "Primary Trade",
+    "selectPrimaryTrade": "Select Primary Trade",
+    "yearsExperience": "Years of Experience",
+    "bioLabel": "About your work (Bio)",
+    "bioPlaceholder": "Describe your skills, tools, and specialty...",
+    "idProofLabel": "ID Proof Document (Aadhaar / Voter ID)",
+    "replaceDoc": "Replace Document",
+    "uploadIdProof": "Upload ID Proof",
+    "attached": "Attached",
+    "emailModalTitle": "Email / Gmail Address",
+    "emailModalDesc": "Link your email to receive official receipts and job notifications.",
+    "saveEmail": "Save Email",
+    "avatarUpdated": "Profile photo updated!",
+    "idUploaded": "ID proof document uploaded securely",
+    "saveSuccess": "Profile updated successfully!",
+    "noRatingsYet": "No ratings yet",
+    "noReviewsYet": "No ratings or reviews yet"
   },
   "authChoice": {
     "badge": "DoneKaro Portal",
@@ -1066,7 +1223,10 @@
     "verifyLinkMobileBtn": "Verify via OTP & Link Mobile",
     "invalidMobileRetry": "We couldn't process your mobile number. Please try again.",
     "otpCancelled": "OTP verification was cancelled.",
-    "otpWidgetError": "Could not open OTP verification widget. Please ensure ad-blockers are disabled and retry."
+    "otpWidgetError": "Could not open OTP verification widget. Please ensure ad-blockers are disabled and retry.",
+    "backToHome": "Back to Home",
+    "welcomeBack": "Welcome to DoneKaro",
+    "platformSubtitle": "Muzaffarnagar's trusted local home services marketplace"
   },
   "registerPage": {
     "title": "New to DoneKaro? Create Account",
@@ -1078,7 +1238,21 @@
     "workerChoiceEn": "Register as Worker",
     "workerChoiceHi": "कामगार के रूप में पंजीकरण करें",
     "termsAcceptance": "I agree to the Terms & Conditions",
+    "termsAcceptancePrefix": "I agree to the",
+    "termsAcceptanceLink": "Terms & Conditions",
     "termsRequired": "Please accept the Terms & Conditions before continuing.",
+    "termsReviewPrompt": "Click to read and accept the full Terms & Conditions",
+    "addressProofLabel": "Address Proof (Mandatory) *",
+    "addressProofRequired": "Address proof document is mandatory for customer registration.",
+    "addressProofFormats": "JPG, PNG, WEBP, PDF up to 10MB",
+    "uploadAddressProofPrompt": "Click to upload Electricity Bill, Voter ID, Ration Card, or Masked Aadhaar",
+    "addressProofPrivacyHint": "Stored in a private storage bucket for address verification only.",
+    "addressProofNotice": "Your document is never shared with workers or third parties. It is accessible exclusively to administrators for customer safety verification.",
+    "removeFile": "Remove document",
+    "uploadingAddressProof": "Uploading address proof securely...",
+    "incompleteNoticeTitle": "Registration Incomplete: Address Verification Required",
+    "incompleteNoticeDesc": "Your mobile number is verified. Please upload your mandatory address proof below to complete registration and access DoneKaro.",
+    "retryUploadBtn": "Upload Address Proof & Complete Registration",
     "fullName": "Full Name *",
     "workerFullName": "Full Name *",
     "phone": "Mobile Number (10 digits) *",
@@ -1106,7 +1280,11 @@
     "wizardPrompt": "Prefer the step-by-step registration wizard? Open wizard",
     "alreadyHaveAccount": "Already have an account?",
     "loginHere": "Log In here",
-    "backToOptions": "Back to Login / Sign Up options"
+    "backToOptions": "Back to Login / Sign Up options",
+    "passwordlessNoticeTitle": "100% Passwordless & Secure",
+    "passwordlessNoticeDesc": "Verify your mobile number via OTP once. Your session stays permanently saved on this device—no passwords to remember or reset!",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Sign In with OTP"
   },
   "contactModal": {
     "title": "Contact Details",
@@ -1141,7 +1319,7 @@
     "about": "About Us",
     "contact": "Contact",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
+    "terms": "Terms & Conditions",
     "copyright": "© 2026 DoneKaro. All rights reserved.",
     "madeWith": "Made with ❤️ for Muzaffarnagar",
     "tagline": "Connecting Muzaffarnagar residents with background-verified local artisans and technicians.",
@@ -1185,35 +1363,6 @@
     "prompt": "Browsing in Guest Mode",
     "subprompt": "Sign in to book artisans, chat, and access verified phone numbers",
     "exploringAsGuest": "You are exploring DoneKaro in Guest Mode"
-  },
-  "profile": {
-    "title": "My Account",
-    "subtitle": "Personal details, service options & preferences",
-    "verifiedCustomer": "Verified Customer",
-    "verifiedWorker": "Verified Partner",
-    "incompleteProfile": "Incomplete Profile",
-    "completeProfile": "Complete",
-    "editProfile": "Edit Profile",
-    "myBookings": "My bookings",
-    "workerMode": "Worker Mode",
-    "becomeWorker": "Earn with DoneKaro",
-    "helpSupport": "Help & support",
-    "manageAddresses": "Manage addresses & localities",
-    "manageAddressesDesc": "Muzaffarnagar pincodes (251001 & 251002)",
-    "emailReceipts": "Email & notifications",
-    "reviewsRatings": "My ratings & reviews",
-    "aboutApp": "About DoneKaro",
-    "faqsHelp": "Help Center & FAQs",
-    "referTitle": "Refer & earn / Share DoneKaro",
-    "referDesc": "Help your friends and family find verified local electricians, plumbers, and technicians without middlemen.",
-    "referNow": "Refer now",
-    "completed": "Completed",
-    "availableForJobs": "Available for Jobs",
-    "offlineUnavailable": "Offline / Unavailable",
-    "saveChanges": "Save Changes",
-    "logoutModalTitle": "Logout Confirmation",
-    "logoutModalDesc": "Are you sure you want to sign out of your account?",
-    "confirmLogout": "Confirm Logout"
   },
   "aiAssistant": {
     "bookingMitra": "Booking Help",
@@ -1259,5 +1408,13 @@
     "part_time_driver": "Part-time Driver",
     "car_mechanic": "Car Mechanic",
     "ambulance": "Ambulance"
+  },
+  "worker": {
+    "newLeads": "Leads"
+  },
+  "quotes": {
+    "acceptQuote": "Accept Quote",
+    "cancelRequest": "Cancel Request",
+    "chooseAnotherProvider": "Choose Another Provider"
   }
 }
