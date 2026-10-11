@@ -33,7 +33,7 @@ export function getNavItems(
   if (isAdmin) {
     return [
       { path: '/admin', label: t('nav.adminDashboard'), icon: Shield },
-      { path: '/notifications', label: t('nav.notifications'), icon: Bell, badge: unreadCount },
+      { path: '/admin?tab=notifications', label: t('admin.alerts', 'Alerts'), icon: Bell, badge: unreadCount },
     ]
   }
   if (isWorker) {

@@ -227,19 +227,21 @@ export function ProfileMenuList({
                 {language === 'hi' ? 'बुकिंग व गतिविधियाँ' : 'Bookings & Activity'}
               </p>
 
-              {/* Row: My Bookings / Orders */}
-              <div
-                onClick={() => onNavigate('/bookings')}
-                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <Calendar className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
-                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
-                    {t('profile.myBookings', 'My bookings')}
-                  </span>
+              {/* Row: My Bookings / Orders (Customer only) */}
+              {!isWorker && (
+                <div
+                  onClick={() => onNavigate('/bookings')}
+                  className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <Calendar className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                      {t('profile.myBookings', 'My bookings')}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
-              </div>
+              )}
 
               {/* Row: Worker Dashboard (Worker only) */}
               {isWorker && (

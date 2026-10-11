@@ -25,6 +25,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
   const location = useLocation()
   const navigate = useNavigate()
 
+  const brandHomePath = isAdmin ? '/admin' : '/'
   const navItems = getNavItems(t, isAuthenticated, isWorker, isAdmin, unreadCount)
   const isActive = (path: string) =>
     location.pathname === path || (path !== '/' && location.pathname.startsWith(path))
@@ -55,7 +56,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
               <Menu className="w-6 h-6" />
             </button>
 
-            <NavLink to="/" className="flex items-center gap-2 min-w-0" aria-label={t('app.name')}>
+            <NavLink to={brandHomePath} className="flex items-center gap-2 min-w-0" aria-label={t('app.name')}>
               <AppLogo className="w-8 h-8 rounded-xl shrink-0 shadow-sm" />
               <span className="font-black text-lg tracking-tight text-slate-900 dark:text-white truncate">
                 {t('app.name')}
@@ -84,7 +85,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
         {/* ========================================================= */}
         <div className="hidden md:flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <NavLink to="/" className="flex items-center gap-2.5" aria-label={t('app.name')}>
+            <NavLink to={brandHomePath} className="flex items-center gap-2.5" aria-label={t('app.name')}>
               <AppLogo className="w-9 h-9 rounded-xl shadow-sm" />
               <span className="font-black text-xl text-slate-900 dark:text-white">
                 {t('app.name')}

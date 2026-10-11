@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, Link } from 'react-router-dom'
 import { useNotifications } from '@/context/NotificationContext'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { Card, Badge, Button } from '@kaamgar/ui'
+import { localizeNotification, getLocalizedActionLabel } from '@/utils/notificationLocalizer'
 import {
   Bell,
   CheckCircle,
@@ -105,6 +107,7 @@ function formatNotificationTime(isoString: string): string {
 
 export default function Notifications() {
   const { t } = useTranslation()
+  const { language } = useLanguage()
   const navigate = useNavigate()
   const { isWorker, isAdmin } = useAuth()
   const {
@@ -266,15 +269,17 @@ export default function Notifications() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {dbNotifications.map(notification => {
               const isUnread = !notification.read_at
               const config = getTypeConfig(notification.notification_type)
               const Icon = config.icon
               const action = getNotificationAction(notification)
+              const localized = localizeNotification(notification, t, language)
+              const actionLabel = action ? getLocalizedActionLabel(action.label, language) : ''
 
               return (
-                <Card
+                <div
                   key={notification.id}
                   onClick={() => {
                     if (action) {
@@ -283,42 +288,54 @@ export default function Notifications() {
                       void markAsRead(notification.id)
                     }
                   }}
-                  className={`p-4 transition-all duration-200 cursor-pointer ${
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer ${
                     isUnread
-                      ? 'bg-surface-100 border-brand-500/40 shadow-sm hover:border-brand-500/70'
-                      : 'bg-surface-200/40 border-semantic-border-light opacity-90 hover:opacity-100 hover:bg-surface-200/70'
+                      ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.08] border-amber-500/40 shadow-xs hover:border-amber-500/70'
+                      : 'bg-white dark:bg-zinc-900 border-slate-200/90 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-xs'
                   }`}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${config.bg}`}>
+                  <div className="flex items-start gap-3.5 sm:gap-4">
+                    {/* Category Icon Badge */}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-xs ${config.bg}`}>
                       <Icon className={`w-5 h-5 ${config.color}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
+                      {/* Top Meta Bar: Category, Unread Badge & Time */}
+                      <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                         <div className="flex items-center gap-2">
-                          <h3
-                            className={`font-semibold text-base ${
-                              isUnread ? 'text-semantic-text-primary' : 'text-semantic-text-secondary'
-                            }`}
-                          >
-                            {notification.title}
-                          </h3>
+                          <span className="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200/80 dark:border-zinc-700">
+                            {localized.category}
+                          </span>
                           {isUnread && (
-                            <span className="w-2 h-2 rounded-full bg-brand-400 shrink-0" title="Unread" />
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
+                              {language === 'hi' ? 'नया' : 'NEW'}
+                            </span>
                           )}
                         </div>
-                        <span className="text-xs text-semantic-text-tertiary whitespace-nowrap">
-                          {formatNotificationTime(notification.created_at)}
+                        <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
+                          {localized.timeAgo}
                         </span>
                       </div>
 
-                      <p className="mt-1 text-sm text-semantic-text-secondary leading-relaxed">
-                        {notification.body}
+                      {/* Notification Title */}
+                      <h3
+                        className={`text-base font-bold tracking-tight mb-1 ${
+                          isUnread ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        {localized.title}
+                      </h3>
+
+                      {/* Notification Description */}
+                      <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed font-normal">
+                        {localized.body}
                       </p>
 
+                      {/* Action Bar */}
                       {action && (
-                        <div className="mt-3 flex items-center gap-2">
+                        <div className="mt-3.5 flex items-center gap-2.5 flex-wrap">
                           <Button
                             variant="primary"
                             size="sm"
@@ -326,40 +343,41 @@ export default function Notifications() {
                               e.stopPropagation()
                               handleActionClick(notification, action.url)
                             }}
-                            className="text-xs py-1 px-3"
+                            className="text-xs font-bold py-1.5 px-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-xs cursor-pointer"
                           >
-                            {action.label}
+                            {actionLabel}
                           </Button>
                           {isUnread && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <button
+                              type="button"
                               onClick={e => {
                                 e.stopPropagation()
                                 void markAsRead(notification.id)
                               }}
-                              className="text-xs text-semantic-text-tertiary hover:text-semantic-text-primary"
+                              className="text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 px-2 py-1 rounded-lg transition-colors cursor-pointer"
                             >
                               {t('notifications.markRead', 'Mark as read')}
-                            </Button>
+                            </button>
                           )}
                         </div>
                       )}
                     </div>
 
+                    {/* Dismiss Button */}
                     <button
+                      type="button"
                       onClick={e => {
                         e.stopPropagation()
                         void deleteDbNotification(notification.id)
                       }}
-                      className="shrink-0 p-1 text-semantic-text-tertiary hover:text-danger-400 rounded-lg hover:bg-surface-200 transition-colors"
+                      className="shrink-0 p-1.5 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                       title={t('notifications.dismiss', 'Dismiss')}
-                      aria-label="Dismiss notification"
+                      aria-label={t('notifications.dismiss', 'Dismiss')}
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                </Card>
+                </div>
               )
             })}
           </div>

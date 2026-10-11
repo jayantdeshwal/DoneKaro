@@ -108,7 +108,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RootRoute() {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, isLoading, user, isAdmin } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
@@ -117,6 +117,10 @@ function RootRoute() {
 
   if (user?.role === 'customer' && user?.registration_completed === false) {
     return <Navigate to="/register?incomplete=true" replace />
+  }
+
+  if (isAdmin) {
+    return <Navigate to="/admin" replace />
   }
 
   if (isAuthenticated || isGuestMode) {
@@ -147,7 +151,7 @@ function AppRoutes() {
         <Route path="category" element={<Navigate to="/categories" replace />} />
         <Route path="notifications" element={lazyElement(<ProtectedRoute><Notifications /></ProtectedRoute>)} />
         <Route path="alerts" element={lazyElement(<ProtectedRoute><Notifications /></ProtectedRoute>)} />
-        <Route path="worker/dashboard" element={lazyElement(<ProtectedRoute><WorkerDashboard /></ProtectedRoute>)} />
+        <Route path="worker/dashboard" element={lazyElement(<WorkerRoute><WorkerDashboard /></WorkerRoute>)} />
         <Route path="worker/reviews" element={lazyElement(<WorkerRoute><WorkerReviews /></WorkerRoute>)} />
         <Route path="admin" element={lazyElement(<AdminRoute><AdminDashboard /></AdminRoute>)} />
         <Route path="admin/support" element={lazyElement(<AdminRoute><AdminSupportPage /></AdminRoute>)} />

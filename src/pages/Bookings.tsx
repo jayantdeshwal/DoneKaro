@@ -38,6 +38,7 @@ import {
   BookAgainModal,
   BookingCancelModal,
   BookingCard,
+  HistoricalBookingSummaryCard,
   BookingReviewModal,
   BookingStatsCards,
   BookingTabs,
@@ -568,28 +569,13 @@ export default function Bookings() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {pastBookings.map(b => (
-                      <BookingCard
+                      <HistoricalBookingSummaryCard
                         key={b.id}
                         booking={b}
-                        isPast={true}
-                        decidingRequestId={decidingRequestId}
-                        changeRequestError={changeRequestError}
-                        paymentError={paymentError}
-                        paymentActionBookingId={paymentActionBookingId}
-                        onChangeRequestDecision={handleChangeRequestDecision}
-                        onOpenPaymentModal={handleOpenPaymentModal}
-                        onOpenReceiptModal={handleOpenReceiptModal}
-                        onOpenDetailsModal={handleOpenDetailsModal}
-                        onOpenBookAgainModal={handleOpenBookAgainModal}
-                        onOpenCancelModal={handleOpenCancelModal}
-                        onOpenContactModal={handleOpenContactModal}
-                        onOpenReviewModal={booking => {
-                          setSelectedBooking(booking)
-                          setShowReviewModal(true)
-                        }}
-                        onOpenSupport={openSupport}
+                        onOpenDetails={handleOpenDetailsModal}
+                        onOpenReceipt={handleOpenReceiptModal}
                       />
                     ))}
                   </div>

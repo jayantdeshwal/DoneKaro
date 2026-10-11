@@ -27,6 +27,9 @@ import {
   Search,
   Bell,
   FileText,
+  UserCheck,
+  Users,
+  Zap,
 } from 'lucide-react'
 import AppLogo from '../common/AppLogo'
 
@@ -173,162 +176,341 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           {/* Group A: Activities & Core Navigation */}
           <div>
             <p className="px-2 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">
-              {language === 'hi' ? 'मुख्य गतिविधियाँ' : 'Main Activities'}
+              {isAdmin
+                ? (language === 'hi' ? 'प्रशासनिक प्रबंधन' : 'Admin Operations')
+                : isWorker
+                ? (language === 'hi' ? 'कारीगर कार्य एवं सेवाएँ' : 'Worker Operations')
+                : (language === 'hi' ? 'मुख्य गतिविधियाँ' : 'Main Activities')}
             </p>
             <div className="space-y-1">
-              <button
-                type="button"
-                onClick={() => handleNavigate('/')}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <Home className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                      {t('nav.home', 'Home')}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                      {language === 'hi' ? 'मुख्य पृष्ठ एवं सेवाएँ' : 'Discovery & local services'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              {/* ADMIN-SPECIFIC NAVIGATION */}
+              {isAdmin ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
+                          {t('nav.adminDashboard', 'Admin Dashboard')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'मुख्य डैशबोर्ड व आँकड़े' : 'Console overview & metrics'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
 
-              {isAuthenticated && !isAdmin && !isWorker && (
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('/bookings')}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-855 active:scale-[0.99] transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                      <Calendar className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin?tab=workers')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <UserCheck className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                          {t('admin.workerApprovals', 'Worker Approvals')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'लंबित कारीगर पहचान सत्यापन' : 'Verify ID proofs & approve workers'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                        {t('nav.bookings', 'My Bookings')}
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                        {language === 'hi' ? 'सक्रिय व पिछली बुकिंग' : 'Active and completed orders'}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              )}
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
 
-              {isWorker && (
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('/worker/dashboard')}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                      <Briefcase className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin?tab=bookings')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <Calendar className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                          {t('admin.allBookings', 'All Bookings')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'शहर की सभी सेवा बुकिंग्स' : 'Monitor city-wide active & past jobs'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                        {t('nav.workerDashboard', 'Worker Dashboard')}
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                        {language === 'hi' ? 'काम अनुरोध, लीड्स व आय' : 'Jobs, leads, quotes & earnings'}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              )}
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
 
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('/admin')}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                      <Shield className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin?tab=customers')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                          {t('admin.customerDirectory', 'Customers Directory')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'नागरिक खाते एवं गतिविधि' : 'Registered citizen profiles'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                        {t('nav.adminDashboard', 'Admin Dashboard')}
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                        {language === 'hi' ? 'सत्यापन, निगरानी व टीम' : 'Approvals, metrics & team'}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              )}
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => handleNavigate('/categories')}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                    <Grid className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                      {t('nav.category', 'All Categories')}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                      {language === 'hi' ? 'इलेक्ट्रीशियन, प्लंबर व अन्य' : 'Electrician, Plumber, AC & More'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavigate('/search')}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-sky-600 dark:group-hover:text-sky-400">
-                      {t('nav.search', 'Search & Hire')}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                      {language === 'hi' ? 'मुजफ्फरनगर के सत्यापित कामगार खोजें' : 'Filter by locality and rating'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('/notifications')}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                      <Bell className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin?tab=notifications')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                          {t('admin.alerts', 'Platform Alerts')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'पंजीकरण व प्रेषण सूचनाएँ' : 'Dispatch alerts & registrations'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                        {t('nav.alerts', 'Notifications & Alerts')}
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                        {language === 'hi' ? 'बुकिंग अपडेट व सूचनाएँ' : 'Booking updates and status'}
-                      </p>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/admin?tab=admins')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                          {language === 'hi' ? 'प्रशासक दल' : 'Manage Administrators'}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'विशेषाधिकार व टीम प्रबंधन' : 'Team members & privileges'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                </button>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                </>
+              ) : isWorker ? (
+                /* WORKER-SPECIFIC NAVIGATION */
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <Home className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                          {t('nav.home', 'Home')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'मुख्य पृष्ठ' : 'Home & platform overview'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/worker/dashboard')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <Briefcase className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                          {t('nav.workerDashboard', 'Worker Dashboard')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'काम अनुरोध, स्थिति व आय' : 'Jobs, status & earnings'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/worker/dashboard?tab=leads')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                          {language === 'hi' ? 'नए काम लीड्स' : 'New Job Leads'}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'कोटेशन अनुरोध व ग्राहक काम' : 'Customer quote requests'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/notifications')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                          {t('nav.alerts', 'Notifications & Alerts')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'बुकिंग अपडेट व सूचनाएँ' : 'Booking updates and status'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                </>
+              ) : (
+                /* CUSTOMER / GUEST NAVIGATION */
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <Home className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                          {t('nav.home', 'Home')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'मुख्य पृष्ठ एवं सेवाएँ' : 'Discovery & local services'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  {isAuthenticated && (
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('/bookings')}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-855 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                          <Calendar className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                            {t('nav.bookings', 'My Bookings')}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                            {language === 'hi' ? 'सक्रिय व पिछली बुकिंग' : 'Active and completed orders'}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/categories')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <Grid className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                          {t('nav.category', 'All Categories')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'इलेक्ट्रीशियन, प्लंबर व अन्य' : 'Electrician, Plumber, AC & More'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('/search')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                        <Search className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-sky-600 dark:group-hover:text-sky-400">
+                          {t('nav.search', 'Search & Hire')}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                          {language === 'hi' ? 'मुजफ्फरनगर के सत्यापित कामगार खोजें' : 'Filter by locality and rating'}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
+                  {isAuthenticated && (
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('/notifications')}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                          <Bell className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                            {t('nav.alerts', 'Notifications & Alerts')}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                            {language === 'hi' ? 'बुकिंग अपडेट व सूचनाएँ' : 'Booking updates and status'}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

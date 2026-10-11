@@ -79,7 +79,7 @@ export default function Login() {
   // Redirect based on role and active 2FA status (server-checked)
   useEffect(() => {
     if (user) {
-      if (user.role === 'super_admin' || user.role === 'sub_admin') {
+      if (user.role === 'admin' || user.role === 'super_admin' || user.role === 'sub_admin') {
         // Check server-side 2FA status
         const supabase = getSupabaseClient()
         void (async () => {

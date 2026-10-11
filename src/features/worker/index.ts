@@ -25,6 +25,7 @@ export { SendQuoteModal } from './components/quotes/SendQuoteModal'
 // Bookings Components
 export { BookingFeedTabs } from './components/bookings/BookingFeedTabs'
 export { WorkerBookingCard } from './components/bookings/WorkerBookingCard'
+export { HistoricalWorkerJobSummaryCard } from './components/bookings/HistoricalWorkerJobSummaryCard'
 export { WorkerPaymentCard } from './components/bookings/WorkerPaymentCard'
 export { BookingStatusActions } from './components/bookings/BookingStatusActions'
 

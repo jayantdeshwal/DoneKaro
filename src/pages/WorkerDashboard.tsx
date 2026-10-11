@@ -25,6 +25,7 @@ import { QuoteRequestsFeed } from '@/features/worker/components/quotes/QuoteRequ
 import { SendQuoteModal } from '@/features/worker/components/quotes/SendQuoteModal'
 import { BookingFeedTabs } from '@/features/worker/components/bookings/BookingFeedTabs'
 import { WorkerBookingCard } from '@/features/worker/components/bookings/WorkerBookingCard'
+import { HistoricalWorkerJobSummaryCard } from '@/features/worker/components/bookings/HistoricalWorkerJobSummaryCard'
 import { BusinessSummary } from '@/features/worker/components/business/BusinessSummary'
 import { AdditionalChargeModal } from '@/features/worker/components/modals/AdditionalChargeModal'
 import { ConfirmCashModal } from '@/features/worker/components/modals/ConfirmCashModal'
@@ -293,20 +294,39 @@ export default function WorkerDashboard() {
               </p>
             </div>
           ) : (
-            filteredBookings.map(booking => (
-              <WorkerBookingCard
-                key={booking.id}
-                booking={booking}
-                isRepeatCustomer={(completedCountsByCustomer.get(booking.customer_id) ?? 0) > 1}
-                isUpdating={updatingBookingId === booking.id}
-                onOpenContactModal={handleOpenContactModal}
-                onOpenChangeRequest={setChangeRequestBooking}
-                onConfirmCash={setConfirmModalBooking}
-                onViewDetails={setDetailsModalBooking}
-                onViewReceipt={setReceiptModalBooking}
-                onUpdateStatus={handleUpdateStatus}
-              />
-            ))
+            filteredBookings.map(booking => {
+              const isHistorical =
+                booking.status === 'completed' ||
+                booking.status === 'cancelled' ||
+                booking.status === 'rejected'
+
+              if (isHistorical) {
+                return (
+                  <HistoricalWorkerJobSummaryCard
+                    key={booking.id}
+                    booking={booking}
+                    isRepeatCustomer={(completedCountsByCustomer.get(booking.customer_id) ?? 0) > 1}
+                    onViewDetails={setDetailsModalBooking}
+                    onViewReceipt={setReceiptModalBooking}
+                  />
+                )
+              }
+
+              return (
+                <WorkerBookingCard
+                  key={booking.id}
+                  booking={booking}
+                  isRepeatCustomer={(completedCountsByCustomer.get(booking.customer_id) ?? 0) > 1}
+                  isUpdating={updatingBookingId === booking.id}
+                  onOpenContactModal={handleOpenContactModal}
+                  onOpenChangeRequest={setChangeRequestBooking}
+                  onConfirmCash={setConfirmModalBooking}
+                  onViewDetails={setDetailsModalBooking}
+                  onViewReceipt={setReceiptModalBooking}
+                  onUpdateStatus={handleUpdateStatus}
+                />
+              )
+            })
           )}
         </div>
       </div>

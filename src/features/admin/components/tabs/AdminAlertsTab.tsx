@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Card, Badge, Button } from '@kaamgar/ui'
+import { useLanguage } from '@/context/LanguageContext'
+import { localizeNotification } from '@/utils/notificationLocalizer'
 import {
   Bell,
   RefreshCw,
@@ -39,6 +41,7 @@ export function AdminAlertsTab({
   handleInspectWorkerFromNotification,
 }: AdminAlertsTabProps) {
   const { t } = useTranslation()
+  const { language } = useLanguage()
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -103,7 +106,7 @@ export function AdminAlertsTab({
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isLoadingNotifications ? 'animate-spin text-brand-400' : ''}`}
               />
-              Refresh
+              {t('common.refresh', 'Refresh')}
             </Button>
             <Button
               variant="secondary"
@@ -209,6 +212,7 @@ export function AdminAlertsTab({
               const isWorkerEvent =
                 notif.notification_type === 'worker_registration_submitted' ||
                 notif.notification_type === 'worker_document_uploaded'
+              const localized = localizeNotification(notif, t, language)
 
               return (
                 <motion.div
@@ -246,26 +250,23 @@ export function AdminAlertsTab({
                     {/* Text content */}
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-semibold text-sm text-semantic-text-primary">
-                          {notif.title}
+                        <h4 className="font-semibold text-sm text-slate-900 dark:text-zinc-100">
+                          {localized.title}
                         </h4>
                         {isUnread && (
                           <Badge
                             variant="warning"
                             className="text-[10px] px-1.5 py-0.2 uppercase font-bold tracking-wider"
                           >
-                            NEW
+                            {language === 'hi' ? 'नया' : 'NEW'}
                           </Badge>
                         )}
                         <span className="text-xs text-semantic-text-tertiary">
-                          {new Date(notif.created_at).toLocaleString('en-IN', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                          })}
+                          {localized.timeAgo}
                         </span>
                       </div>
                       <p className="text-sm text-semantic-text-secondary leading-relaxed">
-                        {notif.body}
+                        {localized.body}
                       </p>
                     </div>
                   </div>
@@ -289,7 +290,8 @@ export function AdminAlertsTab({
                         variant="ghost"
                         size="sm"
                         onClick={() => markNotificationRead(notif.id)}
-                        title="Mark as read"
+                        title={t('notifications.markRead', 'Mark as read')}
+                        aria-label={t('notifications.markRead', 'Mark as read')}
                         className="text-xs text-semantic-text-tertiary hover:text-semantic-text-primary p-2 rounded-xl"
                       >
                         <Check className="w-4 h-4" />
