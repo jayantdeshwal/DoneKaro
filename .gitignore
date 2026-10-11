@@ -45,7 +45,6 @@ coverage/
 
 # Expo
 .expo/
-dist/
 
 # Vercel
 .vercel/
@@ -53,8 +52,16 @@ dist/
 # TypeScript
 *.tsbuildinfo
 
-# Misc
+# Database backups and temporary snapshots
+*.dump
+*.backup
+*.sql.bak
+*.bak
+backups/
+
+# Misc & Local Cache
 *.pem
 .cache/
 scratch/
 supabase/.temp/
+.supabase/
