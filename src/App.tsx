@@ -108,7 +108,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RootRoute() {
-  const { isAuthenticated, isLoading, user, isAdmin } = useAuth()
+  const { isAuthenticated, isLoading, user, isAdmin, isWorker } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
@@ -121,6 +121,10 @@ function RootRoute() {
 
   if (isAdmin) {
     return <Navigate to="/admin" replace />
+  }
+
+  if (isWorker) {
+    return <Navigate to="/worker/dashboard" replace />
   }
 
   if (isAuthenticated || isGuestMode) {

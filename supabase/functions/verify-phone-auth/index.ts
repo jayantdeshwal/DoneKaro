@@ -139,14 +139,17 @@ serve(async (req: Request) => {
     const { data: existingProfile } = await adminClient
       .from('profiles')
       .select('id, full_name, email, role, phone')
-      .eq('phone', formattedPhone)
+      .or(`phone.eq.${formattedPhone},phone.eq.${cleanDigits}`)
       .maybeSingle()
 
     if (existingProfile) {
       // Reject admin accounts from the customer/worker OTP path
-      if (existingProfile.role === 'super_admin' || existingProfile.role === 'sub_admin') {
+      if (existingProfile.role === 'super_admin' || existingProfile.role === 'sub_admin' || existingProfile.role === 'admin') {
         return new Response(
-          JSON.stringify({ error: 'Administrator accounts must sign in through the Administrator portal.' }),
+          JSON.stringify({
+            error: 'Administrator accounts must sign in through the Administrator portal.',
+            isAdminAccount: true,
+          }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
@@ -157,10 +160,19 @@ serve(async (req: Request) => {
       }
     }
 
-    // If not found by profile, look up by canonical email
+    const legacyEmails = [
+      canonicalEmail.toLowerCase(),
+      `${cleanDigits}@phone.donekaro.local`,
+      `${cleanDigits}@phone.kaamgar.local`,
+      `${cleanDigits}@phone.jugnu.in`,
+    ]
+
+    // If not found by profile, look up by canonical/legacy emails
     if (!authUser) {
       const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 })
-      const userByEmail = usersData?.users.find((user) => user.email?.toLowerCase() === canonicalEmail)
+      const userByEmail = usersData?.users.find((user) =>
+        legacyEmails.includes(user.email?.toLowerCase() || '')
+      )
       if (userByEmail) {
         authUser = userByEmail
       }
@@ -185,7 +197,9 @@ serve(async (req: Request) => {
         // Handle concurrent OTP race: another request may have just created the same user
         if (createErr.message?.toLowerCase().includes('already') || createErr.message?.toLowerCase().includes('duplicate')) {
           const { data: retryUsersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 })
-          const retryUser = retryUsersData?.users.find((user) => user.email?.toLowerCase() === canonicalEmail)
+          const retryUser = retryUsersData?.users.find((user) =>
+            legacyEmails.includes(user.email?.toLowerCase() || '')
+          )
           if (retryUser) {
             authUser = retryUser
             isNewUser = false

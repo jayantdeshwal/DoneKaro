@@ -141,10 +141,35 @@ export default function Login() {
             const authResult = await verifyAndLoginWithOtp(cleanPhone, accessToken)
             if (authResult.user.role === 'customer' && authResult.user.registration_completed === false) {
               navigate('/register?incomplete=true')
+            } else if (authResult.user.role === 'admin' || authResult.user.role === 'super_admin' || authResult.user.role === 'sub_admin') {
+              const supabase = getSupabaseClient()
+              try {
+                const { data: active } = await supabase.rpc('is_admin_2fa_active')
+                if (active === true) {
+                  navigate('/admin')
+                  return
+                }
+              } catch {
+                // Ignore RPC check failure
+              }
+              // Admin session established, prompt for active admin 2FA authorization if needed
+              setLoginRole('admin')
+              const clean = tryNormalizeIndianPhone(authResult.user.phone || cleanPhone) ?? ''
+              if (clean.length === 10) setAdminPhone(clean)
+              return
+            } else if (authResult.user.role === 'worker') {
+              navigate('/worker/dashboard')
             } else {
               navigate('/')
             }
-          } catch (err) {
+          } catch (err: any) {
+            const msg = err?.message || ''
+            if (msg.toLowerCase().includes('administrator')) {
+              setLoginRole('admin')
+              setAdminPhone(cleanPhone)
+              setAdminError('Administrator account detected. Please complete sign-in via the Administrator portal.')
+              return
+            }
             setCustomerError(sanitizeErrorMessage(err, 'Sign in failed after OTP verification.'))
           } finally {
             setCustomerLoading(false)
@@ -198,11 +223,33 @@ export default function Login() {
             const authRes = await verifyAndLoginWithOtp(cleanPhone, accessToken)
             if (authRes.role === 'worker') {
               navigate('/worker/dashboard')
+            } else if (authRes.role === 'admin' || authRes.role === 'super_admin' || authRes.role === 'sub_admin') {
+              const supabase = getSupabaseClient()
+              try {
+                const { data: active } = await supabase.rpc('is_admin_2fa_active')
+                if (active === true) {
+                  navigate('/admin')
+                  return
+                }
+              } catch {
+                // Ignore RPC check failure
+              }
+              setLoginRole('admin')
+              const clean = tryNormalizeIndianPhone(authRes.user.phone || cleanPhone) ?? ''
+              if (clean.length === 10) setAdminPhone(clean)
+              return
             } else {
               // User has verified phone but has not completed worker onboarding
               navigate(`/register/worker?phone=${cleanPhone}`)
             }
-          } catch (err) {
+          } catch (err: any) {
+            const msg = err?.message || ''
+            if (msg.toLowerCase().includes('administrator')) {
+              setLoginRole('admin')
+              setAdminPhone(cleanPhone)
+              setAdminError('Administrator account detected. Please complete sign-in via the Administrator portal.')
+              return
+            }
             setWorkerError(sanitizeErrorMessage(err, 'Sign in failed after OTP verification.'))
           } finally {
             setWorkerLoading(false)

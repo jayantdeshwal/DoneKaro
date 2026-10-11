@@ -40,6 +40,10 @@ interface ProfileRow {
   created_at: string | null
 }
 
+export const SUPER_ADMIN_UUID = '3216cdd3-aaea-45ab-944c-cfb30d6a6e0b'
+
+let activeAuthLoadSequence = 0
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -108,28 +112,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone?: string
     user_metadata?: Record<string, unknown>
     created_at?: string
-  }) => {
+  }): Promise<User | null> => {
+    const currentSeq = ++activeAuthLoadSequence
     const supabase = getSupabaseClient()
-    const { data: profileData, error: profileError } = await supabase
+    let { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id, full_name, phone, email, role, language, avatar_url, address_proof_url, registration_completed, created_at')
       .eq('id', authUser.id)
       .maybeSingle()
 
+    // Graceful column fallback: If query fails because newly added schema columns (such as address_proof_url)
+    // are not yet migrated to the remote database (Postgres error 42703), retry with the stable core columns.
+    if (profileError && (profileError.code === '42703' || profileError.message?.includes('does not exist'))) {
+      const fallbackQuery = await supabase
+        .from('profiles')
+        .select('id, full_name, phone, email, role, language, avatar_url, created_at')
+        .eq('id', authUser.id)
+        .maybeSingle()
+      if (!fallbackQuery.error) {
+        profileData = fallbackQuery.data as any
+        profileError = null
+      }
+    }
+
+    // Prevent stale async queries from older sessions or events overwriting state
+    if (currentSeq !== activeAuthLoadSequence) {
+      return null
+    }
+
+    if (profileError) {
+      console.error('[AuthContext] Error loading user profile:', profileError)
+      // Never silently downgrade an existing user or the designated super-admin on query error
+      if (authUser.id === SUPER_ADMIN_UUID) {
+        const fallbackSuperAdmin: User = {
+          id: authUser.id,
+          name: 'Jayant Deshwal (Super Admin)',
+          phone: authUser.phone || '',
+          email: 'jayant.deshwal.56@gmail.com',
+          role: 'super_admin',
+          language: 'en',
+          avatar_url: null,
+          address_proof_url: null,
+          registration_completed: true,
+          created_at: authUser.created_at || new Date().toISOString(),
+        }
+        setUser(fallbackSuperAdmin)
+        return fallbackSuperAdmin
+      }
+      // If user is already set with same ID, retain their current role
+      if (user && user.id === authUser.id) {
+        return user
+      }
+      throw new Error(`Profile query failed: ${profileError.message}`)
+    }
+
     // Successful query with no row = account deleted. Sign out immediately.
-    // A query error (network/DB failure) is NOT treated as deletion — fall through normally.
-    if (!profileError && profileData === null) {
+    // A query error (network/DB failure) is NOT treated as deletion — handled above.
+    if (profileData === null) {
       console.warn('[AuthContext] Profile not found for authenticated user — account deleted. Signing out.')
       setUser(null)
       void supabase.auth.signOut()
-      return
+      return null
     }
 
-    const profile = profileData as ProfileRow | null
+    const profile = profileData as ProfileRow
 
-    let role = profile?.role as UserRole | undefined
-
-    if (role !== 'worker' && role !== 'admin' && role !== 'super_admin' && role !== 'sub_admin') {
+    // Authoritative role resolution:
+    // 1. Authoritative Super Admin anchor
+    let role: UserRole = profile.role
+    if (authUser.id === SUPER_ADMIN_UUID) {
+      role = 'super_admin'
+    } else if (role !== 'worker' && role !== 'admin' && role !== 'super_admin' && role !== 'sub_admin') {
       const { data: workerCheck } = (await supabase
         .from('worker_profiles' as any)
         .select('id')
@@ -137,11 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle()) as { data: { id: string } | null }
       if (workerCheck?.id) {
         role = 'worker'
+      } else {
+        role = role ?? 'customer'
       }
     }
 
     // Filter out internal synthetic email domains from personal email display
-    const rawEmail = profile?.email || authUser.email || ''
+    const rawEmail = profile.email || authUser.email || ''
     const isSyntheticEmail =
       rawEmail.includes('@phone.donekaro.local') ||
       rawEmail.includes('@phone.kaamgar.local') ||
@@ -151,23 +206,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const resolvedUser: User = {
       id: authUser.id,
       name:
-        profile?.full_name ||
+        profile.full_name ||
         String(authUser.user_metadata?.full_name ?? authUser.user_metadata?.name ?? authUser.email ?? 'User'),
-      phone: profile?.phone || authUser.phone || '',
+      phone: profile.phone || authUser.phone || '',
       email: cleanEmail,
-      role: role ?? 'customer',
-      language: profile?.language ?? 'en',
-      avatar_url: profile?.avatar_url ?? (authUser.user_metadata?.avatar_url as string) ?? null,
-      address_proof_url: profile?.address_proof_url ?? null,
-      registration_completed: profile?.registration_completed ?? true,
-      created_at: profile?.created_at ?? authUser.created_at,
+      role,
+      language: profile.language ?? 'en',
+      avatar_url: profile.avatar_url ?? (authUser.user_metadata?.avatar_url as string) ?? null,
+      address_proof_url: profile.address_proof_url ?? null,
+      registration_completed: profile.registration_completed ?? true,
+      created_at: profile.created_at ?? authUser.created_at,
     }
-    setUser(resolvedUser)
-    if (typeof window !== 'undefined') {
-      if (!sessionStorage.getItem('donekaro_auth_session_event')) {
-        sessionStorage.setItem('donekaro_auth_session_event', `auth_${Date.now()}`)
+
+    if (currentSeq === activeAuthLoadSequence) {
+      setUser(resolvedUser)
+      if (typeof window !== 'undefined') {
+        if (!sessionStorage.getItem('donekaro_auth_session_event')) {
+          sessionStorage.setItem('donekaro_auth_session_event', `auth_${Date.now()}`)
+        }
       }
     }
+
+    return resolvedUser
   }
 
   const login = (userData: User) => {
@@ -263,10 +323,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(sessionErr?.message || 'Failed to install authenticated session. Please retry.')
     }
 
-    // Load authoritative profile
-    await loadSupabaseUser(sessionData.user)
+    // Load authoritative profile from database
+    const authoritativeUser = await loadSupabaseUser(sessionData.user)
 
-    const resolvedUser: User = {
+    const finalUser: User = authoritativeUser || {
       id: data.user.id,
       name: data.user.name || fullName || 'User',
       phone: data.user.phone || formattedPhone,
@@ -280,9 +340,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return {
-      user: resolvedUser,
+      user: finalUser,
       isNewUser: Boolean(data.isNewUser),
-      role: (data.role as UserRole) || 'customer',
+      role: finalUser.role,
     }
   }
 

@@ -146,7 +146,7 @@ serve(async (req: Request) => {
     const { data: adminProfile, error: profileErr } = await adminClient
       .from('profiles')
       .select('id, full_name, email, role, phone')
-      .eq('phone', formattedPhone)
+      .or(`phone.eq.${formattedPhone},phone.eq.${cleanDigits}`)
       .maybeSingle()
 
     if (profileErr) {
