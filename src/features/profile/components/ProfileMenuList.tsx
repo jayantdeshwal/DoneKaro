@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Share2,
   Gift,
+  Lock,
 } from 'lucide-react'
 import { triggerPWAInstall } from '@/components/PWAInstallPrompt'
 import type { OpenSupportOptions } from '@/features/support'
@@ -463,6 +464,20 @@ export function ProfileMenuList({
                   <FileText className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
                   <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
                     {language === 'hi' ? 'नियम एवं शर्तें (Terms & Conditions)' : 'Terms & Conditions'}
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              {/* Row: Privacy Policy (Google Play Policy) */}
+              <div
+                onClick={() => onNavigate('/privacy')}
+                className="flex items-center justify-between py-3.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/70 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <Lock className="w-5 h-5 text-slate-500 dark:text-zinc-400 group-hover:text-amber-600 dark:group-hover:text-brand-400" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-brand-400">
+                    {language === 'hi' ? 'गोपनीयता नीति (Privacy Policy)' : 'Privacy Policy'}
                   </span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />

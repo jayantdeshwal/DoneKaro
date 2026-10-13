@@ -209,6 +209,9 @@ export default function AdminDashboard() {
         onClose={() => admin.setInspectCustomer(null)}
         bookings={admin.bookings}
         setProfileToDelete={admin.setProfileToDelete}
+        handleViewCustomerDocument={admin.handleViewCustomerDocument}
+        loadingSignedDoc={admin.loadingSignedCustomerDoc}
+        signedDocError={admin.signedCustomerDocError}
       />
 
       {/* Approve / Reject Action Confirmation Modal */}

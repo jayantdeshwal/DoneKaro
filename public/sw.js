@@ -162,9 +162,9 @@ self.addEventListener('periodicsync', event => {
   }
 })
 
-// 6. Push Notifications
+// 6. Push Notifications (Web Push RFC 8291 / 8292 & Android TWA Delegation)
 self.addEventListener('push', event => {
-  let data = { title: 'DoneKaro', body: 'New update available!' }
+  let data = { title: 'DoneKaro', body: 'New update available!', url: '/' }
   try {
     if (event.data) {
       data = event.data.json()
@@ -175,36 +175,66 @@ self.addEventListener('push', event => {
     }
   }
 
+  const title = (data.title && typeof data.title === 'string') ? data.title : 'DoneKaro'
+  const body = (data.body && typeof data.body === 'string') ? data.body : 'You have a new update from DoneKaro.'
+
+  // Sanitize internal navigation path to prevent open redirect
+  let targetUrl = '/'
+  if (data.url && typeof data.url === 'string') {
+    if (data.url.startsWith('/') && !data.url.startsWith('//')) {
+      targetUrl = data.url
+    } else {
+      try {
+        const parsed = new URL(data.url, self.location.origin)
+        if (parsed.origin === self.location.origin) {
+          targetUrl = parsed.pathname + parsed.search + parsed.hash
+        }
+      } catch {
+        targetUrl = '/'
+      }
+    }
+  }
+
   const options = {
-    body: data.body || 'You have a new update from DoneKaro.',
+    body,
     icon: '/icon-192.png',
     badge: '/favicon.svg',
     vibrate: [100, 50, 100],
     data: {
-      url: data.url || '/'
-    }
+      url: targetUrl,
+      notificationId: data.notificationId || null,
+      timestamp: Date.now()
+    },
+    tag: data.tag || 'donekaro-alert',
+    renotify: true
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'DoneKaro', options)
+    self.registration.showNotification(title, options)
   )
 })
 
-// 7. Notification Click Handler
+// 7. Notification Click Handler (Focus existing tab/app or launch deep link)
 self.addEventListener('notificationclick', event => {
   event.notification.close()
   const targetUrl = event.notification.data?.url || '/'
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // If a window on our origin is already open, focus it and navigate to destination
       for (const client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
+        if ('focus' in client) {
+          if ('navigate' in client && client.url !== targetUrl) {
+            client.navigate(targetUrl)
+          }
           return client.focus()
         }
       }
+      // If no window is active, open the target deep-link
       if (self.clients.openWindow) {
         return self.clients.openWindow(targetUrl)
       }
     })
   )
 })
+

@@ -10,7 +10,7 @@ import {
   createSubAdmin,
   demoteSubAdmin,
 } from '@/services/admin'
-import { getIdProofSignedUrl } from '@/services/storage'
+import { getIdProofSignedUrl, getCustomerAddressProofSignedUrl } from '@/services/storage'
 import { removePhoneFromRegisteredCache } from '@/services/authCheck'
 import {
   markAllNotificationsRead as markAllNotificationsReadRpc,
@@ -142,6 +142,26 @@ export function useAdminData(isAdmin: boolean) {
       setSignedDocError(err instanceof Error ? err.message : 'Failed to open document')
     } finally {
       setLoadingSignedDoc(false)
+    }
+  }
+
+  // Customer document inspection state
+  const [loadingSignedCustomerDoc, setLoadingSignedCustomerDoc] = useState(false)
+  const [signedCustomerDocError, setSignedCustomerDocError] = useState('')
+
+  const handleViewCustomerDocument = async (path: string) => {
+    setLoadingSignedCustomerDoc(true)
+    setSignedCustomerDocError('')
+    try {
+      const signedUrl = await getCustomerAddressProofSignedUrl(path, 3600)
+      if (!signedUrl) {
+        throw new Error('Unable to generate secure signed link for this customer document.')
+      }
+      window.open(signedUrl, '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      setSignedCustomerDocError(err instanceof Error ? err.message : 'Failed to open customer document')
+    } finally {
+      setLoadingSignedCustomerDoc(false)
     }
   }
 
@@ -856,6 +876,10 @@ export function useAdminData(isAdmin: boolean) {
     loadingSignedDoc,
     signedDocError,
     handleViewIdDocument,
+
+    loadingSignedCustomerDoc,
+    signedCustomerDocError,
+    handleViewCustomerDocument,
 
     refreshAll,
   }

@@ -27,6 +27,7 @@ const WorkerDashboard = lazyWithRetry(() => import('./pages/WorkerDashboard'))
 const WorkerReviews = lazyWithRetry(() => import('./pages/WorkerReviews'))
 const CategoryPage = lazyWithRetry(() => import('./pages/CategoryPage'))
 const Terms = lazyWithRetry(() => import('./pages/Terms'))
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'))
 const AdminSupportPage = lazyWithRetry(() =>
   import('./features/admin-support').then((m) => ({ default: m.AdminSupportPage }))
 )
@@ -162,6 +163,10 @@ function AppRoutes() {
         <Route path="terms" element={lazyElement(<Terms />)} />
         <Route path="terms-and-conditions" element={<Navigate to="/terms" replace />} />
         <Route path="legal/terms" element={<Navigate to="/terms" replace />} />
+        <Route path="privacy" element={lazyElement(<PrivacyPolicy />)} />
+        <Route path="privacy-policy" element={<Navigate to="/privacy" replace />} />
+        <Route path="legal/privacy" element={<Navigate to="/privacy" replace />} />
+        <Route path="delete-account" element={<Navigate to="/privacy#account-deletion" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

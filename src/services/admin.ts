@@ -25,6 +25,7 @@ export interface AdminCustomerRow {
   name: string
   phone: string
   avatar_url: string | null
+  address_proof_url?: string | null
   created_at: string
   total_bookings: number | null
   completed_bookings: number | null
@@ -185,6 +186,7 @@ export async function fetchAdminCustomers(): Promise<AdminCustomerRow[]> {
         name: row.name || 'Unnamed Customer',
         phone: row.phone || 'No phone',
         avatar_url: row.avatar_url || null,
+        address_proof_url: row.address_proof_url || null,
         created_at: row.created_at,
         total_bookings: row.total_bookings == null ? null : Number(row.total_bookings),
         completed_bookings: row.completed_bookings == null ? null : Number(row.completed_bookings),
@@ -197,14 +199,28 @@ export async function fetchAdminCustomers(): Promise<AdminCustomerRow[]> {
 
   // 2. Direct tables query with graceful error handling and local cache fallback
   try {
+    let rawCustomerProfiles: any[] = []
     const [customersResult, bookingsResult] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, full_name, phone, avatar_url, created_at')
+        .select('id, full_name, phone, avatar_url, address_proof_url, created_at')
         .eq('role', 'customer')
         .order('created_at', { ascending: false }),
       supabase.from('bookings').select('id, customer_id, status'),
     ])
+
+    // Graceful column fallback: If query fails because address_proof_url column is not yet migrated,
+    // retry with core profiles columns.
+    if (customersResult.error && (customersResult.error.code === '42703' || customersResult.error.message?.includes('does not exist'))) {
+      const fallbackQuery = await supabase
+        .from('profiles')
+        .select('id, full_name, phone, avatar_url, created_at')
+        .eq('role', 'customer')
+        .order('created_at', { ascending: false })
+      rawCustomerProfiles = (fallbackQuery.data ?? []) as any[]
+    } else {
+      rawCustomerProfiles = (customersResult.data ?? []) as any[]
+    }
 
     const bookings = (bookingsResult.data ?? []) as any[]
     const bookingMetricsAvailable = !bookingsResult.error
@@ -224,13 +240,13 @@ export async function fetchAdminCustomers(): Promise<AdminCustomerRow[]> {
 
     const customerMap = new Map<string, AdminCustomerRow>()
 
-    const rawCustomerProfiles = (customersResult.data ?? []) as any[]
     for (const c of rawCustomerProfiles) {
       customerMap.set(c.id, {
         id: c.id,
         name: c.full_name || 'Registered Customer',
         phone: c.phone || 'No phone',
         avatar_url: c.avatar_url || null,
+        address_proof_url: c.address_proof_url || null,
         created_at: c.created_at || new Date().toISOString(),
         total_bookings: bookingMetricsAvailable ? totalBookingsByCustomer.get(c.id) || 0 : null,
         completed_bookings: bookingMetricsAvailable ? completedByCustomer.get(c.id) || 0 : null,

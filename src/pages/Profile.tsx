@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { getSupabaseClient } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAiAssistant } from '@/features/ai-support'
 import { useSupport } from '@/features/support'

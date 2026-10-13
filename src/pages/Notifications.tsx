@@ -22,6 +22,15 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { DbNotification } from '@/services/notifications'
+import {
+  getNotificationSupportInfo,
+  requestNotificationPermission,
+  getNotificationStatusGuidance,
+  subscribeToPush,
+  unsubscribeFromPush,
+  checkIsSubscribed,
+  NotificationPermissionState,
+} from '@/utils/pushNotification'
 
 const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
   booking_created: {
@@ -122,6 +131,25 @@ export default function Notifications() {
 
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshSuccess, setRefreshSuccess] = useState(false)
+  const [permissionState, setPermissionState] = useState<NotificationPermissionState>(() => {
+    return getNotificationSupportInfo().permission
+  })
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false)
+
+  const handleEnableNotifications = async () => {
+    setIsRequestingPermission(true)
+    try {
+      const res = await requestNotificationPermission()
+      setPermissionState(res)
+      if (res === 'granted') {
+        await subscribeToPush(undefined, language)
+      }
+    } finally {
+      setIsRequestingPermission(false)
+    }
+  }
+
+  const permissionGuidance = getNotificationStatusGuidance(permissionState, language)
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -250,6 +278,47 @@ export default function Notifications() {
             )}
           </div>
         </div>
+
+        {/* Phone / Push Notification Permission Banner */}
+        {permissionState !== 'granted' && permissionState !== 'unsupported' && (
+          <div
+            className={`mb-6 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 transition-all ${
+              permissionState === 'denied'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                : 'bg-brand-500/10 border-brand-500/30 text-slate-900 dark:text-zinc-100'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                  permissionState === 'denied'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'bg-brand-500 text-slate-950 font-bold'
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold">{permissionGuidance.title}</h4>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5 leading-relaxed max-w-xl">
+                  {permissionGuidance.message}
+                </p>
+              </div>
+            </div>
+
+            {permissionState === 'default' && permissionGuidance.actionText && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleEnableNotifications}
+                disabled={isRequestingPermission}
+                className="shrink-0 text-xs font-bold px-3.5 py-1.5"
+              >
+                {isRequestingPermission ? t('common.loading', 'Requesting...') : permissionGuidance.actionText}
+              </Button>
+            )}
+          </div>
+        )}
 
         {isLoadingNotifications && dbNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-semantic-text-secondary">
