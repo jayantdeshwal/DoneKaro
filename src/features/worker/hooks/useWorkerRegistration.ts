@@ -362,48 +362,23 @@ export function useWorkerRegistration() {
       const allSelectedCategories =
         selectedServices.length > 0 ? selectedServices : [primaryCategory]
 
+      // Authoritative register_worker RPC invocation matching public.register_worker signature
+      // (worker_name, worker_phone, worker_bio, worker_experience, worker_category_id,
+      //  worker_area_pincodes, worker_avatar_url, worker_id_proof_url, worker_category_ids)
       const { error: rpcError } = await (supabase as any).rpc('register_worker', {
-        target_name: formData.name.trim(),
-        target_bio: formData.bio.trim() || null,
-        target_experience_years: parseInt(formData.experience) || 0,
-        target_service_areas: formData.areas,
-        target_id_proof_url: idProofPath,
-        target_avatar_url: avatarUrl,
-        target_categories: allSelectedCategories,
+        worker_name: formData.name.trim(),
+        worker_phone: cleanPhone,
+        worker_bio: formData.bio.trim() || null,
+        worker_experience: parseInt(formData.experience) || 0,
+        worker_category_id: primaryCategory,
+        worker_area_pincodes: formData.areas,
+        worker_avatar_url: avatarUrl,
+        worker_id_proof_url: idProofPath || null,
+        worker_category_ids: allSelectedCategories,
       })
 
       if (rpcError) {
-        console.warn('RPC register_worker failed, falling back to direct table update:', rpcError)
-
-        await (supabase.from('profiles') as any).upsert({
-          id: authUser.id,
-          full_name: formData.name.trim(),
-          phone: cleanPhone,
-          role: 'worker',
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString(),
-        })
-
-        const { error: wpError } = await (supabase.from('worker_profiles') as any).upsert({
-          id: authUser.id,
-          bio: formData.bio.trim() || null,
-          experience_years: parseInt(formData.experience) || 0,
-          id_proof_url: idProofPath,
-          approval_status: 'pending',
-          is_available: false,
-          updated_at: new Date().toISOString(),
-        })
-        if (wpError) throw wpError
-
-        await (supabase.from('worker_categories') as any).delete().eq('worker_id', authUser.id)
-        const categoryInserts = allSelectedCategories.map(catId => ({
-          worker_id: authUser.id,
-          category_id: catId,
-        }))
-        const { error: wcError } = await (supabase.from('worker_categories') as any).insert(
-          categoryInserts
-        )
-        if (wcError) throw wcError
+        throw new Error(rpcError.message || 'Worker registration failed on database RPC')
       }
 
       try {

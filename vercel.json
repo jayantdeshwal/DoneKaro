@@ -2,13 +2,13 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/((?!assets/|.well-known).*)",
+      "source": "/((?!assets/|\\.well-known).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/.well-known/assetlinks.json",
+      "source": "/.well-known/(.*)",
       "headers": [
         {
           "key": "Content-Type",
