@@ -363,6 +363,31 @@ export async function notifyAdminsOfWorkerRegistration(params: {
   }
 }
 
+function getStoragePath(value: unknown, bucket: string): string | null {
+  if (typeof value !== 'string' || !value.trim()) return null
+
+  const input = value.trim()
+  let path: string
+
+  try {
+    const url = new URL(input)
+    const marker = '/storage/v1/object/'
+    const markerIndex = url.pathname.indexOf(marker)
+    if (markerIndex === -1) return null
+
+    const objectPath = url.pathname.slice(markerIndex + marker.length)
+    const segments = objectPath.split('/').filter(Boolean)
+    if (segments.length < 3 || decodeURIComponent(segments[1]) !== bucket) return null
+
+    path = segments.slice(2).map((segment) => decodeURIComponent(segment)).join('/')
+  } catch {
+    const rawPath = input.split(/[?#]/, 1)[0].replace(/^\/+/, '')
+    path = rawPath.startsWith(`${bucket}/`) ? rawPath.slice(bucket.length + 1) : rawPath
+  }
+
+  return path || null
+}
+
 /**
  * Permanently deletes a worker or customer profile from the platform,
  * cascading through bookings, reviews, notifications, complaints, and auth records.
@@ -373,6 +398,45 @@ export async function deleteProfilePermanently(targetProfileId: string): Promise
   deleted_reviews?: number
 }> {
   const supabase = getSupabaseClient()
+
+  try {
+    const { data: profile, error: profileError } = await (supabase.from('profiles') as any)
+      .select('avatar_url, address_proof_url')
+      .eq('id', targetProfileId)
+      .maybeSingle()
+
+    if (profileError) throw profileError
+
+    const { data: workerProfile, error: workerProfileError } = await (supabase.from('worker_profiles') as any)
+      .select('id_proof_url')
+      .eq('id', targetProfileId)
+      .maybeSingle()
+
+    if (workerProfileError) throw workerProfileError
+
+    const pathsByBucket: Record<string, string[]> = {
+      avatars: [],
+      'customer-documents': [],
+      'worker-documents': [],
+    }
+
+    const avatarPath = getStoragePath(profile?.avatar_url, 'avatars')
+    const addressProofPath = getStoragePath(profile?.address_proof_url, 'customer-documents')
+    const idProofPath = getStoragePath(workerProfile?.id_proof_url, 'worker-documents')
+
+    if (avatarPath) pathsByBucket.avatars.push(avatarPath)
+    if (addressProofPath) pathsByBucket['customer-documents'].push(addressProofPath)
+    if (idProofPath) pathsByBucket['worker-documents'].push(idProofPath)
+
+    for (const [bucket, paths] of Object.entries(pathsByBucket)) {
+      if (paths.length === 0) continue
+
+      const { error: storageError } = await supabase.storage.from(bucket).remove(paths)
+      if (storageError) throw storageError
+    }
+  } catch (storageCleanupError) {
+    console.warn('Profile storage cleanup notice; continuing with database deletion:', storageCleanupError)
+  }
 
   const { data, error } = await (supabase as any).rpc('admin_delete_profile_permanently', {
     target_profile_id: targetProfileId,
