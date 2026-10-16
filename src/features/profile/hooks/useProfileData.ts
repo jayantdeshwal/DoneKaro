@@ -185,6 +185,14 @@ export function useProfileData({
     if (!file || !user?.id) return
 
     setIdProofUploadError('')
+    if (workerDetails?.approval_status === 'approved') {
+      setIdProofUploadError('Approved artisans must contact support to update verified KYC documents.')
+      return
+    }
+    if (workerDetails?.approval_status !== 'pending' && workerDetails?.approval_status !== 'rejected') {
+      return
+    }
+
     const validation = validateFile(file, {
       maxSizeMb: 10,
       allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
