@@ -65,7 +65,7 @@ export type AdminTabType =
 export interface ReviewWorkerRpc {
   rpc: (
     functionName: 'review_worker',
-    params: { target_worker_id: string; decision: 'approved' | 'rejected'; decision_reason?: string },
+    params: { target_worker_id: string; decision: 'approved' | 'rejected'; decision_reason: string | null },
   ) => Promise<{ error: { message: string } | null }>
 }
 

@@ -14,6 +14,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 // @ts-ignore
 import webpush from 'npm:web-push@3.6.7'
+import { getCorsHeaders, handleCors } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -29,15 +30,6 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
   } catch (err) {
     console.warn('VAPID initialization error:', err)
-  }
-}
-
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get('Origin') || '*'
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
   }
 }
 
@@ -90,11 +82,10 @@ function resolveSafeDestinationUrl(notificationType: string, bookingId?: string 
 }
 
 serve(async (req: Request) => {
-  const corsHeaders = getCorsHeaders(req)
-
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const additionalAllowedHeaders = ['x-webhook-secret']
+  const corsResponse = handleCors(req, additionalAllowedHeaders)
+  if (corsResponse) return corsResponse
+  const corsHeaders = getCorsHeaders(req, additionalAllowedHeaders)
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {

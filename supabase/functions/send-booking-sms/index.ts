@@ -13,6 +13,7 @@ declare const Deno: {
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
+import { getCorsHeaders, handleCors } from '../_shared/cors.ts'
 
 const MSG91_AUTH_KEY = Deno.env.get('MSG91_AUTH_KEY') || ''
 const MSG91_FLOW_BOOKING_CREATED = Deno.env.get('MSG91_FLOW_BOOKING_CREATED') || ''
@@ -37,21 +38,10 @@ interface RequestPayload {
   booking_id: string
 }
 
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get('Origin') || '*'
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
-}
-
 serve(async (req: Request) => {
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
   const corsHeaders = getCorsHeaders(req)
-
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {

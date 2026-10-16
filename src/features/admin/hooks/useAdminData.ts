@@ -556,7 +556,7 @@ export function useAdminData(isAdmin: boolean) {
       const { error } = await supabase.rpc('review_worker', {
         target_worker_id: selectedWorkerForAction.id,
         decision: actionType === 'approve' ? 'approved' : 'rejected',
-        decision_reason: actionType === 'reject' ? rejectionReason.trim() || 'Registration requires additional review.' : undefined,
+        decision_reason: actionType === 'reject' ? rejectionReason.trim() || null : null,
       })
 
       if (error) throw new Error(error.message)

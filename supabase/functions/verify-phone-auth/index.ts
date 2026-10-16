@@ -11,27 +11,17 @@ declare const Deno: {
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
+import { getCorsHeaders, handleCors } from '../_shared/cors.ts'
 
 const MSG91_AUTH_KEY = Deno.env.get('MSG91_AUTH_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get('Origin') || '*'
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
-}
-
 serve(async (req: Request) => {
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
   const corsHeaders = getCorsHeaders(req)
-
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
@@ -131,16 +121,54 @@ serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    // 5. Look up existing profile or auth user by phone or canonical email
-    let authUser: any = null
+    // 5. Resolve an existing account only through a profile bound to this verified phone
+    let authUser: {
+      id: string
+      email?: string
+      user_metadata?: Record<string, unknown>
+    } | null = null
     let isNewUser = false
 
-    // Check profiles by phone
-    const { data: existingProfile } = await adminClient
-      .from('profiles')
-      .select('id, full_name, email, role, phone')
-      .or(`phone.eq.${formattedPhone},phone.eq.${cleanDigits}`)
-      .maybeSingle()
+    const legacyEmails = [
+      canonicalEmail.toLowerCase(),
+      `${cleanDigits}@phone.donekaro.local`,
+      `${cleanDigits}@phone.kaamgar.local`,
+      `${cleanDigits}@phone.jugnu.in`,
+    ]
+
+    const findExistingProfile = async () => {
+      const phoneLookup = await adminClient
+        .from('profiles')
+        .select('id, full_name, email, role, phone')
+        .or(`phone.eq.${formattedPhone},phone.eq.${cleanDigits}`)
+        .maybeSingle()
+
+      if (phoneLookup.error) return { profile: null, error: phoneLookup.error }
+      if (phoneLookup.data) return { profile: phoneLookup.data, error: null }
+
+      const emailLookup = await adminClient
+        .from('profiles')
+        .select('id, full_name, email, role, phone')
+        .in('email', legacyEmails)
+        .maybeSingle()
+
+      if (emailLookup.error) return { profile: null, error: emailLookup.error }
+
+      const profilePhone = String(emailLookup.data?.phone || '').replace(/\D/g, '').slice(-10)
+      return {
+        profile: profilePhone === cleanDigits ? emailLookup.data : null,
+        error: null,
+      }
+    }
+
+    const { profile: existingProfile, error: profileLookupError } = await findExistingProfile()
+    if (profileLookupError) {
+      console.error('[verify-phone-auth] Profile lookup error:', profileLookupError)
+      return new Response(
+        JSON.stringify({ error: 'Authentication service error. Please retry.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (existingProfile) {
       // Reject admin accounts from the customer/worker OTP path
@@ -157,24 +185,12 @@ serve(async (req: Request) => {
       const { data: userData, error: getUserErr } = await adminClient.auth.admin.getUserById(existingProfile.id)
       if (!getUserErr && userData?.user) {
         authUser = userData.user
-      }
-    }
-
-    const legacyEmails = [
-      canonicalEmail.toLowerCase(),
-      `${cleanDigits}@phone.donekaro.local`,
-      `${cleanDigits}@phone.kaamgar.local`,
-      `${cleanDigits}@phone.jugnu.in`,
-    ]
-
-    // If not found by profile, look up by canonical/legacy emails
-    if (!authUser) {
-      const { data: usersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 })
-      const userByEmail = usersData?.users.find((user) =>
-        legacyEmails.includes(user.email?.toLowerCase() || '')
-      )
-      if (userByEmail) {
-        authUser = userByEmail
+      } else {
+        console.error('[verify-phone-auth] Profile has no corresponding auth user:', getUserErr)
+        return new Response(
+          JSON.stringify({ error: 'Account is not properly configured. Please contact support.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
       }
     }
 
@@ -196,15 +212,29 @@ serve(async (req: Request) => {
       if (createErr) {
         // Handle concurrent OTP race: another request may have just created the same user
         if (createErr.message?.toLowerCase().includes('already') || createErr.message?.toLowerCase().includes('duplicate')) {
-          const { data: retryUsersData } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 })
-          const retryUser = retryUsersData?.users.find((user) =>
-            legacyEmails.includes(user.email?.toLowerCase() || '')
-          )
-          if (retryUser) {
-            authUser = retryUser
-            isNewUser = false
-          } else {
-            console.error('[verify-phone-auth] createUser error (no retry match):', createErr)
+          const { profile: retryProfile, error: retryLookupError } = await findExistingProfile()
+          if (retryLookupError) {
+            console.error('[verify-phone-auth] Profile lookup failed after duplicate create:', retryLookupError)
+          } else if (retryProfile) {
+            if (retryProfile.role === 'super_admin' || retryProfile.role === 'sub_admin' || retryProfile.role === 'admin') {
+              return new Response(
+                JSON.stringify({
+                  error: 'Administrator accounts must sign in through the Administrator portal.',
+                  isAdminAccount: true,
+                }),
+                { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+
+            const { data: retryUserData, error: retryUserError } = await adminClient.auth.admin.getUserById(retryProfile.id)
+            if (!retryUserError && retryUserData?.user) {
+              authUser = retryUserData.user
+              isNewUser = false
+            }
+          }
+
+          if (!authUser) {
+            console.error('[verify-phone-auth] createUser duplicate could not be resolved through profiles:', createErr)
             return new Response(
               JSON.stringify({ error: 'Could not provision account. Please retry.' }),
               { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -221,16 +251,17 @@ serve(async (req: Request) => {
         authUser = createdData.user
       }
 
-      // Ensure profile row exists
-      await adminClient.from('profiles').upsert({
-        id: authUser.id,
-        full_name: fullName || 'User',
-        phone: formattedPhone,
-        email: personalEmail || null,
-        role: 'customer',
-        registration_completed: false,
-        updated_at: new Date().toISOString(),
-      })
+      if (isNewUser) {
+        await adminClient.from('profiles').upsert({
+          id: authUser.id,
+          full_name: fullName || 'User',
+          phone: formattedPhone,
+          email: personalEmail || null,
+          role: 'customer',
+          registration_completed: false,
+          updated_at: new Date().toISOString(),
+        })
+      }
     }
 
     // 7. Ensure profile is updated with verified phone if missing
