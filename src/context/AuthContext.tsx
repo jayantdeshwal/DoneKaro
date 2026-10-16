@@ -54,11 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const loadSession = async () => {
       try {
-        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        if (import.meta.env.DEV) {
           const testSessionRaw = sessionStorage.getItem('donekaro_test_session')
           if (testSessionRaw) {
             try {
-              const testUser = JSON.parse(testSessionRaw)
+              const testUser: User = JSON.parse(testSessionRaw)
               if (testUser && testUser.id && isMounted) {
                 setUser(testUser)
                 setIsLoading(false)
