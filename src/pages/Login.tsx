@@ -125,6 +125,44 @@ export default function Login() {
 
     setCustomerLoading(true)
     try {
+      // Remove DEV and localhost restrictions so this works on Vercel
+      const isReviewerBypassActive =
+        import.meta.env.VITE_E2E_TEST_MODE === 'true' &&
+        (cleanPhone === '9999999999' || cleanPhone === '+919999999999')
+
+      if (isReviewerBypassActive) {
+        const reviewerPassword = import.meta.env.VITE_E2E_TEST_PASSWORD
+        if (!reviewerPassword) {
+          setCustomerError('Reviewer password is not configured in environment variables.')
+          return
+        }
+
+        const supabase = getSupabaseClient()
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: 'reviewer@donekaro.com',
+          password: reviewerPassword,
+        })
+
+        if (error || !data.user || data.user.email !== 'reviewer@donekaro.com') {
+          setCustomerError('Reviewer sign-in failed. Please check credentials.')
+          return
+        }
+
+        const { data: reviewerProfile, error: profileError } = await (supabase.from('profiles') as any)
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle()
+
+        if (profileError || reviewerProfile?.role !== 'customer') {
+          await supabase.auth.signOut()
+          setCustomerError('Reviewer account must have the customer role.')
+          return
+        }
+
+        navigate('/')
+        return
+      }
+
       // 1. Verify account exists before opening OTP
       const check = await checkPhoneRegistration(cleanPhone)
       if (!check.isRegistered) {
