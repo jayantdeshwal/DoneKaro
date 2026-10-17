@@ -28,6 +28,7 @@ const WorkerReviews = lazyWithRetry(() => import('./pages/WorkerReviews'))
 const CategoryPage = lazyWithRetry(() => import('./pages/CategoryPage'))
 const Terms = lazyWithRetry(() => import('./pages/Terms'))
 const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'))
+const DeleteAccount = lazyWithRetry(() => import('./pages/DeleteAccount'))
 const AdminSupportPage = lazyWithRetry(() =>
   import('./features/admin-support').then((m) => ({ default: m.AdminSupportPage }))
 )
@@ -139,6 +140,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/privacy" element={lazyElement(<PrivacyPolicy />)} />
+      <Route path="/delete-account" element={lazyElement(<DeleteAccount />)} />
       <Route path="/" element={<Layout />}>
         <Route index element={lazyElement(<RootRoute />)} />
         <Route path="home" element={lazyElement(<GuestOrAuthRoute><Home /></GuestOrAuthRoute>)} />
@@ -166,7 +168,6 @@ function AppRoutes() {
         <Route path="legal/terms" element={<Navigate to="/terms" replace />} />
         <Route path="privacy-policy" element={<Navigate to="/privacy" replace />} />
         <Route path="legal/privacy" element={<Navigate to="/privacy" replace />} />
-        <Route path="delete-account" element={<Navigate to="/privacy#account-deletion" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
