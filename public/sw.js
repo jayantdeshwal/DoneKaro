@@ -198,7 +198,7 @@ self.addEventListener('push', event => {
   const options = {
     body,
     icon: '/icon-192.png',
-    badge: '/favicon.svg',
+    badge: '/icon-maskable.png',
     vibrate: [100, 50, 100],
     data: {
       url: targetUrl,
@@ -217,20 +217,15 @@ self.addEventListener('push', event => {
 // 7. Notification Click Handler (Focus existing tab/app or launch deep link)
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  const targetUrl = event.notification.data?.url || '/'
+  const targetUrl = new URL(event.notification.data?.url || '/', self.location.origin).href
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      // If a window on our origin is already open, focus it and navigate to destination
       for (const client of clientList) {
-        if ('focus' in client) {
-          if ('navigate' in client && client.url !== targetUrl) {
-            client.navigate(targetUrl)
-          }
-          return client.focus()
-        }
+        if (new URL(client.url).origin !== self.location.origin) continue
+        if ('navigate' in client && client.url !== targetUrl) return client.navigate(targetUrl).then(() => client.focus())
+        if ('focus' in client) return client.focus()
       }
-      // If no window is active, open the target deep-link
       if (self.clients.openWindow) {
         return self.clients.openWindow(targetUrl)
       }

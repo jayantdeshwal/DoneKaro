@@ -192,6 +192,72 @@ export async function subscribeToPush(
   }
 }
 
+/** Subscribes an authenticated user to Web Push after login. */
+export async function subscribeToPushNotifications(userId: string): Promise<SubscriptionResult> {
+  if (
+    typeof window === 'undefined' ||
+    typeof navigator === 'undefined' ||
+    !('serviceWorker' in navigator) ||
+    !('PushManager' in window) ||
+    !('Notification' in window)
+  ) {
+    return { success: false, error: 'Push notifications are not supported on this device/browser.' }
+  }
+
+  if (!userId) {
+    return { success: false, error: 'An authenticated user is required to subscribe.' }
+  }
+
+  const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
+  if (!vapidKey) {
+    return { success: false, error: 'VAPID public key not configured on client environment.' }
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') {
+      return { success: false, error: `Notification permission was ${permission}.` }
+    }
+
+    let subscription = await registration.pushManager.getSubscription()
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey) as unknown as BufferSource,
+      })
+    }
+
+    const keys = subscription.toJSON().keys
+    const p256dh = keys?.p256dh
+    const auth = keys?.auth
+    if (!p256dh || !auth) {
+      return { success: false, error: 'Subscription is missing encryption keys.' }
+    }
+
+    const supabase = getSupabaseClient()
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    if (authError || authData.user?.id !== userId) {
+      return { success: false, error: 'The authenticated user changed before push registration completed.' }
+    }
+
+    const { error } = await (supabase as any).rpc('save_push_subscription', {
+      p_endpoint: subscription.endpoint,
+      p_p256dh: p256dh,
+      p_auth: auth,
+      p_locale: 'en',
+    })
+
+    if (error) throw error
+
+    return { success: true, endpoint: subscription.endpoint }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Subscription failed.'
+    console.warn('Failed to register push notifications after login:', message)
+    return { success: false, error: message }
+  }
+}
+
 /**
  * Unsubscribes from Web Push in the browser and marks or deletes the subscription in Supabase.
  */
