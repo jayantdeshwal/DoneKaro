@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.donekaro.app",
       "sha256_cert_fingerprints": [
-        "DE:A9:95:DD:05:75:CC:38:79:FC:F0:79:21:EB:51:59:68:15:5E:D0:AB:45:53:EA:67:A3:39:1C:31:F8:E2:D3"
+        "DE:A9:95:DD:05:75:CC:38:79:FC:F0:79:21:EB:51:59:68:15:5E:D0:AB:45:53:EA:67:A3:39:1C:31:F8:E2:D3",
+        "8A:EE:64:8B:70:63:5C:CF:B3:A4:A4:2C:96:87:53:0D:83:62:FF:24:65:F5:F7:43:61:B9:B4:02:A8:32:85:FE"
       ]
     }
   }
