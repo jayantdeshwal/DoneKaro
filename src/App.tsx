@@ -138,6 +138,7 @@ function RootRoute() {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/privacy" element={lazyElement(<PrivacyPolicy />)} />
       <Route path="/" element={<Layout />}>
         <Route index element={lazyElement(<RootRoute />)} />
         <Route path="home" element={lazyElement(<GuestOrAuthRoute><Home /></GuestOrAuthRoute>)} />
@@ -163,7 +164,6 @@ function AppRoutes() {
         <Route path="terms" element={lazyElement(<Terms />)} />
         <Route path="terms-and-conditions" element={<Navigate to="/terms" replace />} />
         <Route path="legal/terms" element={<Navigate to="/terms" replace />} />
-        <Route path="privacy" element={lazyElement(<PrivacyPolicy />)} />
         <Route path="privacy-policy" element={<Navigate to="/privacy" replace />} />
         <Route path="legal/privacy" element={<Navigate to="/privacy" replace />} />
         <Route path="delete-account" element={<Navigate to="/privacy#account-deletion" replace />} />
