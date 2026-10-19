@@ -21,7 +21,6 @@ export default function WorkerRegistration() {
     setFormData,
     phoneVerified,
     setPhoneVerified,
-    verifyingOtp,
     alreadyRegisteredNotice,
     setAlreadyRegisteredNotice,
     avatarPreview,
@@ -44,7 +43,6 @@ export default function WorkerRegistration() {
     handleSelectParentCategory,
     handleAvatarChange,
     handleIdProofChange,
-    handleVerifyWorkerPhone,
     handleNext,
     handleBack,
     handleSubmit,
@@ -163,10 +161,8 @@ export default function WorkerRegistration() {
                 errors={errors}
                 phoneVerified={phoneVerified}
                 setPhoneVerified={setPhoneVerified}
-                verifyingOtp={verifyingOtp}
                 alreadyRegisteredNotice={alreadyRegisteredNotice}
                 setAlreadyRegisteredNotice={setAlreadyRegisteredNotice}
-                onVerifyPhone={handleVerifyWorkerPhone}
               />
             )}
 
@@ -236,7 +232,12 @@ export default function WorkerRegistration() {
                 >
                   {loading
                     ? uploadProgress || 'Submitting...'
-                    : t('auth.workerRegistration.submit', 'Submit for Approval')}
+                    : phoneVerified
+                      ? t('auth.workerRegistration.submit', 'Submit for Approval')
+                      : t(
+                          'auth.workerRegistration.verifyAndSubmit',
+                          'Verify Mobile & Submit for Approval'
+                        )}
                 </Button>
               )}
             </div>

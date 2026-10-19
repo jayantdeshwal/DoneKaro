@@ -79,12 +79,20 @@ export default function Register() {
     setUploadStatusMsg('')
     setAlreadyRegisteredNotice(null)
 
+    const formSnapshot = {
+      name: customerName.trim(),
+      phone: customerPhone,
+      email: customerEmail.trim(),
+      addressProof: customerAddressProof,
+    }
+
     if (!customerTermsAccepted) {
       setCustomerError(t('registerPage.termsRequired', 'Please accept the Terms & Conditions before continuing.'))
       return
     }
 
-    if (!customerAddressProof) {
+    const addressProof = formSnapshot.addressProof
+    if (!addressProof) {
       setCustomerError(
         t('registerPage.addressProofRequired', 'Address proof document is mandatory for customer registration.')
       )
@@ -101,7 +109,7 @@ export default function Register() {
       setCustomerLoading(true)
       setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
       try {
-        const addressProofPath = await uploadCustomerAddressProof(customerAddressProof, targetUserId)
+        const addressProofPath = await uploadCustomerAddressProof(addressProof, targetUserId)
         const supabase = getSupabaseClient()
         const { error: rpcErr } = await (supabase as any).rpc('complete_customer_registration', {
           p_address_proof_path: addressProofPath,
@@ -112,17 +120,29 @@ export default function Register() {
             rpcErr.message?.toLowerCase().includes('does not exist') ||
             rpcErr.message?.toLowerCase().includes('not found')
           if (fnMissing) {
-            await (supabase.from('profiles') as any).update({
-              address_proof_url: addressProofPath,
-              registration_completed: true,
-              updated_at: new Date().toISOString(),
-            }).eq('id', targetUserId)
+            const { data: updatedProfile, error: updateError } = await (supabase.from('profiles') as any)
+              .update({
+                address_proof_url: addressProofPath,
+                registration_completed: true,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', targetUserId)
+              .select('id')
+              .maybeSingle()
+            if (updateError) throw updateError
+            if (!updatedProfile) throw new Error('Customer registration profile could not be updated')
           } else {
             throw new Error(rpcErr.message || 'Registration completion failed')
           }
         }
 
         updateUser({ address_proof_url: addressProofPath, registration_completed: true })
+        setCustomerName('')
+        setCustomerPhone('')
+        setCustomerEmail('')
+        setCustomerAddressProof(null)
+        setCustomerTermsAccepted(false)
+        setPendingCustomerId(null)
         navigate('/')
       } catch (err) {
         setCustomerError(
@@ -138,12 +158,12 @@ export default function Register() {
       return
     }
 
-    const cleanName = customerName.trim()
+    const cleanName = formSnapshot.name
     if (!cleanName || cleanName.length < 2) {
       setCustomerError('Full Name is mandatory (minimum 2 characters)')
       return
     }
-    const normalizeResult = normalizeIndianPhone(customerPhone)
+    const normalizeResult = normalizeIndianPhone(formSnapshot.phone)
     if (!normalizeResult.ok) {
       setCustomerError(normalizeResult.error)
       return
@@ -174,14 +194,14 @@ export default function Register() {
               cleanPhone,
               accessToken,
               cleanName,
-              customerEmail.trim() || undefined
+              formSnapshot.email || undefined
             )
 
             const customerId = authResult.user.id
             setPendingCustomerId(customerId)
 
             // 2. Upload mandatory customer address proof to private bucket
-            const addressProofPath = await uploadCustomerAddressProof(customerAddressProof, customerId)
+            const addressProofPath = await uploadCustomerAddressProof(addressProof, customerId)
 
             // 3. Update profile authoritatively with address_proof_url reference and registration_completed: true
             const supabase = getSupabaseClient()
@@ -194,17 +214,29 @@ export default function Register() {
                 rpcErr.message?.toLowerCase().includes('does not exist') ||
                 rpcErr.message?.toLowerCase().includes('not found')
               if (fnMissing) {
-                await (supabase.from('profiles') as any).update({
-                  address_proof_url: addressProofPath,
-                  registration_completed: true,
-                  updated_at: new Date().toISOString(),
-                }).eq('id', customerId)
+                const { data: updatedProfile, error: updateError } = await (supabase.from('profiles') as any)
+                  .update({
+                    address_proof_url: addressProofPath,
+                    registration_completed: true,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', customerId)
+                  .select('id')
+                  .maybeSingle()
+                if (updateError) throw updateError
+                if (!updatedProfile) throw new Error('Customer registration profile could not be updated')
               } else {
                 throw new Error(rpcErr.message || 'Registration completion failed')
               }
             }
 
             updateUser({ address_proof_url: addressProofPath, registration_completed: true })
+            setCustomerName('')
+            setCustomerPhone('')
+            setCustomerEmail('')
+            setCustomerAddressProof(null)
+            setCustomerTermsAccepted(false)
+            setPendingCustomerId(null)
             navigate('/')
           } catch (err) {
             setCustomerError(

@@ -10,7 +10,6 @@ import { getSupabaseClient } from '@/lib/supabase'
 import { uploadAvatar, uploadIdProof, validateFile } from '@/services/storage'
 import { notifyAdminsOfWorkerRegistration } from '@/services/admin'
 import { openOtpWidget } from '@/services/otp'
-import { checkPhoneRegistration } from '@/services/authCheck'
 import { sanitizeErrorMessage } from '@/utils/errors'
 import { normalizeIndianPhone, tryNormalizeIndianPhone, sanitizePhoneInput } from '@/utils/phone'
 import { REGISTRATION_STEPS } from '../constants'
@@ -39,7 +38,6 @@ export function useWorkerRegistration() {
   const [phoneVerified, setPhoneVerified] = useState(
     !!(user?.phone && user.phone.trim().length >= 10)
   )
-  const [verifyingOtp, setVerifyingOtp] = useState(false)
   const [alreadyRegisteredNotice, setAlreadyRegisteredNotice] = useState<{
     phone: string
     role: UserRole
@@ -160,80 +158,7 @@ export function useWorkerRegistration() {
     }
   }
 
-  const handleVerifyWorkerPhone = async () => {
-    setErrors({})
-    setAlreadyRegisteredNotice(null)
-    const normalizeResult = normalizeIndianPhone(formData.phone)
-
-    if (!formData.name.trim() || formData.name.trim().length < 2) {
-      setErrors(prev => ({
-        ...prev,
-        name: 'Please enter your full name (minimum 2 characters)',
-      }))
-      return
-    }
-    if (!normalizeResult.ok) {
-      setErrors(prev => ({ ...prev, phone: normalizeResult.error }))
-      return
-    }
-    const cleanPhone = normalizeResult.digits
-
-    setVerifyingOtp(true)
-    try {
-      const launched = await openOtpWidget({
-        identifier: cleanPhone,
-        onSuccess: async (accessToken: string) => {
-          try {
-            const authResult = await verifyAndLoginWithOtp(
-              cleanPhone,
-              accessToken,
-              formData.name.trim(),
-              formData.email.trim() || undefined
-            )
-            setPhoneVerified(true)
-            setVerifyingOtp(false)
-            setErrors({})
-            if (authResult.role === 'worker') {
-              navigate('/worker/dashboard')
-              return
-            }
-            // Auto-advance to Step 2: Work Details
-            setCurrentStep(1)
-          } catch (e: any) {
-            setVerifyingOtp(false)
-            setErrors(prev => ({
-              ...prev,
-              phone: sanitizeErrorMessage(e, 'Verification failed. Please retry.'),
-            }))
-          }
-        },
-        onFailure: (errDetail: any) => {
-          setVerifyingOtp(false)
-          if (!errDetail?.cancelled) {
-            setErrors(prev => ({
-              ...prev,
-              phone: errDetail?.message || 'OTP verification failed. Please try again.',
-            }))
-          }
-        },
-      })
-      if (!launched) {
-        setVerifyingOtp(false)
-        setErrors(prev => ({
-          ...prev,
-          phone: 'Unable to initialize SMS verification. Please check your network or try again.',
-        }))
-      }
-    } catch (err: any) {
-      setVerifyingOtp(false)
-      setErrors(prev => ({
-        ...prev,
-        phone: sanitizeErrorMessage(err, 'Failed to launch verification widget.'),
-      }))
-    }
-  }
-
-  const validateStep = (stepIndex: number): boolean => {
+  const validateStep = (stepIndex: number, requirePhoneVerification = true): boolean => {
     const errs: Record<string, string> = {}
 
     if (stepIndex === 0) {
@@ -244,7 +169,7 @@ export function useWorkerRegistration() {
       const normalized = tryNormalizeIndianPhone(raw)
       if (!raw || !normalized || raw.length < 10) {
         errs.phone = t('auth.errors.invalidPhone', 'Please enter a valid 10-digit Indian mobile number')
-      } else if (!phoneVerified) {
+      } else if (requirePhoneVerification && !phoneVerified) {
         errs.phone = t(
           'auth.workerRegistration.phoneVerifyRequired',
           'Please verify your mobile number with OTP before continuing'
@@ -299,7 +224,7 @@ export function useWorkerRegistration() {
   }
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
+    if (validateStep(currentStep, currentStep !== 0)) {
       setCurrentStep(prev => Math.min(prev + 1, REGISTRATION_STEPS.length - 1))
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -317,82 +242,177 @@ export function useWorkerRegistration() {
       setCurrentStep(1)
       return
     }
-    if (!validateStep(0)) {
+    if (!validateStep(0, false)) {
       setCurrentStep(0)
+      return
+    }
+
+    const formSnapshot: RegistrationFormData = {
+      ...formData,
+      areas: [...formData.areas],
+    }
+    const servicesSnapshot = [...selectedServices]
+    const normalizeResult = normalizeIndianPhone(formSnapshot.phone)
+    if (!normalizeResult.ok) {
+      setErrors(prev => ({ ...prev, phone: normalizeResult.error }))
+      setCurrentStep(0)
+      return
+    }
+    const cleanPhone = normalizeResult.digits
+    const idProof = formSnapshot.idProof
+    if (!idProof) {
+      setErrors(prev => ({
+        ...prev,
+        idProof: t(
+          'auth.workerRegistration.idProofRequired',
+          'Government ID proof is required for verification'
+        ),
+      }))
+      setCurrentStep(2)
       return
     }
 
     setLoading(true)
     setUploadProgress('')
+    setErrors({})
 
     try {
-      const supabase = getSupabaseClient()
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser()
-
-      if (!authUser) {
-        throw new Error(
-          t(
-            'auth.workerRegistration.loginRequiredToSubmit',
-            'You must be signed in to submit. Please verify your phone number in Step 1.'
-          )
-        )
-      }
-
-      let idProofPath = ''
-      if (formData.idProof) {
+      const finishRegistration = async (authUserId: string) => {
+        const supabase = getSupabaseClient()
         setUploadProgress(t('auth.workerRegistration.uploadingId', 'Uploading Government ID proof securely...'))
-        idProofPath = await uploadIdProof(formData.idProof, authUser.id)
-      }
+        const idProofPath = await uploadIdProof(idProof, authUserId)
 
-      let avatarUrl: string | null = null
-      if (formData.avatar) {
-        setUploadProgress(t('auth.workerRegistration.uploadingAvatar', 'Uploading profile photo...'))
-        avatarUrl = await uploadAvatar(formData.avatar, authUser.id)
-      }
+        let avatarUrl: string | null = null
+        if (formSnapshot.avatar) {
+          setUploadProgress(t('auth.workerRegistration.uploadingAvatar', 'Uploading profile photo...'))
+          avatarUrl = await uploadAvatar(formSnapshot.avatar, authUserId)
+        }
 
-      setUploadProgress(t('auth.workerRegistration.savingProfile', 'Submitting your registration...'))
+        setUploadProgress(t('auth.workerRegistration.savingProfile', 'Submitting your registration...'))
+        const primaryCategory = servicesSnapshot[0] || formSnapshot.category
+        const allSelectedCategories =
+          servicesSnapshot.length > 0 ? servicesSnapshot : [primaryCategory]
 
-      const normalizedPhone = normalizeIndianPhone(formData.phone)
-      const cleanPhone = normalizedPhone.ok
-        ? normalizedPhone.digits
-        : formData.phone.replace(/\D/g, '').slice(-10)
-      const primaryCategory = selectedServices[0] || formData.category
-      const allSelectedCategories =
-        selectedServices.length > 0 ? selectedServices : [primaryCategory]
-
-      // Authoritative register_worker RPC invocation matching public.register_worker signature
-      // (worker_name, worker_phone, worker_bio, worker_experience, worker_category_id,
-      //  worker_area_pincodes, worker_avatar_url, worker_id_proof_url, worker_category_ids)
-      const { error: rpcError } = await (supabase as any).rpc('register_worker', {
-        worker_name: formData.name.trim(),
-        worker_phone: cleanPhone,
-        worker_bio: formData.bio.trim() || null,
-        worker_experience: parseInt(formData.experience) || 0,
-        worker_category_id: primaryCategory,
-        worker_area_pincodes: formData.areas,
-        worker_avatar_url: avatarUrl,
-        worker_id_proof_url: idProofPath || null,
-        worker_category_ids: allSelectedCategories,
-      })
-
-      if (rpcError) {
-        throw new Error(rpcError.message || 'Worker registration failed on database RPC')
-      }
-
-      try {
-        await notifyAdminsOfWorkerRegistration({
-          workerId: authUser.id,
-          workerName: formData.name.trim(),
-          category: allSelectedCategories.join(', '),
+        const { error: rpcError } = await (supabase as any).rpc('register_worker', {
+          worker_name: formSnapshot.name.trim(),
+          worker_phone: cleanPhone,
+          worker_bio: formSnapshot.bio.trim() || null,
+          worker_experience: parseInt(formSnapshot.experience) || 0,
+          worker_category_id: primaryCategory,
+          worker_area_pincodes: formSnapshot.areas,
+          worker_avatar_url: avatarUrl,
+          worker_id_proof_url: idProofPath,
+          worker_category_ids: allSelectedCategories,
         })
-      } catch (notifyErr) {
-        console.warn('Admin notification failed (non-blocking):', notifyErr)
+
+        if (rpcError) {
+          throw new Error(rpcError.message || 'Worker registration failed on database RPC')
+        }
+
+        try {
+          await notifyAdminsOfWorkerRegistration({
+            workerId: authUserId,
+            workerName: formSnapshot.name.trim(),
+            category: allSelectedCategories.join(', '),
+          })
+        } catch (notifyErr) {
+          console.warn('Admin notification failed (non-blocking):', notifyErr)
+        }
+
+        setFormData({
+          name: '',
+          phone: '',
+          email: '',
+          category: '',
+          experience: '',
+          bio: '',
+          avatar: null,
+          idProof: null,
+          areas: [],
+        })
+        setSelectedServices([])
+        setSelectedParentCategory(null)
+        setAvatarPreview(null)
+        setIdProofPreview(null)
+        setPhoneVerified(false)
+        setTermsAccepted(false)
+        setSubmitted(true)
       }
 
-      setSubmitted(true)
-    } catch (err: any) {
+      if (phoneVerified) {
+        const {
+          data: { user: authUser },
+          error: authError,
+        } = await getSupabaseClient().auth.getUser()
+        if (authError) throw authError
+        if (!authUser) {
+          throw new Error(
+            t(
+              'auth.workerRegistration.loginRequiredToSubmit',
+              'You must be signed in to submit. Please verify your phone number.'
+            )
+          )
+        }
+        await finishRegistration(authUser.id)
+        setLoading(false)
+        setUploadProgress('')
+      } else {
+        const launched = await openOtpWidget({
+          identifier: cleanPhone,
+          onSuccess: async (accessToken: string) => {
+            try {
+              const authResult = await verifyAndLoginWithOtp(
+                cleanPhone,
+                accessToken,
+                formSnapshot.name.trim(),
+                formSnapshot.email.trim() || undefined
+              )
+              if (authResult.role === 'worker') {
+                navigate('/worker/dashboard')
+                return
+              }
+              setPhoneVerified(true)
+              await finishRegistration(authResult.user.id)
+            } catch (err) {
+              console.error('Registration failed:', err)
+              setErrors(prev => ({
+                ...prev,
+                form: sanitizeErrorMessage(
+                  err,
+                  t('auth.workerRegistration.submissionFailed', 'Registration submission failed. Please try again.')
+                ),
+              }))
+            } finally {
+              setLoading(false)
+              setUploadProgress('')
+            }
+          },
+          onFailure: err => {
+            setLoading(false)
+            setUploadProgress('')
+            if (err && typeof err === 'object' && 'cancelled' in err && err.cancelled) return
+            setErrors(prev => ({
+              ...prev,
+              phone:
+                typeof err === 'string'
+                  ? err
+                  : err instanceof Error
+                    ? err.message
+                    : err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
+                      ? err.message
+                      : 'OTP verification failed. Please try again.',
+            }))
+          },
+        })
+        if (!launched) {
+          setLoading(false)
+          setErrors(prev => ({
+            ...prev,
+            phone: 'Unable to initialize SMS verification. Please check your network or try again.',
+          }))
+        }
+      }
+    } catch (err) {
       console.error('Registration failed:', err)
       setErrors(prev => ({
         ...prev,
@@ -401,7 +421,6 @@ export function useWorkerRegistration() {
           t('auth.workerRegistration.submissionFailed', 'Registration submission failed. Please try again.')
         ),
       }))
-    } finally {
       setLoading(false)
       setUploadProgress('')
     }
@@ -414,7 +433,6 @@ export function useWorkerRegistration() {
     setFormData,
     phoneVerified,
     setPhoneVerified,
-    verifyingOtp,
     alreadyRegisteredNotice,
     setAlreadyRegisteredNotice,
     avatarPreview,
@@ -439,7 +457,6 @@ export function useWorkerRegistration() {
     handleSelectParentCategory,
     handleAvatarChange,
     handleIdProofChange,
-    handleVerifyWorkerPhone,
     handleNext,
     handleBack,
     handleSubmit,

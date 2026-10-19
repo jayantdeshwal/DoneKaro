@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle, Mail, ShieldCheck } from 'lucide-react'
-import { Button, Input } from '@kaamgar/ui'
+import { CheckCircle, Mail } from 'lucide-react'
+import { Input } from '@kaamgar/ui'
 import { sanitizePhoneInput } from '@/utils/phone'
 import type { RegistrationFormData } from '../../types'
 
@@ -11,14 +11,12 @@ interface PersonalInfoStepProps {
   errors: Record<string, string>
   phoneVerified: boolean
   setPhoneVerified: (verified: boolean) => void
-  verifyingOtp: boolean
   alreadyRegisteredNotice: {
     phone: string
     role: string
     message?: string
   } | null
   setAlreadyRegisteredNotice: (notice: any) => void
-  onVerifyPhone: () => void | Promise<void>
 }
 
 export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
@@ -27,10 +25,8 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
   errors,
   phoneVerified,
   setPhoneVerified,
-  verifyingOtp,
   alreadyRegisteredNotice,
   setAlreadyRegisteredNotice,
-  onVerifyPhone,
 }) => {
   const { t } = useTranslation()
 
@@ -40,7 +36,7 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
         <p className="text-xs text-brand-300">
           {t(
             'auth.workerRegistration.step1Notice',
-            'Step 1 requires your Full Name and a verified Mobile Number. Mobile verification protects customers and ensures job notifications reach you.'
+            'Enter your full name and mobile number. Your mobile number will be verified after you complete your registration details.'
           )}
         </p>
       </div>
@@ -95,7 +91,6 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
         </p>
       </div>
 
-      {/* Verification Trigger or Verified Badge */}
       {phoneVerified ? (
         <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between text-emerald-400">
           <div className="flex items-center gap-2.5">
@@ -116,18 +111,12 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
           </button>
         </div>
       ) : (
-        <div className="pt-1">
-          <Button
-            type="button"
-            variant="primary"
-            className="w-full py-2.5"
-            onClick={onVerifyPhone}
-            loading={verifyingOtp}
-          >
-            <ShieldCheck className="w-4 h-4 mr-2" />
-            {t('auth.workerRegistration.verifyPhoneBtn', 'Verify Mobile Number with OTP')}
-          </Button>
-        </div>
+        <p className="text-xs text-semantic-text-tertiary">
+          {t(
+            'auth.workerRegistration.phoneVerificationAtSubmit',
+            'Your mobile number will be verified by OTP after you complete the required registration details.'
+          )}
+        </p>
       )}
     </div>
   )
