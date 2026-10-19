@@ -1235,6 +1235,7 @@
   },
   "registerPage": {
     "title": "New to DoneKaro? Create Account",
+    "errorTitle": "Registration Error",
     "subtitle": "Select your role to register with mobile OTP verification & password",
     "tabCustomer": "Customer Sign Up",
     "tabWorker": "Worker Sign Up",

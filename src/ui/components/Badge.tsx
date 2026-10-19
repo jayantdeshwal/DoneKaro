@@ -39,7 +39,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
               'h-1.5 w-1.5 rounded-full',
               variant === 'success' && 'bg-success-500',
               variant === 'warning' && 'bg-warning-500',
-              variant === 'danger' && 'bg-danger-500',
+              variant === 'danger' && 'bg-gray-900 text-red-300 border border-red-800 shadow-md',
               variant === 'info' && 'bg-blue-500',
               variant === 'brand' && 'bg-brand-500',
               variant === 'default' && 'bg-surface-400',

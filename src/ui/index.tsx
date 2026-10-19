@@ -25,7 +25,7 @@ export function Input({ label, error, helperText, leftIcon, rightIcon, className
         <input id={inputId} className={`w-full rounded-xl bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 shadow-xs transition-all ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''} ${className}`} aria-invalid={Boolean(error)} {...props} />
         {rightIcon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500">{rightIcon}</span>}
       </div>
-      {error ? <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400 font-medium">{error}</p> : helperText && <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">{helperText}</p>}
+      {error ? <p className="mt-1.5 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 font-medium shadow-md" role="alert">{error}</p> : helperText && <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">{helperText}</p>}
     </div>
   )
 }
@@ -64,7 +64,7 @@ export function Badge({ variant = 'default', size = 'md', dot, className = '', c
     default: 'bg-slate-100 text-slate-700 border border-slate-200/90 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
     success: 'bg-emerald-50 text-emerald-700 border border-emerald-200/90 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/50',
     warning: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',
-    danger: 'bg-rose-50 text-rose-700 border border-rose-200/90 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/50',
+    danger: 'bg-gray-900 text-red-300 border border-red-800 shadow-md',
     info: 'bg-sky-50 text-sky-700 border border-sky-200/90 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/50',
     primary: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',
     brand: 'bg-amber-50 text-amber-800 border border-amber-200/90 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50',

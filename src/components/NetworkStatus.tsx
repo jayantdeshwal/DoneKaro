@@ -34,7 +34,7 @@ export default function NetworkStatus() {
       <div
         role="alert"
         aria-live="assertive"
-        className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-white text-xs sm:text-sm font-medium py-2 px-4 text-center flex items-center justify-center gap-2 shadow-md animate-in"
+        className="fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-red-800 text-red-300 text-xs sm:text-sm font-medium py-2 px-4 text-center flex items-center justify-center gap-2 shadow-md animate-in"
       >
         <WifiOff className="w-4 h-4 flex-shrink-0 animate-pulse" />
         <span>आप इंटरनेट से डिस्कनेक्ट हैं / You are currently offline. Check your internet connection.</span>

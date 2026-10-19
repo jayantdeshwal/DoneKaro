@@ -517,10 +517,10 @@ export default function Login() {
           {loginRole === 'customer' && (
             <div>
               {customerError && (
-                <div className="mb-4 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl space-y-2 text-xs">
-                  <div className="flex items-start gap-2 text-red-400">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <span className="leading-relaxed">{customerError}</span>
+                <div className="mb-4 p-3.5 bg-gray-900 border border-red-800 rounded-xl shadow-md space-y-2 text-xs">
+                  <div className="flex items-start gap-2 text-red-300">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="leading-relaxed text-red-300">{customerError}</span>
                   </div>
                   {customerError.toLowerCase().includes('register') && (
                     <div className="pl-6 pt-1">
@@ -590,10 +590,10 @@ export default function Login() {
           {loginRole === 'worker' && (
             <div>
               {workerError && (
-                <div className="mb-4 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl space-y-2 text-xs">
-                  <div className="flex items-start gap-2 text-red-400">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <span className="leading-relaxed">{workerError}</span>
+                <div className="mb-4 p-3.5 bg-gray-900 border border-red-800 rounded-xl shadow-md space-y-2 text-xs">
+                  <div className="flex items-start gap-2 text-red-300">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="leading-relaxed text-red-300">{workerError}</span>
                   </div>
                   {workerError.toLowerCase().includes('register') && (
                     <div className="pl-6 pt-1">
@@ -663,10 +663,10 @@ export default function Login() {
           {loginRole === 'admin' && (
             <div>
               {adminError && (
-                <div className="mb-4 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs">
-                  <div className="flex items-start gap-2 text-red-400">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <span className="leading-relaxed">{adminError}</span>
+                <div className="mb-4 p-3.5 bg-gray-900 border border-red-800 rounded-xl shadow-md text-xs">
+                  <div className="flex items-start gap-2 text-red-300">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="leading-relaxed text-red-300">{adminError}</span>
                   </div>
                 </div>
               )}

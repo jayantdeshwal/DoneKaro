@@ -61,8 +61,8 @@ export function ProfileHeader({
         </div>
       )}
       {saveErrorMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2 animate-fadeIn">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="mb-4 p-3 rounded-xl bg-gray-900 border border-red-800 text-red-300 text-xs flex items-center gap-2 shadow-md animate-fadeIn">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
           <span>{saveErrorMsg}</span>
         </div>
       )}
@@ -73,8 +73,8 @@ export function ProfileHeader({
           {/* Status indicator tag */}
           <div className="flex items-center gap-1.5 mb-1.5">
             {!isProfileComplete ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/30">
-                <AlertCircle className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-300 bg-gray-900 px-2 py-0.5 rounded-full border border-red-800 shadow-md">
+                <AlertCircle className="w-3 h-3 text-red-500" />
                 <span>{t('profile.incompleteProfile', 'Incomplete profile')}</span>
               </span>
             ) : isWorker ? (
@@ -84,8 +84,8 @@ export function ProfileHeader({
                   <span>{isHindi ? 'सत्यापित कामगार' : 'Verified Partner'}</span>
                 </span>
               ) : workerApprovalStatus === 'rejected' ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/30">
-                  <AlertCircle className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-300 bg-gray-900 px-2 py-0.5 rounded-full border border-red-800 shadow-md">
+                  <AlertCircle className="w-3 h-3 text-red-500" />
                   <span>{isHindi ? 'सत्यापन अस्वीकृत' : 'Verification Rejected'}</span>
                 </span>
               ) : workerApprovalStatus === 'pending' ? (

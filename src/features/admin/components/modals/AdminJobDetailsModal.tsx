@@ -117,8 +117,8 @@ export function AdminJobDetailsModal({ bookingId, onClose }: AdminJobDetailsModa
 
           {loading && <div className="p-10 text-center text-sm text-slate-500 dark:text-zinc-400">{t('admin.jobDetails.loading', 'Loading Job history...')}</div>}
           {!loading && error && (
-            <div className="m-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />{error}
+            <div className="m-5 rounded-2xl border border-red-800 bg-gray-900 p-4 text-sm text-red-300 shadow-md flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />{error}
             </div>
           )}
 

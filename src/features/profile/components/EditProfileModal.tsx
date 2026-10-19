@@ -90,7 +90,7 @@ export function EditProfileModal({
         </div>
 
         {avatarUploadError && (
-          <p className="text-xs text-rose-500">{avatarUploadError}</p>
+          <p className="rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{avatarUploadError}</p>
         )}
 
         {/* Full Name */}

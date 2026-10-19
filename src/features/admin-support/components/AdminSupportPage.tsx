@@ -122,8 +122,8 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
 
         {/* Global Error Banner */}
         {errorMsg && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs flex items-center gap-2.5">
-            <AlertCircle className="w-5 h-5 shrink-0" />
+          <div className="p-4 rounded-2xl bg-gray-900 border border-red-800 text-red-300 text-xs flex items-center gap-2.5 shadow-md">
+            <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
             <span>{errorMsg}</span>
           </div>
         )}

@@ -232,7 +232,7 @@ export function BookingCard({
         </div>
       ))}
       {changeRequestError && (
-        <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{changeRequestError}</p>
+        <p className="mt-2 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs font-semibold text-red-300 shadow-md">{changeRequestError}</p>
       )}
 
       {/* Payment Summary Section */}

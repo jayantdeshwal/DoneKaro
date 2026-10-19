@@ -297,8 +297,8 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
 
               {/* Error Banner */}
               {errorMessage && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 text-xs flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-xl bg-gray-900 border border-red-800 text-xs text-red-300 shadow-md flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
                   <p>{errorMessage}</p>
                 </div>
               )}

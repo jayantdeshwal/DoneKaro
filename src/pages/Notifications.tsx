@@ -50,8 +50,8 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
   },
   booking_rejected: {
     icon: XCircle,
-    color: 'text-red-400',
-    bg: 'bg-red-950/60 border border-red-800/40',
+    color: 'text-red-500',
+    bg: 'bg-gray-900 border border-red-800 shadow-md',
   },
   booking_cancelled: {
     icon: AlertCircle,
@@ -80,8 +80,8 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
   },
   profile_rejected: {
     icon: AlertCircle,
-    color: 'text-red-400',
-    bg: 'bg-red-950/60 border border-red-800/40',
+    color: 'text-red-500',
+    bg: 'bg-gray-900 border border-red-800 shadow-md',
   },
   worker_registration_submitted: {
     icon: UserCheck,
@@ -284,7 +284,7 @@ export default function Notifications() {
           <div
             className={`mb-6 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 transition-all ${
               permissionState === 'denied'
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                ? 'bg-gray-900 border-red-800 text-red-300 shadow-md'
                 : 'bg-brand-500/10 border-brand-500/30 text-slate-900 dark:text-zinc-100'
             }`}
           >
@@ -292,15 +292,15 @@ export default function Notifications() {
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                   permissionState === 'denied'
-                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    ? 'bg-red-700 text-white font-bold'
                     : 'bg-brand-500 text-slate-950 font-bold'
                 }`}
               >
                 <Bell className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold">{permissionGuidance.title}</h4>
-                <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5 leading-relaxed max-w-xl">
+                <h4 className={`text-sm ${permissionState === 'denied' ? 'font-semibold text-red-500' : 'font-bold'}`}>{permissionGuidance.title}</h4>
+                <p className={`mt-0.5 text-xs leading-relaxed max-w-xl ${permissionState === 'denied' ? 'text-red-300' : 'text-slate-600 dark:text-zinc-400'}`}>
                   {permissionGuidance.message}
                 </p>
               </div>
@@ -341,6 +341,9 @@ export default function Notifications() {
           <div className="space-y-3.5">
             {dbNotifications.map(notification => {
               const isUnread = !notification.read_at
+              const isErrorNotification =
+                notification.notification_type === 'booking_rejected' ||
+                notification.notification_type === 'profile_rejected'
               const config = getTypeConfig(notification.notification_type)
               const Icon = config.icon
               const action = getNotificationAction(notification)
@@ -358,9 +361,11 @@ export default function Notifications() {
                     }
                   }}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                    isUnread
-                      ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.08] border-amber-500/40 shadow-xs hover:border-amber-500/70'
-                      : 'bg-white dark:bg-zinc-900 border-slate-200/90 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-xs'
+                    isErrorNotification
+                      ? 'bg-gray-900 border-red-800 shadow-md'
+                      : isUnread
+                        ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.08] border-amber-500/40 shadow-xs hover:border-amber-500/70'
+                        : 'bg-white dark:bg-zinc-900 border-slate-200/90 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-xs'
                   }`}
                 >
                   <div className="flex items-start gap-3.5 sm:gap-4">
@@ -390,15 +395,17 @@ export default function Notifications() {
 
                       {/* Notification Title */}
                       <h3
-                        className={`text-base font-bold tracking-tight mb-1 ${
-                          isUnread ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-zinc-300'
+                        className={`text-base mb-1 ${
+                          isErrorNotification
+                            ? 'font-semibold text-red-500'
+                            : `font-bold tracking-tight ${isUnread ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-zinc-300'}`
                         }`}
                       >
                         {localized.title}
                       </h3>
 
                       {/* Notification Description */}
-                      <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed font-normal">
+                      <p className={`text-sm leading-relaxed font-normal ${isErrorNotification ? 'text-red-300' : 'text-slate-600 dark:text-zinc-300'}`}>
                         {localized.body}
                       </p>
 

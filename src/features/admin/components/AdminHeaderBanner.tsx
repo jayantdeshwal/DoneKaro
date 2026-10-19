@@ -152,7 +152,7 @@ export function AdminHeaderBanner({
 
       {/* Global Notifications & Error Banners */}
       {workerError && (
-        <div className="mb-6 p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center justify-between">
+        <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{workerError}</span>
@@ -163,7 +163,7 @@ export function AdminHeaderBanner({
         </div>
       )}
       {customerError && (
-        <div className="mb-6 p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center justify-between">
+        <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{customerError}</span>
@@ -174,7 +174,7 @@ export function AdminHeaderBanner({
         </div>
       )}
       {bookingError && (
-        <div className="mb-6 p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center justify-between">
+        <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{bookingError}</span>
@@ -185,7 +185,7 @@ export function AdminHeaderBanner({
         </div>
       )}
       {statsError && (
-        <div className="mb-6 p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm flex items-center justify-between">
+        <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{statsError}</span>

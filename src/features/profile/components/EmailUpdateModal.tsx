@@ -56,9 +56,9 @@ export function EmailUpdateModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
         {emailModalError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{emailModalError}</span>
+          <div className="p-3 bg-gray-900 border border-red-800 rounded-lg text-xs flex items-center gap-2 shadow-md">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+            <span className="text-red-300">{emailModalError}</span>
           </div>
         )}
         <Input

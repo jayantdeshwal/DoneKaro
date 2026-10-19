@@ -146,9 +146,9 @@ export default function WorkerRegistration() {
           <RegistrationStepBar currentStep={currentStep} />
 
           {errors.form && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errors.form}</span>
+            <div className="mb-6 p-3 bg-gray-900 border border-red-800 rounded-xl shadow-md text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+              <p className="text-red-300">{errors.form}</p>
             </div>
           )}
 

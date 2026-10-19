@@ -166,11 +166,11 @@ export default function ContactModal({
             </Button>
           </div>
         ) : (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-gray-900 border border-red-800 text-red-300 text-sm flex items-start gap-3 shadow-md">
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">{t('contactModal.noPhone', 'Phone number not registered')}</p>
-              <p className="text-xs text-amber-400/90 mt-1">
+              <p className="font-semibold text-red-500">{t('contactModal.noPhone', 'Phone number not registered')}</p>
+              <p className="text-xs text-red-300 mt-1">
                 {t('contactModal.unableToContact', 'Phone number is not available for direct calling.')}
               </p>
             </div>

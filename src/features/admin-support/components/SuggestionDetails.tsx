@@ -185,8 +185,8 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
         </div>
 
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3 rounded-xl bg-gray-900 border border-red-800 text-red-300 text-xs flex items-center gap-2 shadow-md">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
             <span>{errorMsg}</span>
           </div>
         )}

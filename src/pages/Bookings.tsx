@@ -430,8 +430,8 @@ export default function Bookings() {
         )}
 
         {loadError && (
-          <div className="mb-6 p-4 rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+          <div className="mb-6 p-4 rounded-xl border border-red-800 bg-gray-900 shadow-md text-red-300 text-xs font-medium flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
             <span>{loadError}</span>
           </div>
         )}

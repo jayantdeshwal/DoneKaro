@@ -116,7 +116,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             </>
           )}
         </div>
-        {errors.idProof && <p className="mt-1 text-xs text-red-400">{errors.idProof}</p>}
+        {errors.idProof && <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{errors.idProof}</p>}
       </div>
 
       {/* Profile Photo (Optional) */}
@@ -173,7 +173,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             </>
           )}
         </div>
-        {errors.avatar && <p className="mt-1 text-xs text-red-400">{errors.avatar}</p>}
+        {errors.avatar && <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{errors.avatar}</p>}
       </div>
 
       <div className="p-4 bg-surface-200/60 border border-semantic-border-light rounded-xl">
@@ -248,7 +248,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             )}
           </div>
         </label>
-        {errors.terms && <p className="mt-1 text-xs text-red-400">{errors.terms}</p>}
+        {errors.terms && <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{errors.terms}</p>}
       </div>
 
       <TermsModal

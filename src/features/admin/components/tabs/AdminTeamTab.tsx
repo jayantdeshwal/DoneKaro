@@ -106,7 +106,7 @@ export function AdminTeamTab({
       </div>
 
       {adminTeamError && (
-        <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
+        <div className="p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm shadow-md">
           {adminTeamError}
         </div>
       )}

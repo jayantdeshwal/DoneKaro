@@ -83,14 +83,14 @@ function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: st
 
   const icons = {
     success: <CheckCircle className="w-5 h-5 text-success-500" />,
-    error: <AlertCircle className="w-5 h-5 text-danger-500" />,
+    error: <AlertCircle className="w-5 h-5 text-red-500" />,
     warning: <AlertTriangle className="w-5 h-5 text-warning-500" />,
     info: <Info className="w-5 h-5 text-blue-500" />,
   }
 
   const borders = {
     success: 'border-l-4 border-success-500',
-    error: 'border-l-4 border-danger-500',
+    error: 'border-l-4 border-red-500',
     warning: 'border-l-4 border-warning-500',
     info: 'border-l-4 border-blue-500',
   }
@@ -106,15 +106,34 @@ function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: st
             exit={{ opacity: 0, x: 100, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'flex items-start gap-3 w-80 bg-semantic-bg-elevated rounded-lg shadow-xl border p-4',
+              'flex items-start gap-3 w-80 rounded-lg shadow-xl border p-4',
+              toast.type === 'error'
+                ? 'bg-gray-900 border-red-800 shadow-md'
+                : 'bg-semantic-bg-elevated',
               borders[toast.type]
             )}
             role="alert"
           >
             <div className="flex-shrink-0 mt-0.5">{icons[toast.type]}</div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-semantic-text-primary">{toast.title}</p>
-              {toast.message && <p className="mt-1 text-sm text-semantic-text-secondary">{toast.message}</p>}
+              <p
+                className={cn(
+                  'text-sm font-semibold',
+                  toast.type === 'error' ? 'text-red-500' : 'text-semantic-text-primary'
+                )}
+              >
+                {toast.title}
+              </p>
+              {toast.message && (
+                <p
+                  className={cn(
+                    'mt-1 text-sm',
+                    toast.type === 'error' ? 'text-red-300' : 'text-semantic-text-secondary'
+                  )}
+                >
+                  {toast.message}
+                </p>
+              )}
               {toast.action && (
                 <Button variant="ghost" size="sm" className="mt-2" onClick={toast.action.onClick}>
                   {toast.action.label}

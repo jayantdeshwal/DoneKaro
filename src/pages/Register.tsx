@@ -137,12 +137,6 @@ export default function Register() {
         }
 
         updateUser({ address_proof_url: addressProofPath, registration_completed: true })
-        setCustomerName('')
-        setCustomerPhone('')
-        setCustomerEmail('')
-        setCustomerAddressProof(null)
-        setCustomerTermsAccepted(false)
-        setPendingCustomerId(null)
         navigate('/')
       } catch (err) {
         setCustomerError(
@@ -231,12 +225,6 @@ export default function Register() {
             }
 
             updateUser({ address_proof_url: addressProofPath, registration_completed: true })
-            setCustomerName('')
-            setCustomerPhone('')
-            setCustomerEmail('')
-            setCustomerAddressProof(null)
-            setCustomerTermsAccepted(false)
-            setPendingCustomerId(null)
             navigate('/')
           } catch (err) {
             setCustomerError(
@@ -342,14 +330,14 @@ export default function Register() {
           {activeTab === 'customer' && (
             <div>
               {alreadyRegisteredNotice && (
-                <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2.5">
-                  <div className="flex items-start gap-2.5 text-amber-300 text-xs">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+                <div className="mb-5 p-3.5 bg-gray-900 border border-red-800 rounded-xl shadow-md space-y-2.5">
+                  <div className="flex items-start gap-2.5 text-red-300 text-xs">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
                     <div>
-                      <p className="font-semibold text-amber-300 mb-0.5">
+                      <p className="font-semibold text-red-500 mb-0.5">
                         {t('auth.alreadyRegisteredTitle', 'Mobile Number Already Registered')}
                       </p>
-                      <p className="text-amber-200/90 leading-relaxed">
+                      <p className="text-red-300 leading-relaxed">
                         {alreadyRegisteredNotice.message}
                       </p>
                     </div>
@@ -357,7 +345,7 @@ export default function Register() {
                   <div className="pt-1">
                     <Link
                       to={`/login?role=customer&phone=${alreadyRegisteredNotice.phone}`}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-red-700 hover:bg-red-600 text-white font-bold text-xs shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       <span>{t('auth.goToCustomerLogin', 'Sign In with OTP')}</span>
@@ -368,21 +356,26 @@ export default function Register() {
               )}
 
               {customerError && (
-                <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-xs">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{customerError}</span>
+                <div className="mb-5 p-3 bg-gray-900 border border-red-800 rounded-lg shadow-md flex items-start gap-2 text-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
+                  <div>
+                    <p className="font-semibold text-red-500 mb-0.5">
+                      {t('registerPage.errorTitle', 'Registration Error')}
+                    </p>
+                    <p className="text-red-300 leading-relaxed">{customerError}</p>
+                  </div>
                 </div>
               )}
 
               {/* Incomplete registration recovery banner */}
               {isIncompleteCustomer && (
-                <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2.5 text-xs text-amber-300">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+                <div className="mb-5 p-3.5 bg-gray-900 border border-red-800 rounded-xl shadow-md flex items-start gap-2.5 text-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
                   <div>
-                    <p className="font-semibold text-amber-300 mb-0.5">
+                    <p className="font-semibold text-red-500 mb-0.5">
                       {t('registerPage.incompleteNoticeTitle', 'Registration Incomplete: Address Verification Required')}
                     </p>
-                    <p className="text-amber-200/90 leading-relaxed">
+                    <p className="text-red-300 leading-relaxed">
                       {t(
                         'registerPage.incompleteNoticeDesc',
                         'Your mobile number is verified. Please upload your mandatory address proof below to complete registration and access DoneKaro.'
@@ -488,7 +481,7 @@ export default function Register() {
                         </button>
                       </span>
                       {!customerTermsAccepted && (
-                        <p className="text-[11px] text-amber-700 dark:text-amber-400/90 mt-1">
+                        <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-[11px] text-red-300 shadow-md">
                           {t(
                             'registerPage.termsReviewPrompt',
                             'Click to read and accept the full Terms & Conditions'

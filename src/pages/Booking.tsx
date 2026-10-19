@@ -333,18 +333,18 @@ export default function Booking() {
         ) : (
           <Card className="p-6 bg-surface-100 border border-semantic-border-light">
             {worker.available === false && (
-              <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-amber-400" />
+              <div className="mb-6 p-4 bg-gray-900 border border-red-800 rounded-xl text-red-300 shadow-md flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-red-500" />
                 <div>
-                  <h3 className="font-semibold text-sm">{t('workerProfile.unavailable', 'Currently Unavailable')}</h3>
-                  <p className="text-xs text-amber-200/90 mt-1">
+                  <h3 className="font-semibold text-red-500 text-sm">{t('workerProfile.unavailable', 'Currently Unavailable')}</h3>
+                  <p className="text-xs text-red-300 mt-1">
                     {t('booking.workerUnavailableWarning', 'This worker is currently unavailable/off-duty and cannot accept new bookings right now.')}
                   </p>
                 </div>
               </div>
             )}
             {errors.form && (
-              <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+              <div className="mb-6 p-3 bg-gray-900 border border-red-800 rounded-lg shadow-md text-red-300 text-sm">
                 {errors.form}
               </div>
             )}
@@ -372,7 +372,7 @@ export default function Booking() {
                         </option>
                       ))}
                     </select>
-                    {errors.service && <p className="mt-1 text-xs text-red-400">{errors.service}</p>}
+                    {errors.service && <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.service}</p>}
                   </div>
                 ) : selectedServiceName ? (
                   <div className="mb-4 p-3 bg-surface-200/50 border border-semantic-border-light rounded-lg flex items-center justify-between">
@@ -394,7 +394,7 @@ export default function Booking() {
                         className="input pl-10 bg-surface-200 border-semantic-border-light text-semantic-text-primary [color-scheme:dark]"
                       />
                     </div>
-                    {errors.date && <p className="mt-1 text-xs text-red-400">{errors.date}</p>}
+                    {errors.date && <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.date}</p>}
                   </div>
                   <div>
                     <label className="label text-semantic-text-secondary">{t('booking.selectTime')}</label>
@@ -416,7 +416,7 @@ export default function Booking() {
                         <option value="17:00">5:00 PM</option>
                       </select>
                     </div>
-                    {errors.time && <p className="mt-1 text-xs text-red-400">{errors.time}</p>}
+                    {errors.time && <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.time}</p>}
                   </div>
                 </div>
                 
@@ -429,7 +429,7 @@ export default function Booking() {
                     rows={3}
                     className="input bg-surface-200 border-semantic-border-light text-semantic-text-primary placeholder:text-semantic-text-tertiary"
                   />
-                  {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
+                  {errors.address && <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.address}</p>}
                 </div>
                 
                 <div className="mb-4">
@@ -445,7 +445,7 @@ export default function Booking() {
                       className="input pl-10 bg-surface-200 border-semantic-border-light text-semantic-text-primary placeholder:text-semantic-text-tertiary"
                     />
                   </div>
-                  {errors.pincode && <p className="mt-1 text-xs text-red-400">{errors.pincode}</p>}
+                  {errors.pincode && <p className="mt-1 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.pincode}</p>}
                 </div>
                 
                 <div className="mb-6">
@@ -483,7 +483,7 @@ export default function Booking() {
                       </div>
                     </div>
                   )}
-                  {errors.image && <p className="mt-2 text-xs text-red-400">{errors.image}</p>}
+                  {errors.image && <p className="mt-2 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.image}</p>}
                 </div>
               </div>
               
@@ -513,7 +513,7 @@ export default function Booking() {
       >
         <div className="space-y-4">
           {bookingError && (
-            <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
+            <div className="p-3 rounded-lg border border-red-800 bg-gray-900 shadow-md text-red-300 text-sm">
               {bookingError}
             </div>
           )}

@@ -1235,6 +1235,7 @@
   },
   "registerPage": {
     "title": "DoneKaro में नए हैं? नया खाता बनाएं",
+    "errorTitle": "पंजीकरण त्रुटि",
     "subtitle": "मोबाइल OTP सत्यापन और पासवर्ड के साथ पंजीकरण करने के लिए अपनी भूमिका चुनें",
     "tabCustomer": "ग्राहक पंजीकरण (Customer)",
     "tabWorker": "कामगार पंजीकरण (Worker)",

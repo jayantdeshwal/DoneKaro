@@ -249,7 +249,7 @@ export function WorkerDossierModal({
               </div>
             </div>
             {signedDocError && (
-              <p className="mt-1 text-xs text-red-400">{signedDocError}</p>
+              <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{signedDocError}</p>
             )}
           </div>
 
@@ -265,7 +265,7 @@ export function WorkerDossierModal({
           )}
 
           {inspectWorker.rejection_reason && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+            <div className="p-3 bg-gray-900 border border-red-800 rounded-lg text-red-300 text-sm shadow-md">
               <p className="font-semibold text-xs uppercase mb-1">Rejection Note</p>
               <p>{inspectWorker.rejection_reason}</p>
             </div>

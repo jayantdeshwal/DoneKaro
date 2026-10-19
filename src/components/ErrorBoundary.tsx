@@ -62,21 +62,21 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="min-h-screen bg-semantic-bg-primary flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-surface-100 border border-semantic-border-light rounded-2xl p-6 sm:p-8 text-center shadow-2xl">
-            <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-red-500 dark:text-red-400" />
+          <div className="w-full max-w-md bg-gray-900 border border-red-800 rounded-2xl p-6 sm:p-8 text-center text-red-300 shadow-2xl">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-900 border border-red-800 rounded-2xl flex items-center justify-center shadow-md">
+              <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-bold text-semantic-text-primary mb-1">
+            <h1 className="text-xl sm:text-2xl font-semibold text-red-500 mb-1">
               कुछ गड़बड़ हो गई / Something went wrong
             </h1>
-            <p className="text-sm text-semantic-text-secondary mb-4">
+            <p className="text-sm text-red-300 mb-4">
               {isChunk
                 ? 'नेटवर्क समस्या या नया अपडेट उपलब्ध है। कृपया पेज पुनः लोड करें। / A network interruption or update occurred. Please reload.'
                 : 'An unexpected issue occurred. We apologize for the inconvenience. Please reload or return to the homepage.'}
             </p>
 
-            <div className="mb-6 p-3 bg-surface-200/80 rounded-lg text-left text-xs text-semantic-text-tertiary font-mono overflow-auto max-h-28 border border-semantic-border-light">
+            <div className="mb-6 p-3 bg-gray-900 rounded-lg text-left text-xs text-red-300 font-mono overflow-auto max-h-28 border border-red-800 shadow-md">
               {safeMessage}
             </div>
 
@@ -196,27 +196,27 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Route
 
       return (
         <div className="max-w-xl mx-auto px-4 py-12 text-center animate-fade-in">
-          <div className="bg-surface-100 border border-semantic-border-light rounded-2xl p-6 sm:p-8 shadow-lg">
-            <div className="w-14 h-14 mx-auto mb-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
-              <AlertTriangle className="w-7 h-7 text-amber-500 dark:text-amber-400" />
+          <div className="bg-gray-900 border border-red-800 rounded-2xl p-6 sm:p-8 shadow-lg text-red-300">
+            <div className="w-14 h-14 mx-auto mb-4 bg-gray-900 border border-red-800 rounded-2xl flex items-center justify-center shadow-md">
+              <AlertTriangle className="w-7 h-7 text-red-500" />
             </div>
 
-            <h2 className="text-lg sm:text-xl font-bold text-semantic-text-primary mb-1">
+            <h2 className="text-lg sm:text-xl font-semibold text-red-500 mb-1">
               इस भाग को लोड करने में समस्या आई / Unable to load this section
             </h2>
-            <p className="text-xs sm:text-sm text-semantic-text-secondary mb-4 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-red-300 mb-4 max-w-md mx-auto">
               {isChunk
                 ? 'इंटरनेट कनेक्शन या नए संस्करण के कारण यह पेज लोड नहीं हो सका। कृपया पुनः प्रयास करें। / Network drop or updated app version detected. Please retry or reload.'
                 : 'An unexpected issue occurred while rendering this page. You can retry or return to the main directory.'}
             </p>
 
-            <div className="mb-6 p-3 bg-surface-200/70 rounded-lg text-left text-xs text-semantic-text-tertiary font-mono overflow-auto max-h-24 border border-semantic-border-light">
+            <div className="mb-6 p-3 bg-gray-900 rounded-lg text-left text-xs text-red-300 font-mono overflow-auto max-h-24 border border-red-800 shadow-md">
               {safeMessage}
             </div>
 
             {import.meta.env.DEV && this.state.error?.stack && (
               <details className="mb-6 text-left text-xs text-semantic-text-tertiary">
-                <summary className="cursor-pointer font-medium text-amber-500 mb-1">
+                <summary className="cursor-pointer font-medium text-red-500 mb-1">
                   Development stack trace
                 </summary>
                 <pre className="p-2 bg-black/40 rounded text-[11px] overflow-auto max-h-32">

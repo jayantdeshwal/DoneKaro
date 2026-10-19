@@ -303,8 +303,8 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
         )}
 
         {errors.category && (
-          <p className="mt-2 text-xs text-red-400 font-medium flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" />
+          <p className="mt-2 flex items-center gap-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-red-300 shadow-md">
+            <AlertCircle className="w-3.5 h-3.5 text-red-500" />
             <span>{errors.category}</span>
           </p>
         )}
@@ -363,7 +363,7 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
             </Badge>
           ))}
         </div>
-        {errors.areas && <p className="mt-1 text-xs text-red-400">{errors.areas}</p>}
+        {errors.areas && <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{errors.areas}</p>}
       </div>
     </div>
   )

@@ -113,7 +113,7 @@ export function CustomerDossierModal({
               )}
             </div>
             {signedDocError && (
-              <p className="mt-1 text-xs text-rose-400">{signedDocError}</p>
+              <p className="mt-1 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">{signedDocError}</p>
             )}
           </div>
 

@@ -91,7 +91,7 @@ export const AdditionalChargeModal: React.FC<AdditionalChargeModalProps> = ({
     >
       <div className="space-y-4">
         {error && (
-          <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-500">
+          <p className="rounded-xl bg-gray-900 border border-red-800 p-3 text-xs text-red-300 shadow-md">
             {error}
           </p>
         )}

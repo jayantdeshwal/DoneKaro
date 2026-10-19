@@ -132,8 +132,8 @@ export const CustomerAddressProofUpload: React.FC<CustomerAddressProofUploadProp
       </div>
 
       {displayError && (
-        <div className="flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 mt-1">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+        <div className="mt-1 flex items-center gap-1.5 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 shadow-md">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
           <span>{displayError}</span>
         </div>
       )}

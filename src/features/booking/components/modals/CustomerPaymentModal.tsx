@@ -44,8 +44,8 @@ export function CustomerPaymentModal({
     >
       <div className="space-y-4">
         {paymentModalError && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-500 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3 bg-gray-900 border border-red-800 rounded-xl text-red-300 text-xs flex items-center gap-2 shadow-md">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
             <span>{paymentModalError}</span>
           </div>
         )}

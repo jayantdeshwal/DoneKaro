@@ -223,7 +223,7 @@ export function Select({ value, onChange, options, placeholder, disabled, classN
         </button>
 
         {error && (
-          <p className="mt-1.5 text-sm text-danger-600" role="alert">{error}</p>
+          <p className="mt-1.5 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-sm text-red-300 shadow-md" role="alert">{error}</p>
         )}
 
         <AnimatePresence>

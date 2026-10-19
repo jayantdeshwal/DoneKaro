@@ -51,7 +51,7 @@ export function BookingReviewModal({
         </p>
 
         {reviewError && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-500 text-xs">
+          <div className="p-3 bg-gray-900 border border-red-800 rounded-xl text-red-300 text-xs shadow-md">
             {reviewError}
           </div>
         )}
