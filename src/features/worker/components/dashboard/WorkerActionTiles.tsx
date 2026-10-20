@@ -62,10 +62,11 @@ export const WorkerActionTiles: React.FC<WorkerActionTilesProps> = ({
         </span>
       </button>
 
-      {/* Tile 2: Active Bookings */}
+      {/* Tile 2: Job Requests (Quotes + Pending Bookings) */}
       <button
         type="button"
         onClick={onSelectJobs}
+        aria-label={t('workerDashboard.jobRequests', 'Job Requests')}
         className="p-3 sm:p-4 rounded-2xl bg-surface-100 border border-semantic-border-light hover:border-brand-500/40 hover:bg-surface-200/80 transition-all flex flex-col items-center justify-center text-center group shadow-sm active:scale-95"
       >
         <div className="w-10 h-10 rounded-xl bg-surface-200 group-hover:bg-brand-500/15 flex items-center justify-center text-brand-400 mb-2 transition-colors relative">

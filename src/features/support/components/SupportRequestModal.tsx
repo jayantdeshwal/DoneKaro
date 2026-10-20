@@ -329,7 +329,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
               </div>
 
               {/* Platform Assurance Notice */}
-              <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-[11px] text-amber-800 dark:text-amber-300/90 leading-relaxed">
+              <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
                 {isHindi
                   ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में सुरक्षित रूप से दर्ज होगा। AI सहायक स्वयं कोई शिकायत दर्ज नहीं करता है।'
                   : '📌 This request will be submitted to the official DoneKaro administration panel. AI Support cannot create complaints on your behalf.'}

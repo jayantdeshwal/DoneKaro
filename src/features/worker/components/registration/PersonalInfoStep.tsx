@@ -32,8 +32,8 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
 
   return (
     <div className="space-y-5">
-      <div className="p-4 bg-brand-500/10 border border-brand-500/20 rounded-xl">
-        <p className="text-xs text-brand-300">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <p className="text-xs text-blue-900 leading-relaxed font-medium">
           {t(
             'auth.workerRegistration.step1Notice',
             'Enter your full name and mobile number. Your mobile number will be verified after you complete your registration details.'

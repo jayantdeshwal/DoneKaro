@@ -291,11 +291,11 @@ export function BookingCard({
             booking.paymentSummary.is_frozen &&
             booking.paymentSummary.payment_status !== 'paid' &&
             booking.paymentSummary.payment_status !== 'pending' && (
-              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+              <div className="mt-4 rounded-xl border border-amber-300 bg-amber-100 p-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    <span className="w-2 h-2 rounded-full bg-amber-700 animate-pulse" />
+                    <p className="text-sm font-bold text-amber-900">
                       {t('bookings.serviceCompleted', 'Service Completed')}
                     </p>
                   </div>
@@ -304,14 +304,14 @@ export function BookingCard({
                   </Badge>
                 </div>
                 <div className="mt-2 flex items-baseline justify-between">
-                  <span className="text-xs text-slate-600 dark:text-zinc-400">
+                  <span className="text-xs text-amber-900">
                     {t('bookings.amountToPay', 'Amount to Pay')}:
                   </span>
-                  <span className="text-base font-bold text-slate-900 dark:text-white">
+                  <span className="text-base font-bold text-amber-900">
                     ₹{booking.paymentSummary.final_payable_amount.toFixed(2)}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
+                <p className="mt-1 text-xs text-amber-900">
                   {t('bookings.payWorkerInCash', 'Pay the worker the amount shown above in cash.')}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -330,11 +330,11 @@ export function BookingCard({
 
           {/* State B: Cash Confirmation Submitted, Waiting for Worker */}
           {booking.status === 'payment_pending' && booking.paymentSummary.payment_status === 'pending' && (
-            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-100 p-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-500 animate-spin" />
-                  <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                  <Clock className="w-4 h-4 text-amber-700 animate-spin" />
+                  <p className="text-sm font-bold text-amber-900">
                     {t('bookings.cashPaymentSubmitted', 'Cash Payment Submitted')}
                   </p>
                 </div>
@@ -342,15 +342,15 @@ export function BookingCard({
                   {t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation')}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-slate-700 dark:text-zinc-300">
+              <p className="mt-2 text-xs text-amber-900">
                 {t(
                   'bookings.waitingForWorkerConfirmationDesc',
                   'Waiting for worker confirmation. Your receipt will appear once the payment is confirmed.'
                 )}
               </p>
-              <div className="mt-2 text-xs font-semibold text-slate-600 dark:text-zinc-400 flex items-center justify-between pt-2 border-t border-amber-500/20">
+              <div className="mt-2 text-xs font-semibold text-amber-900 flex items-center justify-between pt-2 border-t border-amber-300">
                 <span>{t('bookings.amountToPay', 'Amount to Pay')}</span>
-                <span className="text-slate-900 dark:text-white font-bold">
+                <span className="text-amber-900 font-bold">
                   ₹{booking.paymentSummary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}
                 </span>
               </div>

@@ -69,7 +69,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, isLoading, user, isRegistering } = useAuth()
   if (isLoading) {
     return <PageLoader />
   }
@@ -77,7 +77,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
   if (user?.role === 'customer' && user?.registration_completed === false) {
-    return <Navigate to="/register?incomplete=true" replace />
+    return isRegistering ? <PageLoader /> : <Navigate to="/register?incomplete=true" replace />
   }
   return <>{children}</>
 }
@@ -91,7 +91,7 @@ function WorkerRoute({ children }: { children: React.ReactNode }) {
 }
 
 function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, isLoading, user, isRegistering } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
@@ -99,7 +99,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (user?.role === 'customer' && user?.registration_completed === false) {
-    return <Navigate to="/register?incomplete=true" replace />
+    return isRegistering ? <PageLoader /> : <Navigate to="/register?incomplete=true" replace />
   }
 
   if (isAuthenticated || isGuestMode) {
@@ -110,7 +110,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RootRoute() {
-  const { isAuthenticated, isLoading, user, isAdmin, isWorker } = useAuth()
+  const { isAuthenticated, isLoading, user, isAdmin, isWorker, isRegistering } = useAuth()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
@@ -118,7 +118,7 @@ function RootRoute() {
   }
 
   if (user?.role === 'customer' && user?.registration_completed === false) {
-    return <Navigate to="/register?incomplete=true" replace />
+    return isRegistering ? <PageLoader /> : <Navigate to="/register?incomplete=true" replace />
   }
 
   if (isAdmin) {

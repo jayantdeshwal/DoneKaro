@@ -212,7 +212,11 @@ export function useWorkerDashboardData() {
   }
 
   // Counts and business metrics
-  const pendingCount = useMemo(() => bookings.filter(b => b.status === 'pending').length, [bookings])
+  const pendingCount = useMemo(() => {
+    const pendingBookings = bookings.filter(b => b.status === 'pending').length
+    const pendingQuotes = quoteRequests.filter(q => q.status === 'pending').length
+    return pendingBookings + pendingQuotes
+  }, [bookings, quoteRequests])
   const activeCount = useMemo(
     () =>
       bookings.filter(

@@ -25,7 +25,7 @@ export function AppHeader({ onOpenMobileMenu }: AppHeaderProps) {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const brandHomePath = isAdmin ? '/admin' : '/'
+  const brandHomePath = isAdmin ? '/admin' : isWorker ? '/home' : '/'
   const navItems = getNavItems(t, isAuthenticated, isWorker, isAdmin, unreadCount)
   const isActive = (path: string) =>
     location.pathname === path || (path !== '/' && location.pathname.startsWith(path))

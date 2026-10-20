@@ -33,7 +33,7 @@ export function BottomNavigation() {
           const targetTabParam = tab.path && tab.path.includes('?') ? new URLSearchParams(tab.path.split('?')[1]).get('tab') : null
           const isTabActive = tab.path
             ? tab.path === '/'
-              ? location.pathname === '/' && !location.search
+              ? (location.pathname === '/' || location.pathname === '/home') && !location.search
               : targetTabParam
               ? location.pathname === tab.path.split('?')[0] && currentTabParam === targetTabParam
               : location.pathname === tab.path && (!currentTabParam || currentTabParam === 'dashboard' || currentTabParam === 'overview')

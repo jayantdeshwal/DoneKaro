@@ -44,10 +44,10 @@ export function AddAdminModal({
     >
       <form onSubmit={handleCreateAdmin} className="space-y-4 pt-2">
         {/* Security Alert */}
-        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2.5">
-          <Shield className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-200">
-            <strong className="block text-amber-300 font-semibold mb-0.5">High-Privilege Account</strong>
+        <div className="p-3 bg-amber-100 border border-amber-300 rounded-xl flex items-start gap-2.5">
+          <Shield className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-900">
+            <strong className="block text-amber-900 font-semibold mb-0.5">High-Privilege Account</strong>
             New administrators will have full platform permissions including worker approval and profile inspection. They will be required to verify OTP via the mobile number provided below.
           </div>
         </div>

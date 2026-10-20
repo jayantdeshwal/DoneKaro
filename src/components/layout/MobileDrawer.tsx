@@ -317,7 +317,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 <>
                   <button
                     type="button"
-                    onClick={() => handleNavigate('/')}
+                    onClick={() => handleNavigate('/home')}
                     className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">

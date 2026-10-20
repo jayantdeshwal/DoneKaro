@@ -536,10 +536,10 @@ export default function Login() {
                 </div>
               )}
 
-              <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <div className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white block font-semibold mb-0.5">
+              <div className="mb-5 p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-900 leading-relaxed">
+                  <strong className="text-blue-900 block font-semibold mb-0.5">
                     {t('loginPage.passwordlessTitle', 'Instant Passwordless Login')}
                   </strong>
                   {t('loginPage.passwordlessDesc', 'Enter your mobile number to receive an instant verification OTP. No passwords required.')}
@@ -671,10 +671,10 @@ export default function Login() {
                 </div>
               )}
 
-              <div className="mb-5 p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-2.5">
-                <Shield className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <div className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white block font-semibold mb-0.5">
+              <div className="mb-5 p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                <Shield className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-900 leading-relaxed">
+                  <strong className="text-blue-900 block font-semibold mb-0.5">
                     Platform Administrator Console
                   </strong>
                   Enter your registered administrator mobile number to receive an OTP. No password required.

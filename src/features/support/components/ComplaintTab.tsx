@@ -338,7 +338,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           </div>
         </div>
 
-        <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-[11px] text-amber-800 dark:text-amber-300/90 leading-relaxed">
+        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
           {isHindi
             ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में दर्ज होगा और आपको एक आधिकारिक संदर्भ टोकन मिलेगा। AI सहायक स्वतः कोई शिकायत दर्ज नहीं करता।'
             : '📌 This creates an authoritative record in the DoneKaro admin panel with a unique reference token. AI Support is read-only and cannot mutate complaints.'}

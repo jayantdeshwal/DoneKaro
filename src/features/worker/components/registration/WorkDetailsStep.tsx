@@ -131,13 +131,13 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
 
         {/* Category Switched Notice Banner */}
         {categorySwitchedNotice && (
-          <div className="mb-4 p-3 bg-blue-500/15 border border-blue-500/30 rounded-xl flex items-start gap-2.5 text-blue-300 text-xs">
-            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-            <div className="flex-1 font-medium">{categorySwitchedNotice}</div>
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5 text-blue-900 text-xs">
+            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <div className="flex-1 font-medium text-blue-900">{categorySwitchedNotice}</div>
             <button
               type="button"
               onClick={() => setCategorySwitchedNotice(null)}
-              className="text-blue-400 hover:text-white cursor-pointer"
+              className="text-blue-600 hover:text-blue-900 cursor-pointer"
               aria-label="Dismiss notice"
             >
               <X className="w-3.5 h-3.5" />
@@ -178,13 +178,13 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
 
                 {/* 3rd Service Limit Warning */}
                 {serviceLimitMessage && (
-                  <div className="p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl flex items-start gap-2.5 text-amber-300 text-xs">
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <div className="flex-1 font-semibold">{serviceLimitMessage}</div>
+                  <div className="p-3 bg-amber-100 border border-amber-300 rounded-xl flex items-start gap-2.5 text-amber-900 text-xs">
+                    <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                    <div className="flex-1 font-semibold text-amber-900">{serviceLimitMessage}</div>
                     <button
                       type="button"
                       onClick={() => setServiceLimitMessage(null)}
-                      className="text-amber-400/80 hover:text-white cursor-pointer"
+                      className="text-amber-700 hover:text-amber-900 cursor-pointer"
                       aria-label="Dismiss warning"
                     >
                       <X className="w-3.5 h-3.5" />

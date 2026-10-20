@@ -18,7 +18,7 @@ import type { RegistrationFormData } from '../types'
 export function useWorkerRegistration() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user, verifyAndLoginWithOtp, signInWithGoogle } = useAuth()
+  const { user, updateUser, verifyAndLoginWithOtp, signInWithGoogle, setIsRegistering } = useAuth()
   const [currentStep, setCurrentStep] = useState(0)
 
   // Initialize form state
@@ -309,6 +309,8 @@ export function useWorkerRegistration() {
           throw new Error(rpcError.message || 'Worker registration failed on database RPC')
         }
 
+        updateUser({ role: 'worker', registration_completed: true })
+
         try {
           await notifyAdminsOfWorkerRegistration({
             workerId: authUserId,
@@ -340,6 +342,7 @@ export function useWorkerRegistration() {
       }
 
       if (phoneVerified) {
+        setIsRegistering(true)
         const {
           data: { user: authUser },
           error: authError,
@@ -354,9 +357,11 @@ export function useWorkerRegistration() {
           )
         }
         await finishRegistration(authUser.id)
+        setIsRegistering(false)
         setLoading(false)
         setUploadProgress('')
       } else {
+        setIsRegistering(true)
         const launched = await openOtpWidget({
           identifier: cleanPhone,
           onSuccess: async (accessToken: string) => {
@@ -368,6 +373,7 @@ export function useWorkerRegistration() {
                 formSnapshot.email.trim() || undefined
               )
               if (authResult.role === 'worker') {
+                setIsRegistering(false)
                 navigate('/worker/dashboard')
                 return
               }
@@ -383,11 +389,13 @@ export function useWorkerRegistration() {
                 ),
               }))
             } finally {
+              setIsRegistering(false)
               setLoading(false)
               setUploadProgress('')
             }
           },
           onFailure: err => {
+            setIsRegistering(false)
             setLoading(false)
             setUploadProgress('')
             if (err && typeof err === 'object' && 'cancelled' in err && err.cancelled) return
@@ -405,6 +413,7 @@ export function useWorkerRegistration() {
           },
         })
         if (!launched) {
+          setIsRegistering(false)
           setLoading(false)
           setErrors(prev => ({
             ...prev,
@@ -413,6 +422,7 @@ export function useWorkerRegistration() {
         }
       }
     } catch (err) {
+      setIsRegistering(false)
       console.error('Registration failed:', err)
       setErrors(prev => ({
         ...prev,

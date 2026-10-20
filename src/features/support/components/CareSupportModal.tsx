@@ -110,8 +110,8 @@ export const CareSupportModal: React.FC = () => {
 
         {/* Guest Informational Banner */}
         {!isAuthenticated && (
-          <div className="mx-4 mt-3 px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-3 text-xs shrink-0">
-            <p className="text-amber-800 dark:text-amber-300 leading-snug">
+          <div className="mx-4 mt-3 px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between gap-3 text-xs shrink-0">
+            <p className="text-blue-900 leading-snug font-medium">
               {isHindi
                 ? 'अतिथि मोड: औपचारिक शिकायत निवारण और अनुरोध ट्रैकिंग के लिए खाते में लॉगिन होना आवश्यक है।'
                 : 'Guest Mode: Official dispute resolution, complaint tracking, and suggestions require an authenticated account.'}
@@ -122,7 +122,7 @@ export const CareSupportModal: React.FC = () => {
                 closeSupport()
                 navigate('/login')
               }}
-              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-[11px] whitespace-nowrap transition-colors cursor-pointer shadow-xs shrink-0"
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] whitespace-nowrap transition-colors cursor-pointer shadow-xs shrink-0"
             >
               {isHindi ? 'लॉगिन' : 'Sign In'}
             </button>

@@ -375,9 +375,9 @@ export default function WorkerProfile() {
                 </div>
 
                 {!worker.available && (
-                  <div className="mb-4 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-sm flex items-start gap-2.5">
-                    <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-amber-400" />
-                    <span>{t('booking.workerUnavailableWarning', 'This worker is currently unavailable/off-duty and cannot accept new bookings right now.')}</span>
+                  <div className="mb-4 p-3.5 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-sm flex items-start gap-2.5">
+                    <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-amber-700" />
+                    <span className="text-amber-900">{t('booking.workerUnavailableWarning', 'This worker is currently unavailable/off-duty and cannot accept new bookings right now.')}</span>
                   </div>
                 )}
 

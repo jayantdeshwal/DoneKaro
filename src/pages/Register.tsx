@@ -33,7 +33,7 @@ export default function Register() {
   const initialRole = searchParams.get('role') === 'worker' ? 'worker' : 'customer'
   const [activeTab, setActiveTab] = useState<'customer' | 'worker'>(initialRole)
 
-  const { user, updateUser, verifyAndLoginWithOtp } = useAuth()
+  const { user, updateUser, verifyAndLoginWithOtp, setIsRegistering } = useAuth()
 
   const queryPhone = tryNormalizeIndianPhone(searchParams.get('phone') || '') ?? ''
 
@@ -106,6 +106,7 @@ export default function Register() {
       (user?.role === 'customer' && user.registration_completed === false ? user.id : null)
 
     if (targetUserId) {
+      setIsRegistering(true)
       setCustomerLoading(true)
       setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
       try {
@@ -148,6 +149,7 @@ export default function Register() {
       } finally {
         setCustomerLoading(false)
         setUploadStatusMsg('')
+        setIsRegistering(false)
       }
       return
     }
@@ -177,6 +179,7 @@ export default function Register() {
         return
       }
 
+      setIsRegistering(true)
       const widgetOpened = await openOtpWidget({
         identifier: cleanPhone,
         onSuccess: async (accessToken: string) => {
@@ -236,9 +239,11 @@ export default function Register() {
           } finally {
             setCustomerLoading(false)
             setUploadStatusMsg('')
+            setIsRegistering(false)
           }
         },
         onFailure: (err) => {
+          setIsRegistering(false)
           setCustomerLoading(false)
           setUploadStatusMsg('')
           if (err && typeof err === 'object' && (err as any).cancelled) return
@@ -248,10 +253,12 @@ export default function Register() {
       })
 
       if (!widgetOpened && !customerError) {
+        setIsRegistering(false)
         setCustomerLoading(false)
         setCustomerError('OTP verification widget could not be loaded. Please ensure ad-blockers are disabled.')
       }
     } catch (err) {
+      setIsRegistering(false)
       setCustomerLoading(false)
       setCustomerError('Unable to launch OTP verification. Please retry.')
     }
@@ -387,10 +394,10 @@ export default function Register() {
 
               {/* Passwordless benefits notice */}
               {!isIncompleteCustomer && (
-                <div className="p-3.5 bg-brand-500/10 border border-brand-500/25 rounded-xl mb-5 flex items-start gap-2.5">
-                  <ShieldCheck className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" />
-                  <div className="text-xs text-brand-200 leading-relaxed">
-                    <strong className="text-white block font-semibold mb-0.5">
+                <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl mb-5 flex items-start gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div className="text-xs text-blue-900 leading-relaxed">
+                    <strong className="text-blue-900 block font-semibold mb-0.5">
                       {t('registerPage.passwordlessNoticeTitle', '100% Passwordless & Secure')}
                     </strong>
                     {t(

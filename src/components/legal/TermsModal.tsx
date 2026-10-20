@@ -159,8 +159,8 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
           onScroll={checkScrollPosition}
           className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 text-slate-800 dark:text-zinc-200 text-sm leading-relaxed"
         >
-          <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
-            <strong>{language === 'hi' ? 'महत्वपूर्ण सूचना:' : 'Notice to Users:'}</strong>{' '}
+          <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 leading-relaxed">
+            <strong className="text-blue-900">{language === 'hi' ? 'महत्वपूर्ण सूचना:' : 'Notice to Users:'}</strong>{' '}
             {language === 'hi'
               ? 'कृपया नियम एवं शर्तों को अंत तक ध्यानपूर्वक पढ़ें। नीचे पहुंचने के बाद "सहमत हूँ और आगे बढ़ें" बटन सक्षम हो जाएगा।'
               : 'Please read the Terms & Conditions carefully to the end. The "Agree & Continue" button will become available once you have reviewed the complete document.'}

@@ -37,15 +37,15 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="p-4 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-start gap-3">
-        <div className="w-8 h-8 bg-brand-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Info className="w-5 h-5 text-brand-400" />
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <Info className="w-5 h-5 text-blue-600" />
         </div>
         <div>
-          <h4 className="font-semibold text-brand-400 text-sm">
+          <h4 className="font-semibold text-blue-900 text-sm">
             {t('auth.workerRegistration.govtIdTitle', 'Government ID Verification')}
           </h4>
-          <p className="text-xs text-semantic-text-secondary mt-1">
+          <p className="text-xs text-blue-900 mt-1 leading-relaxed">
             {t(
               'auth.workerRegistration.govtIdDesc',
               'Upload a clear photo or PDF of your Aadhaar card or Voter ID. Your document is stored in a strictly private storage bucket and accessible exclusively to administrators for verification.'

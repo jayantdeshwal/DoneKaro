@@ -24,6 +24,8 @@ interface AuthContextType {
   isSuperAdmin: boolean
   isSubAdmin: boolean
   needsPhoneVerification: boolean
+  isRegistering: boolean
+  setIsRegistering: (isRegistering: boolean) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -48,6 +50,7 @@ let activeAuthLoadSequence = 0
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRegistering, setIsRegistering] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -376,10 +379,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const needsPhoneVerification = !!user && (!user.phone || user.phone.trim() === '')
 
   const updateUser = (updates: Partial<User>) => {
-    if (user) {
-      const updated = { ...user, ...updates }
-      setUser(updated)
-    }
+    setUser(currentUser => (currentUser ? { ...currentUser, ...updates } : currentUser))
   }
 
   return (
@@ -399,6 +399,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isSuperAdmin: user?.role === 'super_admin',
         isSubAdmin: user?.role === 'sub_admin',
         needsPhoneVerification,
+        isRegistering,
+        setIsRegistering,
       }}
     >
       {children}

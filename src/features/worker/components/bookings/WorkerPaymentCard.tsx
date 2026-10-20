@@ -58,11 +58,11 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
       {booking.status === 'payment_pending' &&
         summary.payment_status !== 'paid' &&
         summary.payment_status !== 'pending' && (
-          <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+          <div className="mt-3 rounded-xl border border-amber-300 bg-amber-100 p-3.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                <p className="font-bold text-slate-900 dark:text-white">
+                <span className="w-2 h-2 rounded-full bg-amber-700 animate-pulse" />
+                <p className="font-bold text-amber-900">
                   {t(
                     'workerDashboard.paymentRequiredFromCustomer',
                     'Payment Required from Customer'
@@ -74,14 +74,14 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
               </Badge>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-semantic-text-secondary">
+              <span className="text-amber-900 font-medium">
                 {t('bookings.amountToPay', 'Amount Due')}:
               </span>
-              <span className="text-base font-bold text-slate-900 dark:text-white">
+              <span className="text-base font-bold text-amber-900">
                 ₹{summary.final_payable_amount.toFixed(2)}
               </span>
             </div>
-            <p className="mt-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+            <p className="mt-1.5 text-[11px] text-amber-900">
               {t(
                 'workerDashboard.waitingForCustomerPaymentConfirmation',
                 'Waiting for customer payment confirmation. The customer needs to confirm the cash handover.'
@@ -92,11 +92,11 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
 
       {/* State B: Customer Confirmed Cash, Awaiting Worker Confirmation */}
       {booking.status === 'payment_pending' && summary.payment_status === 'pending' && (
-        <div className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3.5">
+        <div className="mt-3 rounded-xl border border-amber-300 bg-amber-100 p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-amber-500 animate-spin" />
-              <p className="font-bold text-amber-900 dark:text-amber-200">
+              <Clock className="w-4 h-4 text-amber-700 animate-spin" />
+              <p className="font-bold text-amber-900">
                 {t(
                   'workerDashboard.cashPaymentAwaitingConfirmation',
                   'Cash Payment Awaiting Confirmation'
@@ -107,7 +107,7 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
               {t('workerDashboard.pendingConfirmation', 'Confirmation Pending')}
             </Badge>
           </div>
-          <p className="mt-2 text-[11px] text-slate-700 dark:text-zinc-300">
+          <p className="mt-2 text-[11px] text-amber-900">
             {t(
               'workerDashboard.customerCashConfirmedDesc',
               'Customer has confirmed cash payment handover.'

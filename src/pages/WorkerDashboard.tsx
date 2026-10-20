@@ -210,7 +210,13 @@ export default function WorkerDashboard() {
           pendingCount={pendingCount}
           isLeadsTab={isLeadsTab}
           onToggleAvailability={handleToggleAvailability}
-          onSelectJobs={() => setActiveTab(pendingCount > 0 ? 'pending' : 'active')}
+          onSelectJobs={() => {
+            setActiveTab(pendingCount > 0 ? 'pending' : 'active')
+            if (pendingCount > 0) {
+              const el = document.getElementById('quote-requests') || document.getElementById('booking-feed-tabs')
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+          }}
           onOpenWorkAdvice={() => openAssistant('worker_sarathi', undefined, activeJob?.id)}
           onOpenSupport={() => openSupport()}
         />
