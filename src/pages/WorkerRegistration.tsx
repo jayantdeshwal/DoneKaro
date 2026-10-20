@@ -219,7 +219,6 @@ export default function WorkerRegistration() {
                   variant="primary"
                   onClick={handleNext}
                   className="flex-1"
-                  disabled={currentStep === 0 && !phoneVerified}
                 >
                   {t('common.next', 'Next')}
                 </Button>

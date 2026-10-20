@@ -54,6 +54,21 @@ const KNOWN_SAFE_SUBSTRINGS = [
   'please select a specific service',
   'address is required',
   'response deadline must be in the future',
+  'select 1 or 2 services',
+  'all selected services must belong to the same parent category',
+  'primary service must be one of the selected services',
+  'one or more selected services are invalid',
+  'cannot select a top-level group as a service',
+  'one or more service areas are invalid',
+  'invalid id document',
+  'experience must be between',
+  'you must be signed in to register',
+  'this account type cannot register as a worker',
+  'failed to upload id proof',
+  'failed to upload avatar',
+  'government id proof is required',
+  'a worker cannot be registered for more than 2 services',
+  'bucket not found',
 ]
 
 /**
