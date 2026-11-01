@@ -96,7 +96,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             <>
               <input
                 type="file"
-                accept="image/*,application/pdf"
+                accept="image/jpeg, image/png, application/pdf"
                 className="hidden"
                 id="idproof-upload"
                 onChange={e => onIdProofChange(e.target.files?.[0])}
@@ -110,7 +110,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
                   {t('auth.workerRegistration.clickUploadId', 'Click to upload Aadhaar or Voter ID')}
                 </span>
                 <span className="text-xs text-semantic-text-tertiary">
-                  {t('auth.workerRegistration.idFormatHint', 'JPG, PNG, PDF up to 10MB')}
+                  {t('auth.workerRegistration.idFormatHint', 'JPG, PNG, or PDF up to 10MB')}
                 </span>
               </label>
             </>

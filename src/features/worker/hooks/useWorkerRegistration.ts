@@ -7,7 +7,7 @@ import {
 } from '@kaamgar/shared'
 import { useAuth } from '@/context/AuthContext'
 import { getSupabaseClient } from '@/lib/supabase'
-import { uploadAvatar, uploadIdProof, validateFile } from '@/services/storage'
+import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES } from '@/services/storage'
 import { notifyAdminsOfWorkerRegistration } from '@/services/admin'
 import { openOtpWidget } from '@/services/otp'
 import { sanitizeErrorMessage } from '@/utils/errors'
@@ -119,7 +119,7 @@ export function useWorkerRegistration() {
     if (!file) return
     const result = validateFile(file, {
       maxSizeMb: 5,
-      allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+      allowedTypes: ['image/jpeg', 'image/png'],
     })
     if (!result.valid) {
       setErrors(prev => ({ ...prev, avatar: result.error || 'Invalid file' }))
@@ -138,7 +138,7 @@ export function useWorkerRegistration() {
     if (!file) return
     const result = validateFile(file, {
       maxSizeMb: 10,
-      allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+      allowedTypes: DEFAULT_DOCUMENT_TYPES,
     })
     if (!result.valid) {
       setErrors(prev => ({ ...prev, idProof: result.error || 'Invalid file' }))
@@ -150,8 +150,9 @@ export function useWorkerRegistration() {
       return next
     })
     setFormData(prev => ({ ...prev, idProof: file }))
-    setIdProofIsPdf(file.type === 'application/pdf')
-    if (file.type !== 'application/pdf') {
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    setIdProofIsPdf(isPdf)
+    if (!isPdf) {
       setIdProofPreview(URL.createObjectURL(file))
     } else {
       setIdProofPreview(null)

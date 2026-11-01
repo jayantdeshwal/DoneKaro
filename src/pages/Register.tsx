@@ -143,7 +143,7 @@ export default function Register() {
         setCustomerError(
           sanitizeErrorMessage(
             err,
-            'Address proof upload failed. Please verify the document format (JPG, PNG, PDF up to 10MB) and retry.'
+            'Address proof upload failed. Please verify the document format (JPG, PNG, or PDF up to 10MB) and retry.'
           )
         )
       } finally {

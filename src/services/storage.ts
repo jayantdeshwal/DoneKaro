@@ -5,9 +5,55 @@ export interface FileValidationOptions {
   allowedTypes?: string[]
 }
 
-const DEFAULT_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-const PROBLEM_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const DEFAULT_DOCUMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+const DEFAULT_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+const PROBLEM_IMAGE_TYPES = ['image/jpeg', 'image/png']
+export const DEFAULT_DOCUMENT_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
+
+/**
+ * Resolves a normalized MIME type and file extension for document uploads.
+ * Guarantees consistent handling for PDF, PNG, and JPG/JPEG files across browsers and operating systems.
+ */
+export function getDocumentMimeAndExt(file: File): { mimeType: string; ext: string; isDocumentType: boolean } {
+  const rawExt = file.name && file.name.includes('.')
+    ? file.name.split('.').pop()?.toLowerCase().trim() || ''
+    : ''
+  const rawType = file.type?.toLowerCase().trim() || ''
+
+  // 1. PDF detection
+  if (
+    rawType === 'application/pdf' ||
+    rawType === 'application/x-pdf' ||
+    rawExt === 'pdf'
+  ) {
+    return { mimeType: 'application/pdf', ext: 'pdf', isDocumentType: true }
+  }
+
+  // 2. PNG detection
+  if (
+    rawType === 'image/png' ||
+    rawType === 'image/x-png' ||
+    rawExt === 'png'
+  ) {
+    return { mimeType: 'image/png', ext: 'png', isDocumentType: true }
+  }
+
+  // 3. JPEG / JPG detection
+  if (
+    rawType === 'image/jpeg' ||
+    rawType === 'image/jpg' ||
+    rawType === 'image/pjpeg' ||
+    rawExt === 'jpg' ||
+    rawExt === 'jpeg'
+  ) {
+    return { mimeType: 'image/jpeg', ext: rawExt === 'jpeg' ? 'jpeg' : 'jpg', isDocumentType: true }
+  }
+
+  return {
+    mimeType: rawType || 'application/octet-stream',
+    ext: rawExt || 'jpg',
+    isDocumentType: false,
+  }
+}
 
 /**
  * Validates a file against allowed MIME types and maximum size in MB.
@@ -26,13 +72,25 @@ export function validateFile(
     }
   }
 
-  if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
-    const extensions = allowedTypes
-      .map(t => t.split('/')[1]?.toUpperCase() || t)
-      .join(', ')
-    return {
-      valid: false,
-      error: `Invalid file format. Allowed types: ${extensions}`,
+  if (allowedTypes.length > 0) {
+    const docInfo = getDocumentMimeAndExt(file)
+    const isAllowed =
+      allowedTypes.includes(file.type) ||
+      (docInfo.isDocumentType && allowedTypes.includes(docInfo.mimeType))
+
+    if (!isAllowed) {
+      const extensions = allowedTypes
+        .map(t => {
+          if (t === 'application/pdf') return 'PDF'
+          if (t === 'image/jpeg') return 'JPG'
+          if (t === 'image/png') return 'PNG'
+          return t.split('/')[1]?.toUpperCase() || t
+        })
+        .join(', ')
+      return {
+        valid: false,
+        error: `Invalid file format. Allowed types: ${extensions}`,
+      }
     }
   }
 
@@ -76,7 +134,7 @@ export async function uploadIdProof(file: File, userId: string): Promise<string>
   if (!validation.valid) throw new Error(validation.error)
 
   const supabase = getSupabaseClient()
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const { mimeType, ext } = getDocumentMimeAndExt(file)
   const filePath = `${userId}/id-proof-${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
@@ -84,7 +142,7 @@ export async function uploadIdProof(file: File, userId: string): Promise<string>
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: true,
-      contentType: file.type,
+      contentType: mimeType,
     })
 
   if (uploadError) {
@@ -132,7 +190,7 @@ export async function uploadProblemImage(file: File, userId: string, serviceRequ
   if (!userId || !serviceRequestId) throw new Error('A signed-in customer and service request are required')
 
   const supabase = getSupabaseClient()
-  const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+  const extension = file.type === 'image/png' ? 'png' : 'jpg'
   const filePath = `${userId}/${serviceRequestId}/problem-${crypto.randomUUID()}.${extension}`
   const { error } = await supabase.storage
     .from('service-request-images')
@@ -187,7 +245,7 @@ export async function uploadCustomerAddressProof(file: File, userId: string): Pr
   if (!userId) throw new Error('An authenticated customer ID is required to upload address proof')
 
   const supabase = getSupabaseClient()
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const { mimeType, ext } = getDocumentMimeAndExt(file)
   const filePath = `${userId}/address-proof-${crypto.randomUUID()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
@@ -195,7 +253,7 @@ export async function uploadCustomerAddressProof(file: File, userId: string): Pr
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: true,
-      contentType: file.type,
+      contentType: mimeType,
     })
 
   if (uploadError) {

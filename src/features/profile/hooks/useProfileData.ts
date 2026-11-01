@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSupabaseClient } from '@/lib/supabase'
-import { uploadAvatar, uploadIdProof, validateFile } from '@/services/storage'
+import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES } from '@/services/storage'
 import { recordPhoneRegistered } from '@/services/authCheck'
 import type { LiveWorkerDetails, ProfileFormData } from '../types'
 
@@ -195,7 +195,7 @@ export function useProfileData({
 
     const validation = validateFile(file, {
       maxSizeMb: 10,
-      allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+      allowedTypes: DEFAULT_DOCUMENT_TYPES,
     })
     if (!validation.valid) {
       setIdProofUploadError(validation.error || 'Invalid document file')

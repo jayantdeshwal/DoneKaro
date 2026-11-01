@@ -359,4 +359,10 @@
   .shadow-glow-brand-lg {
     box-shadow: 0 0 40px rgb(34 197 94 / 0.4);
   }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
 }

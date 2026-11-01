@@ -85,7 +85,7 @@ export function EditProfileModal({
           </div>
           <div>
             <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{t('profile.photo', 'Profile Photo')}</p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-400">PNG, JPG or WebP (Max 5MB)</p>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-400">PNG or JPG (Max 5MB)</p>
           </div>
         </div>
 
@@ -220,7 +220,7 @@ export function EditProfileModal({
                 <input
                   type="file"
                   ref={idProofInputRef}
-                  accept="image/*,application/pdf"
+                  accept="image/jpeg, image/png, application/pdf"
                   className="hidden"
                   onChange={onIdProofSelect}
                 />

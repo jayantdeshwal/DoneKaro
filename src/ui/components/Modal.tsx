@@ -76,14 +76,14 @@ export function Modal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-50 overflow-y-auto"
+        className="fixed inset-0 z-50 overflow-y-auto print:static print:inset-auto print:overflow-visible print:z-auto print:p-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         aria-describedby={description ? 'modal-description' : undefined}
       >
         <motion.div
-          className="fixed inset-0 bg-black/40"
+          className="fixed inset-0 bg-black/40 print:hidden"
           aria-hidden="true"
           onClick={closeOnOverlayClick ? onClose : undefined}
           initial={{ opacity: 0 }}
@@ -92,7 +92,7 @@ export function Modal({
           transition={{ duration: 0.2 }}
         />
 
-        <div className="relative z-10 flex min-h-full items-center justify-center p-4">
+        <div className="relative z-10 flex min-h-full items-center justify-center p-4 print:static print:block print:p-0 print:min-h-0 print:w-full">
           <motion.div
             ref={modalRef}
             tabIndex={-1}
@@ -100,10 +100,10 @@ export function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={cn('w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-2xl text-slate-900 dark:text-zinc-100', sizes[size], className)}
+            className={cn('w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-2xl text-slate-900 dark:text-zinc-100 print:border-none print:shadow-none print:bg-transparent print:p-0 print:m-0 print:max-w-none print:w-full', sizes[size], className)}
           >
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between p-5 border-b border-slate-200 dark:border-zinc-800">
+              <div className="flex items-start justify-between p-5 border-b border-slate-200 dark:border-zinc-800 print:hidden">
                 <div>
                   {title && (
                     <h2 id="modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
@@ -128,7 +128,7 @@ export function Modal({
                 )}
               </div>
             )}
-            <div className="p-5">{children}</div>
+            <div className="p-5 print:p-0">{children}</div>
           </motion.div>
         </div>
       </motion.div>
