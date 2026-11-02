@@ -4,6 +4,7 @@ import { Shield } from 'lucide-react'
 import { AdminSupportPage } from '@/features/admin-support'
 import {
   useAdminData,
+  AdminSessionGuard,
   AdminHeaderBanner,
   AdminStatsCards,
   AdminTabBar,
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-semantic-bg-primary text-semantic-text-primary pb-20">
+      <AdminSessionGuard phone={user?.phone ?? ''} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* Top Executive Header Banner */}
         <AdminHeaderBanner

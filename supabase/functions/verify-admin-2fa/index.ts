@@ -1,7 +1,7 @@
 // Supabase Edge Function: verify-admin-2fa
 // Server-side admin 2FA authorization.
 // Flow: valid Supabase JWT -> admin role check -> MSG91 token verification ->
-//       phone binding check -> write admin_2fa_sessions (30-minute expiry).
+//       phone binding check -> refresh 30-minute authorization within the original 6-hour limit.
 // The session_id is extracted from the JWT server-side — never trusted from the client.
 
 declare const Deno: {
@@ -167,27 +167,53 @@ serve(async (req: Request) => {
       })
     }
 
-    // 9. Write admin_2fa_sessions row via service_role — clients cannot do this directly
-    const now       = new Date().toISOString()
-    const expiresAt = new Date(Date.now() + TWO_FA_LIFETIME_MINUTES * 60 * 1000).toISOString()
-
-    const { error: upsertErr } = await adminClient
+    // Re-verification renews only the soft authorization; never extend the hard session.
+    const nowMs = Date.now()
+    const { data: currentAuth, error: currentAuthError } = await adminClient
       .from('admin_2fa_sessions')
-      .upsert(
-        {
-          admin_id:    authUser.id,
-          session_id:  sessionId,
-          verified_at: now,
-          expires_at:  expiresAt,
-          updated_at:  now,
-        },
-        { onConflict: 'admin_id,session_id' }
-      )
+      .select('hard_expires_at')
+      .eq('admin_id', authUser.id)
+      .eq('session_id', sessionId)
+      .maybeSingle()
 
-    if (upsertErr) {
-      console.error('[verify-admin-2fa] Failed to write 2FA session:', upsertErr)
+    if (currentAuthError || !currentAuth) {
+      console.error('[verify-admin-2fa] Admin authorization row not found:', currentAuthError)
+      return new Response(JSON.stringify({ error: 'Admin session has expired. Please sign in again.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const hardExpiresAt = Date.parse(currentAuth.hard_expires_at)
+    if (!Number.isFinite(hardExpiresAt) || hardExpiresAt <= nowMs) {
+      return new Response(JSON.stringify({ error: 'The six-hour admin session limit has expired. Please sign in again.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const now = new Date(nowMs).toISOString()
+    const expiresAt = new Date(
+      Math.min(nowMs + TWO_FA_LIFETIME_MINUTES * 60 * 1000, hardExpiresAt)
+    ).toISOString()
+
+    const { data: updatedAuth, error: updateError } = await adminClient
+      .from('admin_2fa_sessions')
+      .update({
+        verified_at: now,
+        expires_at: expiresAt,
+        updated_at: now,
+      })
+      .eq('admin_id', authUser.id)
+      .eq('session_id', sessionId)
+      .gt('hard_expires_at', now)
+      .select('id')
+      .maybeSingle()
+
+    if (updateError || !updatedAuth) {
+      console.error('[verify-admin-2fa] Failed to refresh 2FA session:', updateError)
       return new Response(JSON.stringify({ error: 'Failed to establish 2FA authorization. Please retry.' }), {
-        status: 500,
+        status: updateError ? 500 : 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -199,6 +225,7 @@ serve(async (req: Request) => {
         success:            true,
         expires_at:         expiresAt,
         expires_in_minutes: TWO_FA_LIFETIME_MINUTES,
+        hard_expires_at:    currentAuth.hard_expires_at,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

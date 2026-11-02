@@ -9,7 +9,7 @@
 //   5. Resolve existing auth.users record for that admin
 //   6. Issue a genuine Supabase Auth session via magiclink token_hash exchange
 //   7. Extract session_id from the issued JWT
-//   8. Write admin_2fa_sessions row (30-minute authorization window)
+//   8. Write admin_2fa_sessions row (30-minute authorization, 6-hour hard expiry)
 //   9. Return session + admin metadata
 //
 // The session_id is extracted server-side from the issued JWT — never from the client.
@@ -31,6 +31,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 const SUPABASE_ANON_KEY         = Deno.env.get('SUPABASE_ANON_KEY') || ''
 
 const TWO_FA_LIFETIME_MINUTES = 30
+const ADMIN_HARD_LIFETIME_HOURS = 6
 
 /** Decode JWT payload without verifying signature (GoTrue already verified it). */
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -228,9 +229,10 @@ serve(async (req: Request) => {
       )
     }
 
-    // ── 8. Write admin_2fa_sessions row (30-minute authorization) ─────────────
+    // ── 8. Write 2FA authorization and its non-extendable hard expiry ──────────
     const now       = new Date().toISOString()
     const expiresAt = new Date(Date.now() + TWO_FA_LIFETIME_MINUTES * 60 * 1000).toISOString()
+    const hardExpiresAt = new Date(Date.now() + ADMIN_HARD_LIFETIME_HOURS * 60 * 60 * 1000).toISOString()
 
     const { error: upsertErr } = await adminClient
       .from('admin_2fa_sessions')
@@ -240,6 +242,7 @@ serve(async (req: Request) => {
           session_id:  sessionId,
           verified_at: now,
           expires_at:  expiresAt,
+          hard_expires_at: hardExpiresAt,
           updated_at:  now,
         },
         { onConflict: 'admin_id,session_id' }
@@ -274,6 +277,7 @@ serve(async (req: Request) => {
         authorization: {
           expires_at:         expiresAt,
           expires_in_minutes: TWO_FA_LIFETIME_MINUTES,
+          hard_expires_at:    hardExpiresAt,
         },
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
