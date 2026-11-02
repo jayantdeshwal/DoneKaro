@@ -37,6 +37,17 @@ export function useBookingRealtime({ customerId, onUpdate }: UseBookingRealtimeP
           void onUpdate()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'booking_change_requests',
+        },
+        () => {
+          void onUpdate()
+        }
+      )
       .subscribe()
 
     return () => {

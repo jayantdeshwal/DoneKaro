@@ -9,6 +9,7 @@ import { useSupport } from '@/features/support'
 import ContactModal from '@/components/ContactModal'
 import { buildWorkerToCustomerWhatsAppMessage } from '@/utils/contact'
 import type { BookingQuoteRequest } from '@/services/quotes'
+import { withdrawBookingChangeRequest } from '@/services/changeRequests'
 
 // Feature imports
 import type { ContactModalData, WorkerBookingRow } from '@/features/worker/types'
@@ -66,6 +67,20 @@ export default function WorkerDashboard() {
     loadDashboardData,
     handleUpdateStatus,
   } = useWorkerDashboardData()
+
+  const handleWithdrawChangeRequest = async (requestId: string) => {
+    setError('')
+    try {
+      await withdrawBookingChangeRequest(requestId)
+      await loadDashboardData()
+    } catch (withdrawError) {
+      setError(
+        withdrawError instanceof Error
+          ? withdrawError.message
+          : t('workerDashboard.withdrawRequestError', 'Unable to withdraw the additional-charge request')
+      )
+    }
+  }
 
   // 2. Availability toggle
   const {
@@ -330,6 +345,7 @@ export default function WorkerDashboard() {
                   onViewDetails={setDetailsModalBooking}
                   onViewReceipt={setReceiptModalBooking}
                   onUpdateStatus={handleUpdateStatus}
+                  onWithdrawChangeRequest={handleWithdrawChangeRequest}
                 />
               )
             })

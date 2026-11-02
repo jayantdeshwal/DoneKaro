@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, UserRole } from '@kaamgar/shared'
 import { getSupabaseClient } from '@/lib/supabase'
-import { subscribeToPushNotifications } from '@/utils/pushNotification'
 
 export interface PhoneAuthResult {
   user: User
@@ -224,11 +223,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (currentSeq === activeAuthLoadSequence) {
       setUser(resolvedUser)
-      void subscribeToPushNotifications(resolvedUser.id).then(result => {
-        if (!result.success && result.error) {
-          console.warn('[AuthContext] Push notification subscription failed:', result.error)
-        }
-      })
       if (typeof window !== 'undefined') {
         if (!sessionStorage.getItem('donekaro_auth_session_event')) {
           sessionStorage.setItem('donekaro_auth_session_event', `auth_${Date.now()}`)

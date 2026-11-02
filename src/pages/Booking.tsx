@@ -35,7 +35,7 @@ export default function Booking() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showConfirm, setShowConfirm] = useState(false)
   const [quoteRequested, setQuoteRequested] = useState(false)
-  const [responseHours, setResponseHours] = useState('24')
+  const [responseHours, setResponseHours] = useState('6')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [bookingError, setBookingError] = useState('')
   const [createdServiceRequestId, setCreatedServiceRequestId] = useState<string | null>(null)
@@ -44,6 +44,7 @@ export default function Booking() {
   const [problemImagePath, setProblemImagePath] = useState<string | null>(null)
   const imagePickerRef = useRef<HTMLInputElement>(null)
   const cameraPickerRef = useRef<HTMLInputElement>(null)
+  const isSubmittingRef = useRef(false)
 
   useEffect(() => {
     if (!workerId) {
@@ -161,6 +162,8 @@ export default function Booking() {
   }
   
   const confirmBooking = async () => {
+    if (isSubmitting || isSubmittingRef.current) return
+
     if (!isAuthenticated || !user || !worker) {
       navigate('/login')
       return
@@ -173,6 +176,7 @@ export default function Booking() {
       return
     }
 
+    isSubmittingRef.current = true
     setIsSubmitting(true)
     setBookingError('')
     setErrors({})
@@ -251,6 +255,7 @@ export default function Booking() {
       setShowConfirm(false)
       setErrors(prev => ({ ...prev, form: message }))
     } finally {
+      isSubmittingRef.current = false
       setIsSubmitting(false)
     }
   }
@@ -555,9 +560,9 @@ export default function Booking() {
               onChange={event => setResponseHours(event.target.value)}
               className="input w-full bg-surface-200 border-semantic-border-light text-semantic-text-primary"
             >
+              <option value="6">{t('booking.hours6', '6 hours')}</option>
+              <option value="12">{t('booking.hours12', '12 hours')}</option>
               <option value="24">{t('booking.hours24', '24 hours')}</option>
-              <option value="48">{t('booking.hours48', '48 hours')}</option>
-              <option value="72">{t('booking.hours72', '72 hours')}</option>
             </select>
           </div>
           

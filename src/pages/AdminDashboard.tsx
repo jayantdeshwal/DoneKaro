@@ -49,6 +49,8 @@ export default function AdminDashboard() {
           setSearchParams={admin.setSearchParams}
           refreshAll={admin.refreshAll}
           isLoading={admin.isLoadingWorkers || admin.isLoadingBookings || admin.isLoadingNotifications}
+          openSupportAlertCount={admin.openSupportAlertCount}
+          supportAlertsError={admin.supportAlertsError}
           workerError={admin.workerError}
           setWorkerError={admin.setWorkerError}
           customerError={admin.customerError}

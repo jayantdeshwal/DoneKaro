@@ -23,6 +23,7 @@ import { statusConfig } from '../constants/statusConfig'
 import { formatBookingDate, formatBookingTime, resolveServiceAndCategory } from '../utils/bookingFormat'
 import type { BookingChangeRequest } from '@/services/changeRequests'
 import type { SupportTab } from '@/features/support'
+import { BookingLifecycleStepper } from './BookingLifecycleStepper'
 
 interface BookingCardProps {
   booking: BookingRow
@@ -72,6 +73,12 @@ export function BookingCard({
       id={`booking-${booking.id}`}
       className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md"
     >
+      {booking.status !== 'cancelled' && booking.status !== 'rejected' && (
+        <BookingLifecycleStepper
+          currentStep={booking.status === 'pending' ? 1 : 3}
+        />
+      )}
+
       {/* Header: Service Name & Status Badge */}
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
         <div>

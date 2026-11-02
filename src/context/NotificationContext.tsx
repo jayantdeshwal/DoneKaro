@@ -81,6 +81,39 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     info: (title: string, message?: string) => addNotification({ type: 'info', title, message }),
   }
 
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+
+    const handleServiceWorkerMessage = (event: MessageEvent<unknown>) => {
+      if (!event.data || typeof event.data !== 'object') return
+
+      const payload = event.data as {
+        type?: unknown
+        title?: unknown
+        body?: unknown
+      }
+
+      if (
+        payload.type !== 'PUSH_NOTIFICATION' ||
+        typeof payload.title !== 'string' ||
+        typeof payload.body !== 'string'
+      ) {
+        return
+      }
+
+      addNotification({
+        type: 'info',
+        title: payload.title,
+        message: payload.body,
+      })
+    }
+
+    navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage)
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage)
+    }
+  }, [addNotification])
+
   // 2. Database Notifications
   const [dbNotifications, setDbNotifications] = useState<DbNotification[]>([])
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)

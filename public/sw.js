@@ -209,8 +209,28 @@ self.addEventListener('push', event => {
     renotify: true
   }
 
+  const payload = {
+    type: 'PUSH_NOTIFICATION',
+    title,
+    body,
+    url: targetUrl,
+    notificationId: data.notificationId || null,
+    tag: data.tag || 'donekaro-alert'
+  }
+
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      const visibleClients = windowClients.filter(
+        client => client.visibilityState === 'visible' || client.focused
+      )
+
+      if (visibleClients.length > 0) {
+        visibleClients.forEach(client => client.postMessage(payload))
+        return
+      }
+
+      return self.registration.showNotification(title, options)
+    })
   )
 })
 
@@ -232,4 +252,3 @@ self.addEventListener('notificationclick', event => {
     })
   )
 })
-

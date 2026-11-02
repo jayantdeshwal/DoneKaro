@@ -46,6 +46,8 @@ export function useAdminData(isAdmin: boolean) {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(true)
   const [notificationsError, setNotificationsError] = useState('')
   const [notificationFilter, setNotificationFilter] = useState<'all' | 'registrations' | 'documents' | 'unread'>('all')
+  const [openSupportAlertCount, setOpenSupportAlertCount] = useState<number | null>(null)
+  const [supportAlertsError, setSupportAlertsError] = useState('')
 
   // Approval / Rejection action modal
   const [showActionModal, setShowActionModal] = useState(false)
@@ -454,6 +456,35 @@ export function useAdminData(isAdmin: boolean) {
     }
   }
 
+  const loadSupportAlertCount = async () => {
+    if (!isAdmin) return
+
+    try {
+      const supabase = getSupabaseClient()
+      const [complaintsResult, suggestionsResult] = await Promise.all([
+        supabase.from('complaints').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase.from('suggestions').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+      ])
+
+      if (complaintsResult.error || suggestionsResult.error) {
+        const errors = [complaintsResult.error, suggestionsResult.error].filter(Boolean)
+        console.error('[AdminDashboard] Failed to load open support alert count:', errors)
+        setSupportAlertsError('Unable to load support alert count. Please refresh to try again.')
+        return
+      }
+
+      if (complaintsResult.count === null || suggestionsResult.count === null) {
+        throw new Error('Supabase did not return exact support alert counts.')
+      }
+
+      setOpenSupportAlertCount(complaintsResult.count + suggestionsResult.count)
+      setSupportAlertsError('')
+    } catch (err) {
+      console.error('[AdminDashboard] Failed to load open support alert count:', err)
+      setSupportAlertsError('Unable to load support alert count. Please refresh to try again.')
+    }
+  }
+
   const refreshAll = async () => {
     await Promise.all([
       loadWorkersData(),
@@ -462,6 +493,7 @@ export function useAdminData(isAdmin: boolean) {
       loadStats(),
       loadNotificationsData(),
       loadAdminTeamData(),
+      loadSupportAlertCount(),
     ])
   }
 
@@ -503,6 +535,20 @@ export function useAdminData(isAdmin: boolean) {
         { event: '*', schema: 'public', table: 'notifications' },
         () => {
           void loadNotificationsData()
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'complaints' },
+        () => {
+          void loadSupportAlertCount()
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'suggestions' },
+        () => {
+          void loadSupportAlertCount()
         }
       )
       .subscribe()
@@ -840,6 +886,8 @@ export function useAdminData(isAdmin: boolean) {
     filteredNotifications,
     notifCounts,
     unreadNotifsCount,
+    openSupportAlertCount,
+    supportAlertsError,
 
     // Analytics
     bookingTrendsData,

@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
   AlertCircle,
   CheckCircle,
+  Bell,
 } from 'lucide-react'
 import type { AdminTabType } from '../types'
 
@@ -21,6 +22,8 @@ interface AdminHeaderBannerProps {
   setSearchParams: (params: { tab: string }) => void
   refreshAll: () => Promise<void>
   isLoading: boolean
+  openSupportAlertCount: number | null
+  supportAlertsError: string
   workerError: string
   setWorkerError: (err: string) => void
   customerError: string
@@ -41,6 +44,8 @@ export function AdminHeaderBanner({
   setSearchParams,
   refreshAll,
   isLoading,
+  openSupportAlertCount,
+  supportAlertsError,
   workerError,
   setWorkerError,
   customerError,
@@ -137,6 +142,27 @@ export function AdminHeaderBanner({
             </Button>
 
             <Button
+              variant="outline"
+              size="sm"
+              aria-label={`Support alerts: ${openSupportAlertCount ?? 'loading'} open tickets`}
+              onClick={() => {
+                setActiveTab('management')
+                setSearchParams({ tab: 'management' })
+              }}
+              className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-rose-500/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
+            >
+              <span className="relative inline-flex">
+                <Bell className="w-3.5 h-3.5 text-rose-500" />
+                {openSupportAlertCount !== null && (
+                  <span className="absolute -top-2 -right-3 min-w-4 h-4 px-1 rounded-full bg-rose-600 text-white text-[9px] leading-4 text-center font-bold">
+                    {openSupportAlertCount}
+                  </span>
+                )}
+              </span>
+              Support Alerts
+            </Button>
+
+            <Button
               variant="primary"
               size="sm"
               onClick={() => navigate('/search')}
@@ -151,6 +177,12 @@ export function AdminHeaderBanner({
       </div>
 
       {/* Global Notifications & Error Banners */}
+      {supportAlertsError && (
+        <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center gap-2.5 shadow-md">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{supportAlertsError}</span>
+        </div>
+      )}
       {workerError && (
         <div className="mb-6 p-4 rounded-2xl border border-red-800 bg-gray-900 text-red-300 text-sm flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2.5">

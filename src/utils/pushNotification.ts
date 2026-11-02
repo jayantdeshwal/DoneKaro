@@ -110,6 +110,10 @@ export async function subscribeToPush(
     return { success: false, error: 'Push notifications not supported on this device/browser.' }
   }
 
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    return { success: false, error: 'Notification permission has not been granted.' }
+  }
+
   const vapidKey =
     customVapidKey ||
     (typeof import.meta !== 'undefined' && import.meta.env
@@ -215,9 +219,8 @@ export async function subscribeToPushNotifications(userId: string): Promise<Subs
 
   try {
     const registration = await navigator.serviceWorker.ready
-    const permission = await Notification.requestPermission()
-    if (permission !== 'granted') {
-      return { success: false, error: `Notification permission was ${permission}.` }
+    if (Notification.permission !== 'granted') {
+      return { success: false, error: `Notification permission was ${Notification.permission}.` }
     }
 
     let subscription = await registration.pushManager.getSubscription()

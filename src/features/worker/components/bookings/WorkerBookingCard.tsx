@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Calendar,
@@ -25,6 +25,7 @@ interface WorkerBookingCardProps {
   onViewDetails: (booking: WorkerBookingRow) => void
   onViewReceipt: (booking: WorkerBookingRow) => void
   onUpdateStatus: (bookingId: string, status: WorkerBookingRow['status']) => void | Promise<void>
+  onWithdrawChangeRequest: (requestId: string) => Promise<void>
 }
 
 export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
@@ -37,8 +38,10 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
   onViewDetails,
   onViewReceipt,
   onUpdateStatus,
+  onWithdrawChangeRequest,
 }) => {
   const { t, i18n } = useTranslation()
+  const [withdrawingRequestId, setWithdrawingRequestId] = useState<string | null>(null)
   const catObj = CATEGORIES.find(c => c.id === booking.category_id)
   const catName = catObj
     ? getCategoryName(catObj, i18n.language === 'hi' ? 'hi' : 'en')
@@ -219,6 +222,26 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
             Job {formatJobReference(booking.id)} • ₹{request.amount.toFixed(2)}
           </p>
           <p className="mt-1 text-semantic-text-secondary">Reason: {request.reason}</p>
+          {request.status === 'pending' && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={withdrawingRequestId !== null}
+              onClick={async () => {
+                setWithdrawingRequestId(request.id)
+                try {
+                  await onWithdrawChangeRequest(request.id)
+                } finally {
+                  setWithdrawingRequestId(null)
+                }
+              }}
+              className="mt-3 w-full border-rose-500/40 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
+            >
+              {withdrawingRequestId === request.id
+                ? t('workerDashboard.withdrawingRequest', 'Withdrawing...')
+                : t('workerDashboard.withdrawRequest', 'Withdraw Request')}
+            </Button>
+          )}
         </div>
       ))}
 

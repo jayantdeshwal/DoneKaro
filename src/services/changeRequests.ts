@@ -1,7 +1,7 @@
 import type { JobId } from '@kaamgar/shared'
 import { getSupabaseClient } from '@/lib/supabase'
 
-export type ChangeRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+export type ChangeRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'withdrawn'
 // Cash is the only active payment method. Historical UPI rows remain a
 // database compatibility concern and are not selectable by the application.
 export type PaymentMethod = 'cash'
@@ -129,6 +129,14 @@ export async function decideBookingChangeRequest(requestId: string, decision: 'a
   const { error } = await (getSupabaseClient() as any).rpc('decide_booking_change_request', {
     target_request_id: requestId,
     target_decision: decision,
+  })
+
+  if (error) throw error
+}
+
+export async function withdrawBookingChangeRequest(requestId: string): Promise<void> {
+  const { error } = await (getSupabaseClient() as any).rpc('withdraw_booking_change_request', {
+    target_request_id: requestId,
   })
 
   if (error) throw error

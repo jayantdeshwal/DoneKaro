@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button, Card, Badge } from '@kaamgar/ui'
 import { FileText } from 'lucide-react'
 import type { BookingQuote, BookingQuoteRequest } from '@/services/quotes'
 import { formatBookingDate, formatBookingTime, resolveServiceAndCategory } from '../utils/bookingFormat'
+import { BookingLifecycleStepper } from './BookingLifecycleStepper'
 
 interface QuoteRequestsSectionProps {
   quoteRequests: BookingQuoteRequest[]
@@ -23,6 +25,23 @@ export function QuoteRequestsSection({
   onCancelQuoteRequest,
 }: QuoteRequestsSectionProps) {
   const { t, i18n } = useTranslation()
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const nextExpiry = quoteRequests
+      .filter(request => request.status === 'pending')
+      .map(request => new Date(request.response_deadline_at).getTime())
+      .filter(deadline => deadline > now)
+      .sort((a, b) => a - b)[0]
+
+    if (nextExpiry === undefined) return
+
+    const timeout = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(nextExpiry - now, 2_147_483_647)
+    )
+    return () => window.clearTimeout(timeout)
+  }, [quoteRequests, now])
 
   if (quoteRequests.length === 0) return null
 
@@ -38,10 +57,20 @@ export function QuoteRequestsSection({
         const quote = request.status === 'quoted'
           ? quotes.find(item => item.quote_request_id === request.id && item.status === 'submitted')
           : undefined
-        const canCancel = request.status === 'pending' || request.status === 'quoted'
+        const isExpired =
+          request.status === 'pending' &&
+          new Date(request.response_deadline_at).getTime() <= now
+        const displayStatus = isExpired ? 'expired' : request.status
+        const canCancel = request.status === 'pending' && !isExpired || request.status === 'quoted'
+        const lifecycleStep: 1 | 2 | 3 =
+          request.status === 'accepted' ? 3 : request.status === 'quoted' ? 2 : 1
 
         return (
           <Card key={request.id} className="p-4 border-amber-500/25 bg-amber-500/5">
+            <BookingLifecycleStepper
+              currentStep={lifecycleStep}
+              actionRequired={lifecycleStep === 2}
+            />
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">{worker?.name || 'Selected provider'}</p>
@@ -54,12 +83,12 @@ export function QuoteRequestsSection({
                   </p>
                 )}
               </div>
-              <Badge variant={request.status === 'quoted' ? 'success' : request.status === 'pending' ? 'warning' : 'default'}>
-                {request.status === 'pending'
+              <Badge variant={displayStatus === 'quoted' ? 'success' : displayStatus === 'pending' ? 'warning' : 'default'}>
+                {displayStatus === 'pending'
                   ? 'Waiting for provider'
-                  : request.status === 'quoted'
+                  : displayStatus === 'quoted'
                   ? 'Quote received'
-                  : request.status[0].toUpperCase() + request.status.slice(1)}
+                  : displayStatus[0].toUpperCase() + displayStatus.slice(1)}
               </Badge>
             </div>
             {service && (
@@ -98,7 +127,7 @@ export function QuoteRequestsSection({
                 </Button>
               </div>
             )}
-            {(request.status === 'cancelled' || request.status === 'expired' || request.status === 'rejected') && service && (
+            {(isExpired || request.status === 'cancelled' || request.status === 'expired' || request.status === 'rejected') && service && (
               <Link to={`/search?category=${encodeURIComponent(service.category_id)}`} className="inline-block mt-3">
                 <Button variant="secondary" size="sm">
                   {t('quotes.chooseAnotherProvider', 'Choose Another Provider')}

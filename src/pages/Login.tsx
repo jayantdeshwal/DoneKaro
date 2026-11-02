@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button, Input, Card } from '@kaamgar/ui'
 import { useAuth } from '../context/AuthContext'
@@ -31,7 +31,25 @@ export default function Login() {
   const { toggleLanguage } = useLanguage()
   const { toggleTheme, isDark } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
+  const loginState = location.state as {
+    returnTo?: unknown
+    bookingDraft?: unknown
+  } | null
+  const returnTo = typeof loginState?.returnTo === 'string' ? loginState.returnTo : ''
+
+  const navigateAfterCustomerLogin = () => {
+    if (returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+      navigate(
+        returnTo,
+        { state: { bookingDraft: loginState?.bookingDraft }, replace: true }
+      )
+      return
+    }
+
+    navigate('/')
+  }
 
   const queryRole = searchParams.get('role')
   const initialRole = queryRole === 'worker' ? 'worker' : queryRole === 'admin' ? 'admin' : 'customer'
@@ -104,12 +122,12 @@ export default function Login() {
         if (user.role === 'customer' && user.registration_completed === false) {
           navigate('/register?incomplete=true')
         } else {
-          const timer = setTimeout(() => navigate('/'), 500)
+          const timer = setTimeout(navigateAfterCustomerLogin, 500)
           return () => clearTimeout(timer)
         }
       }
     }
-  }, [user, navigate])
+  }, [user, navigate, returnTo, loginState?.bookingDraft])
 
   // ---------------- 1. CUSTOMER PASSWORDLESS OTP LOGIN ----------------
   const handleCustomerOtpLogin = async (e: React.FormEvent) => {
@@ -159,7 +177,7 @@ export default function Login() {
           return
         }
 
-        navigate('/')
+        navigateAfterCustomerLogin()
         return
       }
 
@@ -198,7 +216,7 @@ export default function Login() {
             } else if (authResult.user.role === 'worker') {
               navigate('/worker/dashboard')
             } else {
-              navigate('/')
+              navigateAfterCustomerLogin()
             }
           } catch (err: any) {
             const msg = err?.message || ''
