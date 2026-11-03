@@ -201,7 +201,7 @@ function WorkerGrid({ filteredWorkers, t, iconComponents, CATEGORIES, getCategor
                   {worker.available ? (
                     <Button size="sm" variant="primary">{t('workerCard.bookNow', 'Book Now')} <ArrowRight className="w-4 h-4 ml-1" /></Button>
                   ) : (
-                    <Button size="sm" variant="secondary" disabled className="opacity-60 cursor-not-allowed">
+                    <Button size="sm" variant="secondary" disabled className="cursor-not-allowed">
                       {t('workerProfile.unavailable', 'Unavailable')}
                     </Button>
                   )}

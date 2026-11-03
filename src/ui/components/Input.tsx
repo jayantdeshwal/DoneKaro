@@ -35,7 +35,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'input',
+              'input min-h-[48px] text-base',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
               floatingLabel && 'peer',

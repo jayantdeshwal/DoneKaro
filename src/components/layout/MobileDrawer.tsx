@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-import { useAiAssistant } from '@/features/ai-support'
-import { useSupport } from '@/features/support'
 import { Avatar, Badge } from '@kaamgar/ui'
 import {
   X,
@@ -12,24 +10,15 @@ import {
   LogOut,
   Shield,
   Globe,
-  ShieldAlert,
   Sun,
   Moon,
-  Bot,
-  Sparkles,
   ArrowLeft,
   ChevronRight,
-  ShieldCheck,
   Home,
   Calendar,
   Briefcase,
-  Grid,
-  Search,
-  Bell,
-  FileText,
   UserCheck,
   Users,
-  Zap,
 } from 'lucide-react'
 import AppLogo from '../common/AppLogo'
 
@@ -43,8 +32,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
   const { language, toggleLanguage } = useLanguage()
   const { isDark, toggleTheme } = useTheme()
   const { user, isAuthenticated, isWorker, isAdmin, isSuperAdmin, logout } = useAuth()
-  const { openAssistant } = useAiAssistant()
-  const { openSupport } = useSupport()
   const navigate = useNavigate()
 
   if (!isOpen) return null
@@ -71,7 +58,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
       />
 
       {/* Slide-In Aside from Left (Reference 22.jpeg & 23.jpeg) */}
-      <aside className="fixed inset-y-0 left-0 w-[86vw] max-w-xs sm:max-w-sm bg-white dark:bg-zinc-950 shadow-2xl border-r border-slate-200 dark:border-zinc-800 flex flex-col z-[10000] animate-slide-right overflow-y-auto pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <aside className="mobile-navigation-drawer fixed inset-y-0 left-0 w-[86vw] max-w-xs sm:max-w-sm bg-white dark:bg-slate-950 shadow-2xl border-r border-slate-200 dark:border-slate-800 flex flex-col z-[10000] animate-slide-right overflow-y-auto pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         {/* 1. Header: Logo & Close X Button */}
         <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-zinc-800/80 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md z-10">
           <div className="flex items-center gap-2.5">
@@ -155,7 +142,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 <button
                   type="button"
                   onClick={() => handleNavigate('/login')}
-                  className="w-full py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 shadow-xs hover:bg-amber-400 transition-colors cursor-pointer text-center"
+                  className="w-full py-2 text-xs font-bold rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 shadow-xs hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors cursor-pointer text-center"
                 >
                   {t('nav.loginSignup', 'Login / Register')}
                 </button>
@@ -189,7 +176,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   <button
                     type="button"
                     onClick={() => handleNavigate('/admin')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
@@ -210,7 +197,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   <button
                     type="button"
                     onClick={() => handleNavigate('/admin?tab=workers')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -218,7 +205,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                          {t('admin.workerApprovals', 'Worker Approvals')}
+                          {t('admin.workers', 'Workers')}
                         </p>
                         <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
                           {language === 'hi' ? 'लंबित कारीगर पहचान सत्यापन' : 'Verify ID proofs & approve workers'}
@@ -231,7 +218,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   <button
                     type="button"
                     onClick={() => handleNavigate('/admin?tab=bookings')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -252,7 +239,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   <button
                     type="button"
                     onClick={() => handleNavigate('/admin?tab=customers')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
@@ -270,76 +257,14 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                     <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/admin?tab=notifications')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                        <Bell className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                          {t('admin.alerts', 'Platform Alerts')}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'पंजीकरण व प्रेषण सूचनाएँ' : 'Dispatch alerts & registrations'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/admin?tab=admins')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                        <ShieldCheck className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                          {language === 'hi' ? 'प्रशासक दल' : 'Manage Administrators'}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'विशेषाधिकार व टीम प्रबंधन' : 'Team members & privileges'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
                 </>
               ) : isWorker ? (
                 /* WORKER-SPECIFIC NAVIGATION */
                 <>
                   <button
                     type="button"
-                    onClick={() => handleNavigate('/home')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                        <Home className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                          {t('nav.home', 'Home')}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'मुख्य पृष्ठ' : 'Home & platform overview'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={() => handleNavigate('/worker/dashboard')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -357,47 +282,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                     <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/worker/dashboard?tab=leads')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                        <Zap className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                          {language === 'hi' ? 'नए काम लीड्स' : 'New Job Leads'}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'कोटेशन अनुरोध व ग्राहक काम' : 'Customer quote requests'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/notifications')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                        <Bell className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                          {t('nav.alerts', 'Notifications & Alerts')}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'बुकिंग अपडेट व सूचनाएँ' : 'Booking updates and status'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
                 </>
               ) : (
                 /* CUSTOMER / GUEST NAVIGATION */
@@ -405,29 +289,29 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                   <button
                     type="button"
                     onClick={() => handleNavigate('/')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                    className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                         <Home className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
                           {t('nav.home', 'Home')}
                         </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate">
                           {language === 'hi' ? 'मुख्य पृष्ठ एवं सेवाएँ' : 'Discovery & local services'}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:translate-x-0.5 transition-transform" />
                   </button>
 
                   {isAuthenticated && (
                     <button
                       type="button"
                       onClick={() => handleNavigate('/bookings')}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-855 active:scale-[0.99] transition-all text-left group cursor-pointer"
+                      className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group cursor-pointer text-slate-700 dark:text-slate-200"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -446,70 +330,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                     </button>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/categories')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                        <Grid className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                          {t('nav.category', 'All Categories')}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'इलेक्ट्रीशियन, प्लंबर व अन्य' : 'Electrician, Plumber, AC & More'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate('/search')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                        <Search className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-sky-600 dark:group-hover:text-sky-400">
-                          {t('nav.search', 'Search & Hire')}
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                          {language === 'hi' ? 'मुजफ्फरनगर के सत्यापित कामगार खोजें' : 'Filter by locality and rating'}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  {isAuthenticated && (
-                    <button
-                      type="button"
-                      onClick={() => handleNavigate('/notifications')}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                          <Bell className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                            {t('nav.alerts', 'Notifications & Alerts')}
-                          </p>
-                          <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                            {language === 'hi' ? 'बुकिंग अपडेट व सूचनाएँ' : 'Booking updates and status'}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  )}
                 </>
               )}
             </div>
@@ -517,15 +337,15 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
           {/* Group B: Preferences & Appearance */}
           <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
-            <p className="px-2 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">
-              {t('nav.preferences', 'Preferences')}
+            <p className="px-2 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+              {t('nav.settings', 'Settings')}
             </p>
             <div className="space-y-1">
               {/* Theme Toggle */}
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
+                className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group text-slate-700 dark:text-slate-200"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -549,7 +369,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               <button
                 type="button"
                 onClick={toggleLanguage}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
+                className="min-h-[48px] w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.99] transition-all text-left group text-slate-700 dark:text-slate-200"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -571,93 +391,6 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             </div>
           </div>
 
-          {/* Group C: Support, AI & Legal */}
-          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
-            <p className="px-2 text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">
-              {language === 'hi' ? 'सहायता एवं जानकारी' : 'Support & Legal'}
-            </p>
-            <div className="space-y-1">
-              {/* Care & Support */}
-              <button
-                type="button"
-                onClick={() => {
-                  onClose()
-                  if (isAdmin) {
-                    navigate('/admin?tab=management')
-                  } else {
-                    openSupport()
-                  }
-                }}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                      {isAdmin
-                        ? (language === 'hi' ? 'प्रबंधन पोर्टल' : 'Support Oversight')
-                        : (language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support')}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                      {language === 'hi' ? 'शिकायत, सुझाव व समाधान' : 'Official dispute resolution'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-
-              {/* AI Assistant (Authenticated Non-Admin) */}
-              {isAuthenticated && !isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose()
-                    openAssistant(isWorker ? 'worker_sarathi' : 'customer_booking')
-                  }}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                        {language === 'hi' ? 'AI सहायक' : 'AI Assistant'}
-                      </p>
-                      <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                        {language === 'hi' ? 'बुकिंग व काम सलाह' : 'Guidance & smart assistance'}
-                      </p>
-                    </div>
-                  </div>
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                </button>
-              )}
-
-              {/* Terms & Conditions */}
-              <button
-                type="button"
-                onClick={() => handleNavigate('/terms')}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-850 active:scale-[0.99] transition-all text-left group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-slate-500/10 text-slate-600 dark:text-zinc-400 flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-100">
-                      {language === 'hi' ? 'नियम एवं शर्तें' : 'Terms & Conditions'}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight truncate">
-                      {language === 'hi' ? 'कानूनी शर्तें एवं नियम' : 'Policies & platform rules'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* 4. Footer: Logout / Back to Login + Version Stamp (Reference 22.jpeg) */}
@@ -678,7 +411,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
             <button
               type="button"
               onClick={handleBackToLogin}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs sm:text-sm border border-amber-500/20 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>{t('common.backToLogin', 'Back to Login')} ({language === 'hi' ? 'लॉगिन' : 'Login'})</span>

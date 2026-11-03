@@ -33,6 +33,7 @@ export default function Layout() {
     location.pathname === '/auth' ||
     location.pathname.startsWith('/register') ||
     location.pathname === '/signup'
+  const showFooter = ['/', '/home', '/worker/dashboard', '/admin'].includes(location.pathname)
 
   if (isLoading) {
     return (
@@ -62,7 +63,7 @@ export default function Layout() {
       <main className="min-h-[calc(100vh-64px)] pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))] md:pb-0">
         <Outlet />
       </main>
-      <AppFooter />
+      {showFooter && <AppFooter />}
       <GuestActionBar />
       <BottomNavigation />
       <MobileDrawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />

@@ -88,7 +88,7 @@ export const WorkDetailsStep: React.FC<WorkDetailsStepProps> = ({
                   <div
                     className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-all ${
                       isCategoryActive
-                        ? 'bg-brand-500 text-surface-950 font-bold border-brand-500 shadow-sm'
+                        ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold border-amber-500 shadow-sm'
                         : 'bg-brand-500/10 text-brand-400 border-brand-500/25 group-hover:scale-105'
                     }`}
                   >

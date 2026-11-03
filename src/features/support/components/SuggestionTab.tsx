@@ -185,14 +185,14 @@ export const SuggestionTab: React.FC<SuggestionTabProps> = ({ isHindi }) => {
               setCreatedSuggestion(null)
               switchTab('history')
             }}
-            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-xs"
+            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-xs"
           >
             {isHindi ? 'मेरे अनुरोध देखें' : 'View My Requests'}
           </button>
           <button
             type="button"
             onClick={closeSupport}
-            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
+            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-sm"
           >
             {isHindi ? 'समाप्त' : 'Done'}
           </button>
@@ -239,7 +239,7 @@ export const SuggestionTab: React.FC<SuggestionTabProps> = ({ isHindi }) => {
               onClick={() => setSuggestionCategory(cat.id as any)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 suggestionCategory === cat.id
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                   : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
               }`}
             >
@@ -284,7 +284,7 @@ export const SuggestionTab: React.FC<SuggestionTabProps> = ({ isHindi }) => {
         <button
           type="submit"
           disabled={!isAuthenticated ? false : (suggestionText.trim().length < 10 || submittingSuggestion)}
-          className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+          className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
         >
           {!isAuthenticated ? (
             <span>{isHindi ? 'सुझाव भेजने के लिए लॉगिन करें' : 'Sign In to Submit Feedback'}</span>

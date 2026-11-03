@@ -28,7 +28,7 @@ export const RegistrationStepBar: React.FC<RegistrationStepBarProps> = ({ curren
                 isDone
                   ? 'bg-emerald-500 text-surface-950 font-extrabold'
                   : isCurrent
-                  ? 'bg-brand-500 text-surface-950 font-bold ring-4 ring-brand-500/20'
+                  ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold ring-4 ring-amber-500/20'
                   : 'bg-surface-200 text-semantic-text-tertiary'
               }`}
             >

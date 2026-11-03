@@ -97,7 +97,7 @@ export function PermanentDeleteModal({
               variant="danger"
               onClick={handleExecutePermanentDelete}
               loading={isDeletingProfile}
-              className="bg-rose-600 hover:bg-rose-700 text-white font-medium"
+              className="bg-rose-500 text-white dark:bg-rose-600 dark:text-white hover:bg-rose-600 dark:hover:bg-rose-500 font-medium disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4 mr-1.5" />
               Yes, Permanently Delete

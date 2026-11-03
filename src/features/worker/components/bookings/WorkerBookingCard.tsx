@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Calendar,
   ExternalLink,
@@ -41,6 +42,7 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
   onWithdrawChangeRequest,
 }) => {
   const { t, i18n } = useTranslation()
+  const [isExpanded, setIsExpanded] = useState(false)
   const [withdrawingRequestId, setWithdrawingRequestId] = useState<string | null>(null)
   const catObj = CATEGORIES.find(c => c.id === booking.category_id)
   const catName = catObj
@@ -70,34 +72,14 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
       id={`booking-${booking.id}`}
       className="p-4 rounded-2xl bg-surface-100 border border-semantic-border-light shadow-sm hover:border-brand-500/30 transition-all space-y-3"
     >
-      {/* Top line: Customer name + status badge */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-brand-400 font-bold text-xs">
-            {booking.customer?.name ? booking.customer.name.charAt(0) : 'C'}
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <p className="text-xs font-bold text-slate-900 dark:text-white">
-                {booking.customer?.name || t('bookings.customer', 'Customer')}
-              </p>
-              {isRepeatCustomer && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-600 dark:text-brand-400 text-[9px] font-bold border border-brand-500/20">
-                  <Sparkles className="w-2.5 h-2.5" />
-                  {t('workerDashboard.repeatCustomer', 'Repeat Customer')}
-                </span>
-              )}
-            </div>
-            <p className="text-[10px] text-semantic-text-tertiary capitalize">
-              {catName} {t('workerDashboard.service', 'Service')}
-            </p>
+        <div>
+          <p className="font-semibold text-slate-900 dark:text-white">{catName}</p>
+          <div className="mt-1 flex items-center gap-1.5 text-xs text-semantic-text-secondary">
+            <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-400" />
+            <span>{formattedDate} at {formattedTime}</span>
           </div>
         </div>
-
-        <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-surface-200 text-semantic-text-secondary border border-semantic-border-light whitespace-nowrap">
-          {formatJobReference(booking.id)}
-        </span>
-
         <Badge
           variant={
             booking.status === 'completed'
@@ -120,153 +102,177 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
         </Badge>
       </div>
 
-      {/* Scheduled time & Locality address */}
-      <div className="space-y-1 text-xs text-semantic-text-secondary bg-surface-200/50 p-2.5 rounded-xl border border-semantic-border-light/60">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-          <span>
-            {formattedDate} at {formattedTime}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-          <span className="truncate">
-            {booking.address || t('workerDashboard.muzaffarnagar', 'Muzaffarnagar')}
-          </span>
-        </div>
-        {booking.notes && (
-          <p className="text-[11px] text-semantic-text-tertiary italic pt-1 border-t border-semantic-border-light/40">
-            "{booking.notes}"
-          </p>
-        )}
+      <div>
+        <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+          {booking.customer?.name || t('bookings.customer', 'Customer')}
+        </p>
       </div>
 
-      {/* Contact Customer Buttons */}
-      <div className="flex items-center gap-2 pt-1">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="md"
           onClick={() => onOpenContactModal(booking)}
-          className="flex-1 text-xs flex items-center justify-center gap-1.5 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 py-1.5"
+          className="min-h-12 flex-1 text-xs flex items-center justify-center gap-1.5 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 py-3"
         >
-          <MessageCircle className="w-3.5 h-3.5" />
-          <span>{t('workerDashboard.whatsappCall', 'WhatsApp / Call')}</span>
+          <MessageCircle className="h-4 w-4" />
+          <span>{t('workerDashboard.whatsapp', 'WhatsApp')}</span>
         </Button>
-
         {booking.customer?.phone && (
           <a
             href={`tel:${booking.customer.phone}`}
-            className="px-3 py-1.5 rounded-xl border border-semantic-border-medium hover:border-brand-500 text-xs font-semibold text-semantic-text-secondary hover:text-white transition-colors flex items-center gap-1"
+            className="min-h-12 flex-1 rounded-xl border border-slate-300 px-3 py-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 flex items-center justify-center gap-1.5"
           >
-            <Phone className="w-3.5 h-3.5" />
+            <Phone className="h-4 w-4" />
             <span>{t('workerDashboard.call', 'Call')}</span>
+          </a>
+        )}
+        {directionsUrl && (
+          <a
+            href={directionsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="min-h-12 flex-1 rounded-xl border border-slate-300 px-3 py-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 flex items-center justify-center gap-1.5"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span>{t('bookings.openInGoogleMaps', 'Maps')}</span>
           </a>
         )}
       </div>
 
-      {directionsUrl ? (
-        <a
-          href={directionsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="w-full rounded-xl border border-blue-500/40 px-3 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/10 transition-colors flex items-center justify-center gap-1.5"
+      <div className="space-y-2">
+        <Button
+          variant="secondary"
+          size="md"
+          className="min-h-12 w-full"
+          aria-expanded={isExpanded}
+          aria-controls={`booking-details-${booking.id}`}
+          onClick={() => setIsExpanded(!isExpanded)}
         >
-          <ExternalLink className="w-3.5 h-3.5" />
-          <span>{t('bookings.openInGoogleMaps', 'Open in Google Maps')}</span>
-        </a>
-      ) : (
-        <p className="text-xs text-semantic-text-tertiary">
-          {t(
-            'bookings.customerLocationUnavailable',
-            'Customer location is not available for this booking.'
-          )}
-        </p>
-      )}
-
-      {/* Payment Summary */}
-      <WorkerPaymentCard
-        booking={booking}
-        onConfirmCash={onConfirmCash}
-        onViewReceipt={onViewReceipt}
-      />
-
-      {/* Additional Change Requests */}
-      {booking.changeRequests?.map(request => (
-        <div
-          key={request.id}
-          className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3 text-xs"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-bold text-slate-900 dark:text-white">
-              {t('workerDashboard.additionalChargeRequest', 'Additional charge request')}
-            </span>
-            <Badge
-              variant={
-                request.status === 'approved'
-                  ? 'success'
-                  : request.status === 'rejected'
-                  ? 'danger'
-                  : 'warning'
-              }
-              size="sm"
-            >
-              {request.status === 'pending'
-                ? t(
-                    'workerDashboard.pendingCustomerApproval',
-                    'Pending customer approval'
-                  )
-                : request.status}
-            </Badge>
-          </div>
-          <p className="mt-1 text-semantic-text-secondary">
-            Job {formatJobReference(booking.id)} • ₹{request.amount.toFixed(2)}
-          </p>
-          <p className="mt-1 text-semantic-text-secondary">Reason: {request.reason}</p>
-          {request.status === 'pending' && (
+          {isExpanded
+            ? t('workerDashboard.hideDetails', 'Hide Details')
+            : t('workerDashboard.viewDetails', 'View Details')}
+        </Button>
+        {['accepted', 'in_progress'].includes(booking.status) &&
+          !(booking.changeRequests ?? []).some(request => request.status === 'pending') && (
             <Button
               variant="outline"
-              size="sm"
-              disabled={withdrawingRequestId !== null}
-              onClick={async () => {
-                setWithdrawingRequestId(request.id)
-                try {
-                  await onWithdrawChangeRequest(request.id)
-                } finally {
-                  setWithdrawingRequestId(null)
-                }
-              }}
-              className="mt-3 w-full border-rose-500/40 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
+              size="md"
+              onClick={() => onOpenChangeRequest(booking)}
+              className="min-h-[48px] w-full text-xs border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 py-3"
             >
-              {withdrawingRequestId === request.id
-                ? t('workerDashboard.withdrawingRequest', 'Withdrawing...')
-                : t('workerDashboard.withdrawRequest', 'Withdraw Request')}
+              {t('workerDashboard.requestAdditionalCharge', 'Request Additional Charge')}
             </Button>
           )}
-        </div>
-      ))}
+        <BookingStatusActions
+          booking={booking}
+          isUpdating={isUpdating}
+          onUpdateStatus={onUpdateStatus}
+          onConfirmCash={onConfirmCash}
+          onViewDetails={onViewDetails}
+          onViewReceipt={onViewReceipt}
+        />
+      </div>
 
-      {/* Request Additional Charge Button */}
-      {['accepted', 'in_progress'].includes(booking.status) &&
-        !(booking.changeRequests ?? []).some(request => request.status === 'pending') && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenChangeRequest(booking)}
-            className="w-full text-xs border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            id={`booking-details-${booking.id}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
           >
-            {t('workerDashboard.requestAdditionalCharge', 'Request Additional Charge')}
-          </Button>
-        )}
+            <div className="mt-4 space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+              <div className="space-y-2 rounded-xl border border-semantic-border-light bg-surface-200/50 p-3 text-xs text-semantic-text-secondary">
+                {isRepeatCustomer && (
+                  <p className="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                    <Sparkles className="h-3 w-3" />
+                    {t('workerDashboard.repeatCustomer', 'Repeat Customer')}
+                  </p>
+                )}
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700 dark:text-emerald-400" />
+                  <span className="break-words">
+                    {booking.address || t('workerDashboard.muzaffarnagar', 'Muzaffarnagar')}
+                  </span>
+                </div>
+                {booking.notes && (
+                  <p className="whitespace-pre-wrap break-words border-t border-semantic-border-light/60 pt-2 text-semantic-text-secondary">
+                    {booking.notes}
+                  </p>
+                )}
+                <p className="border-t border-semantic-border-light/60 pt-2">
+                  {t('workerDashboard.jobReference', 'Job reference')}: {formatJobReference(booking.id)}
+                </p>
+              </div>
 
-      {/* Booking Status Action Buttons */}
-      <BookingStatusActions
-        booking={booking}
-        isUpdating={isUpdating}
-        onUpdateStatus={onUpdateStatus}
-        onConfirmCash={onConfirmCash}
-        onViewDetails={onViewDetails}
-        onViewReceipt={onViewReceipt}
-      />
+              {!directionsUrl && (
+                <p className="text-xs text-semantic-text-tertiary">
+                  {t(
+                    'bookings.customerLocationUnavailable',
+                    'Customer location is not available for this booking.'
+                  )}
+                </p>
+              )}
+
+              <WorkerPaymentCard booking={booking} onViewReceipt={onViewReceipt} />
+
+              {booking.changeRequests?.map(request => (
+                <div
+                  key={request.id}
+                  className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3 text-xs"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {t('workerDashboard.additionalChargeRequest', 'Additional charge request')}
+                    </span>
+                    <Badge
+                      variant={
+                        request.status === 'approved'
+                          ? 'success'
+                          : request.status === 'rejected'
+                          ? 'danger'
+                          : 'warning'
+                      }
+                      size="sm"
+                    >
+                      {request.status === 'pending'
+                        ? t('workerDashboard.pendingCustomerApproval', 'Pending customer approval')
+                        : request.status}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-semantic-text-secondary">
+                    ₹{request.amount.toFixed(2)} · {request.reason}
+                  </p>
+                  {request.status === 'pending' && (
+                    <Button
+                      variant="danger-outline"
+                      size="md"
+                      disabled={withdrawingRequestId !== null}
+                      onClick={async () => {
+                        setWithdrawingRequestId(request.id)
+                        try {
+                          await onWithdrawChangeRequest(request.id)
+                        } finally {
+                          setWithdrawingRequestId(null)
+                        }
+                      }}
+                      className="mt-3 min-h-12 w-full py-3"
+                    >
+                      {withdrawingRequestId === request.id
+                        ? t('workerDashboard.withdrawingRequest', 'Withdrawing...')
+                        : t('workerDashboard.withdrawRequest', 'Withdraw Request')}
+                    </Button>
+                  )}
+                </div>
+              ))}
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

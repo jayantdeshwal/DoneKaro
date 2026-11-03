@@ -30,14 +30,14 @@ export function CareSupportBanner({ upcomingBookingId }: CareSupportBannerProps)
       <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
         <button
           onClick={() => openSupport({ bookingId: upcomingBookingId })}
-          className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+          className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
         >
           <Shield className="w-3.5 h-3.5" />
           <span>{i18n.language === 'hi' ? 'सहायता' : 'Need Help?'}</span>
         </button>
         <button
           onClick={() => openSupport({ bookingId: upcomingBookingId, defaultTab: 'complaint' })}
-          className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+          className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
         >
           <ShieldAlert className="w-3.5 h-3.5" />
           <span>{i18n.language === 'hi' ? 'केयर एवं सहायता' : 'Care & Support'}</span>

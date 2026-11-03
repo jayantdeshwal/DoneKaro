@@ -6,13 +6,11 @@ import type { WorkerBookingRow } from '../../types'
 
 interface WorkerPaymentCardProps {
   booking: WorkerBookingRow
-  onConfirmCash: (booking: WorkerBookingRow) => void
   onViewReceipt: (booking: WorkerBookingRow) => void
 }
 
 export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
   booking,
-  onConfirmCash,
   onViewReceipt,
 }) => {
   const { t, i18n } = useTranslation()
@@ -128,15 +126,6 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
               ₹{summary.final_payable_amount.toFixed(2)} · {t('bookings.paymentMethodCash', 'Cash')}
             </span>
           </div>
-          <Button
-            variant="primary"
-            size="sm"
-            className="mt-3 w-full font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center gap-1.5 shadow-sm"
-            onClick={() => onConfirmCash(booking)}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            {t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}
-          </Button>
         </div>
       )}
 
@@ -176,8 +165,8 @@ export const WorkerPaymentCard: React.FC<WorkerPaymentCardProps> = ({
             </p>
             <Button
               variant="outline"
-              size="sm"
-              className="mt-3 w-full text-xs font-bold flex items-center justify-center gap-1.5 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20"
+              size="md"
+              className="mt-3 min-h-12 w-full text-xs font-bold flex items-center justify-center gap-1.5"
               onClick={() => onViewReceipt(booking)}
             >
               <FileText className="w-3.5 h-3.5" />

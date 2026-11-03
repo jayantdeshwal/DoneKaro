@@ -74,7 +74,7 @@ export function HomeDualAudienceCta({
                 variant="outline"
                 size="md"
                 onClick={onWorkerCta}
-                className="w-full sm:w-auto font-semibold px-6 border-emerald-600 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-xs sm:text-sm active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto font-semibold px-6 text-xs sm:text-sm active:scale-95 cursor-pointer"
               >
                 <Briefcase className="w-4 h-4 mr-2" />
                 <span>{t('homeCta.workerCardBtn')}</span>

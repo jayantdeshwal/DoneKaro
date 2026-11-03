@@ -130,7 +130,7 @@ export function AddAdminModal({
             type="submit"
             variant="primary"
             loading={isSubmittingNewAdmin}
-            className="bg-brand-500 hover:bg-brand-600 text-surface-950 font-semibold"
+            className="font-semibold"
           >
             <UserPlus className="w-4 h-4 mr-1.5" />
             Provision Administrator

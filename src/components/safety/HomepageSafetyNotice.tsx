@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import {
-  ShieldCheck,
-  X,
-  FileCheck2,
-  Banknote,
-  Download,
-  Lock,
-  Sparkles,
-} from 'lucide-react'
+import { ShieldCheck, X, FileCheck2, Banknote, Download, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export function HomepageSafetyNotice() {
@@ -18,6 +10,7 @@ export function HomepageSafetyNotice() {
   const shouldReduceMotion = useReducedMotion()
 
   const [isVisible, setIsVisible] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [sessionEventId, setSessionEventId] = useState<string | null>(null)
 
   const isHindi = i18n.language === 'hi'
@@ -28,12 +21,14 @@ export function HomepageSafetyNotice() {
     // 1. Must be genuinely authenticated
     if (!isAuthenticated || !user) {
       setIsVisible(false)
+      setIsExpanded(false)
       return
     }
 
     // 2. Do not display for incomplete customer registrations
     if (user.role === 'customer' && user.registration_completed === false) {
       setIsVisible(false)
+      setIsExpanded(false)
       return
     }
 
@@ -41,6 +36,7 @@ export function HomepageSafetyNotice() {
     const activeEvent = sessionStorage.getItem('donekaro_auth_session_event')
     if (!activeEvent) {
       setIsVisible(false)
+      setIsExpanded(false)
       return
     }
 
@@ -48,9 +44,11 @@ export function HomepageSafetyNotice() {
     const dismissedEvent = sessionStorage.getItem('donekaro_safety_notice_dismissed')
     if (dismissedEvent === activeEvent) {
       setIsVisible(false)
+      setIsExpanded(false)
       return
     }
 
+    setIsExpanded(false)
     setSessionEventId(activeEvent)
     setIsVisible(true)
   }, [isAuthenticated, user])
@@ -59,6 +57,7 @@ export function HomepageSafetyNotice() {
     if (typeof window !== 'undefined' && sessionEventId) {
       sessionStorage.setItem('donekaro_safety_notice_dismissed', sessionEventId)
     }
+    setIsExpanded(false)
     setIsVisible(false)
   }
 
@@ -110,88 +109,81 @@ export function HomepageSafetyNotice() {
     },
   ]
 
-  const animationProps = shouldReduceMotion
-    ? {
-        initial: { opacity: 1 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0 },
-        transition: { duration: 0.15 },
-      }
-    : {
-        initial: { opacity: 0, y: -16, scale: 0.98 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -20, scale: 0.97, height: 0, marginBottom: 0 },
-        transition: { duration: 0.3, ease: 'easeInOut' as const },
-      }
-
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          {...animationProps}
-          className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-2 overflow-hidden"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+          transition={{ duration: shouldReduceMotion ? 0.15 : 0.25, ease: 'easeInOut' }}
+          className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-2"
           role="region"
           aria-label={isHindi ? 'सुरक्षा दिशानिर्देश' : 'Safety Notice'}
         >
-          <div className="relative rounded-3xl bg-gradient-to-br from-amber-50/90 via-white to-amber-100/40 dark:from-zinc-900 dark:via-zinc-900/95 dark:to-zinc-850 border border-amber-300/80 dark:border-amber-500/30 p-4 sm:p-6 shadow-sm dark:shadow-xl shadow-amber-500/5">
-            {/* Top Row: Safety Header & Dismiss X Button */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-xs font-bold">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
-                      {isHindi ? 'सुरक्षित बुकिंग के लिए 5 ज़रूरी बातें' : '5 Tips for Safer Bookings'}
-                    </h2>
-                    <Sparkles className="w-4 h-4 text-amber-500 shrink-0 hidden sm:inline-block" />
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-snug mt-0.5">
-                    {isHindi
-                      ? 'DoneKaro का उपयोग करते समय इन आसान सावधानियों का ध्यान रखें।'
-                      : 'Keep these simple precautions in mind when using DoneKaro.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Close Button */}
+          <div className="overflow-hidden rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/90 to-amber-100/40 shadow-sm shadow-amber-500/5 dark:border-amber-500/30 dark:from-zinc-900 dark:to-zinc-850">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setIsExpanded(open => !open)}
+                aria-expanded={isExpanded}
+                aria-controls="homepage-safety-tips"
+                className="flex min-h-12 flex-1 items-center gap-2 px-4 py-3 text-left text-sm font-bold text-slate-900 transition-colors hover:bg-amber-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500 dark:text-white dark:hover:bg-zinc-800"
+              >
+                <span aria-hidden="true">🛡️</span>
+                <span>5 Tips for Safe Hiring (View)</span>
+                <ShieldCheck className={`ml-auto h-4 w-4 shrink-0 text-amber-600 transition-transform dark:text-amber-400 ${isExpanded ? 'rotate-180' : ''}`} />
+              </button>
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 bg-white/80 dark:bg-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700 transition-colors shrink-0 cursor-pointer shadow-xs active:scale-95"
+                className="mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/80 hover:text-slate-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                 aria-label={isHindi ? 'सूचना बंद करें' : 'Close safety notice'}
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* 5 Compact Rows */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
-              {tips.map((tip, idx) => {
-                const IconComponent = tip.icon
-                return (
-                  <div
-                    key={tip.id}
-                    className={`p-3 rounded-2xl bg-white/90 dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/80 flex items-start gap-2.5 transition-all hover:border-amber-400/50 ${
-                      idx === 4 ? 'sm:col-span-2 lg:col-span-1' : ''
-                    }`}
-                  >
-                    <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 border ${tip.iconColor}`}>
-                      <IconComponent className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 leading-snug">
-                        {isHindi ? tip.titleHi : tip.titleEn}
-                      </p>
-                      <p className="text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed mt-0.5">
-                        {isHindi ? tip.descHi : tip.descEn}
-                      </p>
+            <AnimatePresence initial={false}>
+              {isExpanded && (
+                <motion.div
+                  id="homepage-safety-tips"
+                  initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                  transition={{ duration: shouldReduceMotion ? 0.12 : 0.25, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t border-amber-300/70 p-3 dark:border-amber-500/25 sm:p-4">
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                      {tips.map((tip, idx) => {
+                        const IconComponent = tip.icon
+                        return (
+                          <div
+                            key={tip.id}
+                            className={`flex items-start gap-2.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3 transition-colors hover:border-amber-400/50 dark:border-zinc-700/80 dark:bg-zinc-800/80 ${
+                              idx === 4 ? 'sm:col-span-2 lg:col-span-1' : ''
+                            }`}
+                          >
+                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border ${tip.iconColor}`}>
+                              <IconComponent className="h-3.5 w-3.5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold leading-snug text-slate-900 dark:text-zinc-100">
+                                {isHindi ? tip.titleHi : tip.titleEn}
+                              </p>
+                              <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600 dark:text-zinc-400">
+                                {isHindi ? tip.descHi : tip.descEn}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       )}

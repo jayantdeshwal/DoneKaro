@@ -112,7 +112,7 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
             <button
               onClick={() => loadData(true)}
               disabled={refreshing || loading}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 font-semibold text-xs transition-colors cursor-pointer"
+              className="flex min-h-[48px] items-center gap-1.5 px-3.5 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 font-semibold text-xs transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
@@ -133,8 +133,9 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
           <button
             onClick={() => {
               setActiveTab('complaints')
+              setSelectedSuggestion(null)
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex min-h-[48px] items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'complaints'
                 ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -158,8 +159,9 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
           <button
             onClick={() => {
               setActiveTab('suggestions')
+              setSelectedComplaint(null)
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex min-h-[48px] items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'suggestions'
                 ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -188,49 +190,47 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
             <p className="text-xs font-medium">Loading platform support records...</p>
           </div>
         ) : activeTab === 'complaints' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Column: Complaints List */}
-            <div className="lg:col-span-5 bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
+            <div className="max-w-3xl mx-auto">
               <ComplaintList
                 complaints={complaints}
-                selectedId={selectedComplaint?.id || null}
-                onSelect={c => setSelectedComplaint(c)}
+                onSelect={c => {
+                  setSelectedSuggestion(null)
+                  setSelectedComplaint(c)
+                }}
                 currentFilter={complaintFilter}
                 onFilterChange={f => setComplaintFilter(f)}
               />
             </div>
-
-            {/* Right Column: Complaint Details */}
-            <div className="lg:col-span-7">
-              <ComplaintDetails
-                complaint={selectedComplaint}
-                onClose={() => setSelectedComplaint(null)}
-                onUpdated={() => loadData(true)}
-              />
-            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Column: Suggestions List */}
-            <div className="lg:col-span-5 bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-sm">
+            <div className="max-w-3xl mx-auto">
               <SuggestionList
                 suggestions={suggestions}
-                selectedId={selectedSuggestion?.id || null}
-                onSelect={s => setSelectedSuggestion(s)}
+                onSelect={s => {
+                  setSelectedComplaint(null)
+                  setSelectedSuggestion(s)
+                }}
                 currentFilter={suggestionFilter}
                 onFilterChange={f => setSuggestionFilter(f)}
               />
             </div>
-
-            {/* Right Column: Suggestion Details */}
-            <div className="lg:col-span-7">
-              <SuggestionDetails
-                suggestion={selectedSuggestion}
-                onClose={() => setSelectedSuggestion(null)}
-                onUpdated={() => loadData(true)}
-              />
-            </div>
           </div>
+        )}
+        {selectedComplaint && (
+          <ComplaintDetails
+            complaint={selectedComplaint}
+            onClose={() => setSelectedComplaint(null)}
+            onUpdated={() => loadData(true)}
+          />
+        )}
+        {selectedSuggestion && (
+          <SuggestionDetails
+            suggestion={selectedSuggestion}
+            onClose={() => setSelectedSuggestion(null)}
+            onUpdated={() => loadData(true)}
+          />
         )}
     </div>
   )

@@ -126,7 +126,7 @@ export default function ContactModal({
               {/* Call Button */}
               <a
                 href={telUrl}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-sm"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-sm"
               >
                 <Phone className="w-4 h-4" />
                 <span>{t('contactModal.callNow', 'Call Now')}</span>
@@ -137,7 +137,7 @@ export default function ContactModal({
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-brand-600 hover:bg-brand-500 text-surface-950 font-bold transition-colors shadow-sm"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-sm"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>{t('contactModal.chatWhatsApp', 'WhatsApp')}</span>
@@ -150,7 +150,7 @@ export default function ContactModal({
               variant="outline"
               size="sm"
               onClick={handleCopy}
-              className="w-full flex items-center justify-center gap-2 border-semantic-border-medium hover:bg-surface-200 text-semantic-text-primary"
+              className="w-full flex items-center justify-center gap-2"
             >
               {copied ? (
                 <>

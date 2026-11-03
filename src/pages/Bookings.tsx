@@ -41,8 +41,6 @@ import {
   HistoricalBookingSummaryCard,
   BookingReviewModal,
   BookingStatsCards,
-  BookingTabs,
-  CareSupportBanner,
   CompletedJobDetailsModal,
   CustomerPaymentModal,
   OfficialReceiptModal,
@@ -71,8 +69,6 @@ export default function Bookings() {
     isLoading,
     loadError,
     setLoadError,
-    activeTab,
-    setActiveTab,
     loadBookings,
   } = useCustomerBookings({ userId: user?.id })
 
@@ -418,9 +414,6 @@ export default function Bookings() {
           totalCount={allBookings.length}
         />
 
-        {/* Care & Support Banner */}
-        <CareSupportBanner upcomingBookingId={upcomingBookings[0]?.id} />
-
         {/* Alerts & Notifications */}
         {actionSuccess && (
           <div className="mb-6 p-4 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
@@ -446,15 +439,6 @@ export default function Bookings() {
           onCancelQuoteRequest={handleCancelQuoteRequest}
         />
 
-        {/* Filter Navigation Tabs */}
-        <BookingTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          allCount={allBookings.length}
-          upcomingCount={upcomingBookings.length}
-          pastCount={pastBookings.length}
-        />
-
         {/* Loading Spinner State */}
         {isLoading && (
           <div className="py-20 text-center">
@@ -469,119 +453,115 @@ export default function Bookings() {
         {!isLoading && (
           <div className="space-y-8">
             {/* 1. UPCOMING & ACTIVE SECTION */}
-            {(activeTab === 'all' || activeTab === 'upcoming') && (
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-500" />
-                    <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                      {t('bookings.activeAndUpcoming', 'Upcoming & Active')}
-                    </h2>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                      {upcomingBookings.length}
-                    </span>
-                  </div>
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-amber-500" />
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    {t('bookings.activeAndUpcoming', 'Active & Upcoming Jobs')}
+                  </h2>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    {upcomingBookings.length}
+                  </span>
                 </div>
+              </div>
 
-                {upcomingBookings.length === 0 ? (
-                  <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-center shadow-sm">
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                      <Calendar className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-                      {t('bookings.noUpcoming', 'No upcoming bookings')}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mb-5">
-                      {t(
-                        'bookings.noActiveDesc',
-                        'Ready to get things fixed? Discover our verified local workers and book your service in seconds.'
-                      )}
-                    </p>
-                    <Link to="/categories">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 cursor-pointer"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                        {t('bookings.findService', 'Find a Service')}
-                      </Button>
-                    </Link>
+              {upcomingBookings.length === 0 ? (
+                <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-center shadow-sm">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    <Calendar className="w-6 h-6" />
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {upcomingBookings.map(b => (
-                      <BookingCard
-                        key={b.id}
-                        booking={b}
-                        isPast={false}
-                        decidingRequestId={decidingRequestId}
-                        changeRequestError={changeRequestError}
-                        paymentError={paymentError}
-                        paymentActionBookingId={paymentActionBookingId}
-                        onChangeRequestDecision={handleChangeRequestDecision}
-                        onOpenPaymentModal={handleOpenPaymentModal}
-                        onOpenReceiptModal={handleOpenReceiptModal}
-                        onOpenDetailsModal={handleOpenDetailsModal}
-                        onOpenBookAgainModal={handleOpenBookAgainModal}
-                        onOpenCancelModal={handleOpenCancelModal}
-                        onOpenContactModal={handleOpenContactModal}
-                        onOpenReviewModal={booking => {
-                          setSelectedBooking(booking)
-                          setShowReviewModal(true)
-                        }}
-                        onOpenSupport={openSupport}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                    {t('bookings.noUpcoming', 'No upcoming bookings')}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mb-5">
+                    {t(
+                      'bookings.noActiveDesc',
+                      'Ready to get things fixed? Discover our verified local workers and book your service in seconds.'
+                    )}
+                  </p>
+                  <Link to="/categories">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="text-xs font-bold px-4 py-2 cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                      {t('bookings.findService', 'Find a Service')}
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingBookings.map(b => (
+                    <BookingCard
+                      key={b.id}
+                      booking={b}
+                      isPast={false}
+                      decidingRequestId={decidingRequestId}
+                      changeRequestError={changeRequestError}
+                      paymentError={paymentError}
+                      paymentActionBookingId={paymentActionBookingId}
+                      onChangeRequestDecision={handleChangeRequestDecision}
+                      onOpenPaymentModal={handleOpenPaymentModal}
+                      onOpenReceiptModal={handleOpenReceiptModal}
+                      onOpenDetailsModal={handleOpenDetailsModal}
+                      onOpenBookAgainModal={handleOpenBookAgainModal}
+                      onOpenCancelModal={handleOpenCancelModal}
+                      onOpenContactModal={handleOpenContactModal}
+                      onOpenReviewModal={booking => {
+                        setSelectedBooking(booking)
+                        setShowReviewModal(true)
+                      }}
+                      onOpenSupport={openSupport}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* 2. PAST BOOKINGS SECTION */}
-            {(activeTab === 'all' || activeTab === 'past') && (
-              <section className="space-y-4 pt-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
-                    <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                      {t('bookings.past', 'Past Bookings')}
-                    </h2>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-                      {pastBookings.length}
-                    </span>
-                  </div>
+            <section className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    {t('bookings.past', 'Past Bookings')}
+                  </h2>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                    {pastBookings.length}
+                  </span>
                 </div>
+              </div>
 
-                {pastBookings.length === 0 ? (
-                  <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-center shadow-sm">
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-400">
-                      <Clock className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-                      {t('bookings.noPast', 'No past bookings yet')}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
+              {pastBookings.length === 0 ? (
+                <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-center shadow-sm">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-400">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                    {t('bookings.noPast', 'No past bookings yet')}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
                       {t(
                         'bookings.noPastDesc',
                         'Your completed and past service appointments will be listed here.'
                       )}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {pastBookings.map(b => (
-                      <HistoricalBookingSummaryCard
-                        key={b.id}
-                        booking={b}
-                        onOpenDetails={handleOpenDetailsModal}
-                        onOpenReceipt={handleOpenReceiptModal}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pastBookings.map(b => (
+                    <HistoricalBookingSummaryCard
+                      key={b.id}
+                      booking={b}
+                      onOpenDetails={handleOpenDetailsModal}
+                      onOpenReceipt={handleOpenReceiptModal}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
         )}
       </div>

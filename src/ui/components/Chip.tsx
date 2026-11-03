@@ -13,11 +13,11 @@ export interface ChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Chip = forwardRef<HTMLButtonElement, ChipProps>(
   ({ className, selected, variant = 'default', removable, onRemove, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
     const variants = {
-      default: 'bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800 dark:hover:bg-brand-900/50',
-      outline: 'bg-surface-100 text-semantic-text-secondary border border-semantic-border-medium hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:border-surface-600 dark:hover:bg-surface-700',
+      default: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800',
+      outline: 'bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-50 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800',
     }
 
-    const selectedStyles = 'bg-brand-600 text-white border-brand-600 hover:bg-brand-700 dark:bg-brand-700'
+    const selectedStyles = 'bg-amber-500 text-slate-950 border-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:text-slate-950 dark:border-amber-400 dark:hover:bg-amber-500'
 
     return (
       <button

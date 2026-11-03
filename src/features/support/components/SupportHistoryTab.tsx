@@ -93,7 +93,7 @@ export const SupportHistoryTab: React.FC<SupportHistoryTabProps> = ({ isHindi })
               closeSupport()
               navigate('/login')
             }}
-            className="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer shadow-xs"
+            className="px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors cursor-pointer shadow-xs"
           >
             {isHindi ? 'लॉगिन / पंजीकरण करें' : 'Sign In / Register'}
           </button>
@@ -135,14 +135,14 @@ export const SupportHistoryTab: React.FC<SupportHistoryTabProps> = ({ isHindi })
           <button
             type="button"
             onClick={() => switchTab('complaint')}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500 text-white dark:bg-rose-600 dark:text-white hover:bg-rose-600 dark:hover:bg-rose-500 transition-colors cursor-pointer disabled:opacity-50"
           >
             {isHindi ? 'शिकायत दर्ज करें' : 'File a Complaint'}
           </button>
           <button
             type="button"
             onClick={() => switchTab('suggestion')}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors cursor-pointer"
           >
             {isHindi ? 'सुझाव दें' : 'Give Suggestion'}
           </button>

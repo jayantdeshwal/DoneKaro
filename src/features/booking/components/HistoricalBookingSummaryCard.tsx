@@ -88,14 +88,11 @@ export function HistoricalBookingSummaryCard({
 
         {/* Content Details */}
         <div className="min-w-0 flex-1">
-          {/* Top Line: Service Name + Job ID Badge */}
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          {/* Top Line: Service Name */}
+          <div className="mb-0.5 min-w-0">
             <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
               {serviceName}
             </h3>
-            <span className="font-mono text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-zinc-400 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700 shrink-0">
-              {jobReference}
-            </span>
           </div>
 
           {/* Subtitle / Meta Line: Date/Time & Worker Name */}
@@ -147,7 +144,7 @@ export function HistoricalBookingSummaryCard({
               e.stopPropagation()
               onOpenReceipt(booking)
             }}
-            className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/30 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/30 transition-colors cursor-pointer"
             title={t('bookings.viewReceipt', 'View Receipt')}
           >
             <FileText className="w-3.5 h-3.5" />

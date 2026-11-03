@@ -55,7 +55,7 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
               key={request.id}
               className="rounded-xl bg-white/70 dark:bg-zinc-900/50 border border-amber-500/20 p-3"
             >
-              <div className="flex flex-wrap justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-white">
                     {service
@@ -73,24 +73,18 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
                       · {service.pincode}
                     </p>
                   )}
-                  <p className="text-xs text-semantic-text-secondary mt-1">
-                    {t('workerDashboard.respondBy', 'Respond by')}{' '}
-                    {new Date(request.response_deadline_at).toLocaleString(
-                      i18n.language === 'hi' ? 'hi-IN' : 'en-IN'
-                    )}
-                  </p>
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="primary"
+                    size="md"
                     onClick={() => onOpenSendQuote(request)}
                   >
                     {t('workerDashboard.sendQuote', 'Send Quote')}
                   </Button>
                   <Button
-                    variant="secondary"
-                    size="sm"
+                    variant="ghost"
+                    size="md"
                     onClick={() =>
                       void (async () => {
                         try {
@@ -113,30 +107,6 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
                   </Button>
                 </div>
               </div>
-
-              {service?.notes && (
-                <div className="mt-3 rounded-lg bg-surface-100/80 p-2.5">
-                  <p className="text-[11px] font-semibold text-semantic-text-primary">
-                    {t('workerDashboard.problemDescription', 'Problem Description')}
-                  </p>
-                  <p className="mt-1 text-xs text-semantic-text-secondary">{service.notes}</p>
-                </div>
-              )}
-
-              {service?.problem_image_url && (
-                <div className="mt-3">
-                  <p className="text-[11px] font-semibold text-semantic-text-primary mb-1.5">
-                    {t('workerDashboard.problemImage', 'Problem Image')}
-                  </p>
-                  <a href={service.problem_image_url} target="_blank" rel="noreferrer">
-                    <img
-                      src={service.problem_image_url}
-                      alt={t('workerDashboard.problemImage', 'Problem Image')}
-                      className="h-28 w-28 rounded-xl object-cover border border-semantic-border-light"
-                    />
-                  </a>
-                </div>
-              )}
             </div>
           )
         })}

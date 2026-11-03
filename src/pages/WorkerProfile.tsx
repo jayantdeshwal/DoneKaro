@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
-import { Button, Card, Avatar, Badge, RatingStars, Chip, Input, Tabs, TabList, Tab, TabPanel, Modal } from '@/ui'
+import { Button, Card, Avatar, Badge, RatingStars, Chip, Tabs, TabList, Tab, TabPanel, Modal } from '@/ui'
 import { CATEGORIES, getCategoryName, getServiceById } from '@kaamgar/shared'
-import { Star, MapPin, Clock, CheckCircle, CheckCircle2, Truck, ArrowLeft, Phone, MessageCircle, Zap, Wrench, Hammer, Snowflake, Brush, Calendar, Shield, AlertCircle, Power } from 'lucide-react'
+import { Star, MapPin, Clock, CheckCircle2, Truck, ArrowLeft, MessageCircle, Zap, Wrench, Hammer, Snowflake, Brush, Shield, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { fetchApprovedWorker } from '@/services/workers'
 import { fetchWorkerReviews, ReviewItem } from '@/services/reviews'
 import { useAuth } from '@/context/AuthContext'
-import { useAiAssistant } from '@/features/ai-support'
 import { getSupabaseClient } from '@/lib/supabase'
 
 const iconComponents = {
@@ -21,7 +20,6 @@ const iconComponents = {
 
 export default function WorkerProfile() {
   const { t, i18n } = useTranslation()
-  const { openAssistant } = useAiAssistant()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -33,7 +31,7 @@ export default function WorkerProfile() {
   const [isLoadingReviews, setIsLoadingReviews] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [bookingDraft, setBookingDraft] = useState({ date: '', time: '', pincode: '' })
+  const [showAllReviews, setShowAllReviews] = useState(false)
   const [showContactNotice, setShowContactNotice] = useState(false)
   const { user, isAuthenticated } = useAuth()
   const [isPreviouslyHired, setIsPreviouslyHired] = useState(false)
@@ -141,21 +139,10 @@ export default function WorkerProfile() {
     )
   }
 
-  const navigateToBooking = (draft?: { date: string; time: string; pincode: string }) => {
+  const navigateToBooking = () => {
     const effectiveServiceId = selectedServiceId || (worker?.categories?.length === 1 ? worker.categories[0] : '')
-    if (!isAuthenticated) {
-      navigate('/login', {
-        state: {
-          returnTo: `/worker/${worker.id}`,
-          bookingDraft: draft || bookingDraft,
-          serviceId: effectiveServiceId,
-        },
-      })
-      return
-    }
     navigate(`/booking/${worker.id}`, {
       state: {
-        bookingDraft: draft || bookingDraft,
         serviceRequestId: existingServiceRequestId,
         serviceId: effectiveServiceId,
       },
@@ -164,6 +151,7 @@ export default function WorkerProfile() {
 
   const cat = CATEGORIES.find(c => c.id === (selectedServiceId || worker.category))
   const Icon = iconComponents[(selectedServiceId || worker.category) as keyof typeof iconComponents] || Truck
+  const visibleReviews = showAllReviews ? reviewsList : reviewsList.slice(0, 3)
 
   return (
     <div className="min-h-screen bg-semantic-bg-secondary">
@@ -176,14 +164,14 @@ export default function WorkerProfile() {
         </div>
       </div>
 
-      <div className="container-app py-8">
+      <div className="container-app pt-8 pb-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="grid lg:grid-cols-3 gap-8"
+          className="grid gap-8"
         >
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -236,22 +224,21 @@ export default function WorkerProfile() {
                     </span>
                   </div>
                   <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2">
-                    {worker.areas.map((area: string) => (
+                    {worker.areas.slice(0, 3).map((area: string) => (
                       <Badge key={area} variant="outline" className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {area}
                       </Badge>
                     ))}
+                    {worker.areas.length > 3 && (
+                      <Badge variant="outline">+ {worker.areas.length - 3} more</Badge>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="flex-1 sm:flex-none group" onClick={() => navigateToBooking()}>
-                    <Truck className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform" />
-                    {t('workerProfile.bookNow')}
-                  </Button>
-                  <Button variant="outline" size="lg" onClick={() => setShowContactNotice(true)}>
-                    <Phone className="w-5 h-5 mr-2" />
-                    {t('common.call')}
+                <div className="flex w-full items-center sm:w-auto">
+                  <Button variant="ghost" size="lg" onClick={() => setShowContactNotice(true)}>
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    {t('workerProfile.contactPolicy', 'Contact Policy')}
                   </Button>
                 </div>
               </div>
@@ -322,7 +309,7 @@ export default function WorkerProfile() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {reviewsList.map((review, index) => (
+                      {visibleReviews.map((review, index) => (
                         <motion.div
                           key={review.id || index}
                           initial={{ opacity: 0, y: 10 }}
@@ -353,6 +340,20 @@ export default function WorkerProfile() {
                           )}
                         </motion.div>
                       ))}
+                      {reviewsList.length > 3 && (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowAllReviews(showing => !showing)}
+                        >
+                          {showAllReviews
+                            ? t('workerProfile.showFewerReviews', 'Show fewer reviews')
+                            : t('workerProfile.readAllReviews', `Read all ${reviewsList.length} reviews`)}
+                          <ChevronDown
+                            className={`ml-2 h-4 w-4 transition-transform ${showAllReviews ? 'rotate-180' : ''}`}
+                          />
+                        </Button>
+                      )}
                     </div>
                   )}
                 </Card>
@@ -360,151 +361,28 @@ export default function WorkerProfile() {
             </Tabs>
           </div>
 
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-semantic-text-primary">{t('booking.title', 'Book Service')}</h2>
-                  <Badge variant={worker.available ? 'success' : 'warning'}>
-                    {worker.available ? t('workerCard.available', 'Available') : t('workerProfile.unavailable', 'Currently Unavailable')}
-                  </Badge>
-                </div>
-
-                {!worker.available && (
-                  <div className="mb-4 p-3.5 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-sm flex items-start gap-2.5">
-                    <AlertCircle className="w-5 h-5 mt-0.5 shrink-0 text-amber-700" />
-                    <span className="text-amber-900">{t('booking.workerUnavailableWarning', 'This worker is currently unavailable/off-duty and cannot accept new bookings right now.')}</span>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="label">{t('booking.selectDate')}</label>
-                    <Input 
-                      type="date" 
-                      className="input" 
-                      disabled={!worker.available}
-                      min={new Date().toISOString().split('T')[0]} 
-                      value={bookingDraft.date} 
-                      onChange={e => setBookingDraft(prev => ({ ...prev, date: e.target.value }))} 
-                      leftIcon={<Calendar className="w-5 h-5" />} 
-                    />
-                  </div>
-                  <div>
-                    <label className="label">{t('booking.selectTime')}</label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-semantic-text-tertiary" />
-                      <select 
-                        disabled={!worker.available} 
-                        className="input pl-10 disabled:opacity-60 disabled:cursor-not-allowed" 
-                        value={bookingDraft.time} 
-                        onChange={e => setBookingDraft(prev => ({ ...prev, time: e.target.value }))}
-                      >
-                        <option value="">{t('common.select')}</option>
-                        <option value="9:00">9:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="14:00">2:00 PM</option>
-                        <option value="16:00">4:00 PM</option>
-                      </select>
-                    </div>
-                  </div>
-                  {worker.categories?.length > 1 && (
-                    <div>
-                      <label className="label">{t('booking.selectService', 'Select Service')}</label>
-                      <select
-                        disabled={!worker.available}
-                        value={selectedServiceId}
-                        onChange={e => setSelectedServiceId(e.target.value)}
-                        className="input disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        <option value="">{t('booking.chooseService', 'Choose a service...')}</option>
-                        {worker.categories.map((cId: string) => {
-                          const svc = getServiceById(cId)
-                          const name = svc ? (i18n.language === 'hi' ? svc.name_hi : svc.name_en) : cId
-                          return (
-                            <option key={cId} value={cId}>
-                              {name}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    </div>
-                  )}
-                  <div>
-                    <label className="label">{t('booking.pincode')}</label>
-                    <Input 
-                      type="text" 
-                      disabled={!worker.available} 
-                      placeholder="251001" 
-                      maxLength={6} 
-                      value={bookingDraft.pincode} 
-                      onChange={e => setBookingDraft(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }))} 
-                      className="input" 
-                      leftIcon={<MapPin className="w-5 h-5" />} 
-                    />
-                  </div>
-                  <Button 
-                    variant={worker.available ? "primary" : "secondary"} 
-                    className="w-full" 
-                    size="lg" 
-                    disabled={!worker.available}
-                    onClick={() => navigateToBooking(bookingDraft)}
-                  >
-                    {worker.available
-                      ? (isAuthenticated ? t('booking.confirmBooking') : t('booking.signInToBook', 'Sign In to Book'))
-                      : t('workerProfile.unavailable', 'Currently Unavailable')}
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Card className="p-6 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-brand-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-semantic-text-primary">{t('workerProfile.needHelp', 'Need Help?')}</h3>
-                    <p className="text-sm text-semantic-text-secondary">{t('workerProfile.helpSubtitleAi', 'Get guided assistance with your booking')}</p>
-                  </div>
-                </div>
-                <Button
-                  variant="primary"
-                  className="w-full flex items-center justify-center gap-2 cursor-pointer"
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      navigate('/login', { state: { returnTo: `/worker/${worker.id}` } })
-                    } else {
-                      openAssistant('customer_booking')
-                    }
-                  }}
-                >
-                  <Zap className="w-4 h-4 mr-1" />
-                  {isAuthenticated
-                    ? t('workerProfile.askBookingHelp', 'Ask Booking Help')
-                    : t('workerProfile.signInForAi', 'Sign In for Booking Help')}
-                </Button>
-              </Card>
-            </motion.div>
-
-          </div>
         </motion.div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-semantic-border-light bg-semantic-bg-primary/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur-md">
+        <div className="container-app">
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full min-h-14 text-base font-bold shadow-lg"
+            disabled={!worker.available}
+            onClick={navigateToBooking}
+          >
+            {t('workerProfile.continueToBook', 'Continue to Book')}
+          </Button>
+        </div>
       </div>
 
       {/* Direct Contact Privacy Notice Modal */}
       <Modal
         isOpen={showContactNotice}
         onClose={() => setShowContactNotice(false)}
-        title={t('workerProfile.directContactTitle', 'Direct Contact & Booking')}
+        title={t('workerProfile.contactPolicy', 'Contact Policy')}
         description={t('workerProfile.directContactDesc', 'Worker privacy & verified connections')}
         size="sm"
       >
@@ -515,20 +393,7 @@ export default function WorkerProfile() {
               {t('workerProfile.directContactNote', 'To protect local service professionals from unsolicited calls, direct phone numbers and WhatsApp links are provided immediately once a booking request is made.')}
             </p>
           </div>
-
-          <div className="pt-2 flex flex-col gap-2">
-            <Button
-              variant="primary"
-              size="md"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => {
-                setShowContactNotice(false)
-                navigateToBooking()
-              }}
-            >
-              <Truck className="w-4 h-4" />
-              <span>{t('workerProfile.bookServiceNow', 'Book Service Now')}</span>
-            </Button>
+          <div className="pt-2 flex justify-end">
             <Button variant="ghost" size="sm" onClick={() => setShowContactNotice(false)}>
               {t('common.close', 'Close')}
             </Button>

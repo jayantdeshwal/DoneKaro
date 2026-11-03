@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Modal } from '@/ui'
+import { CATEGORIES, getCategoryName } from '@kaamgar/shared'
 import {
   BookingQuoteRequest,
   respondToBookingQuoteRequest,
+  ServiceRequest,
 } from '@/services/quotes'
 
 interface SendQuoteModalProps {
   request: BookingQuoteRequest | null
+  bookingRequest: ServiceRequest | null
   isOpen: boolean
   onClose: () => void
   onSuccess: () => Promise<void>
@@ -15,11 +18,15 @@ interface SendQuoteModalProps {
 
 export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
   request,
+  bookingRequest,
   isOpen,
   onClose,
   onSuccess,
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const category = bookingRequest
+    ? CATEGORIES.find(item => item.id === bookingRequest.category_id)
+    : undefined
   const [amount, setAmount] = useState('')
   const [details, setDetails] = useState('')
   const [error, setError] = useState('')
@@ -74,6 +81,38 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
       )}
     >
       <div className="space-y-4">
+        {bookingRequest && (
+          <section className="space-y-2 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">
+              {t('workerDashboard.customerRequestSummary', 'Customer Request Summary')}
+            </h4>
+            <p className="font-semibold text-slate-800 dark:text-slate-200">
+              {t('workerDashboard.service', 'Service')}:{' '}
+              {category
+                ? getCategoryName(category, i18n.language === 'hi' ? 'hi' : 'en')
+                : t('workerDashboard.serviceRequest', 'Service request')}
+            </p>
+            <p className="text-slate-700 dark:text-slate-300">
+              {t('workerDashboard.scheduledFor', 'Date & Time')}:{' '}
+              {new Date(bookingRequest.scheduled_for).toLocaleString(
+                i18n.language === 'hi' ? 'hi-IN' : 'en-IN'
+              )}
+            </p>
+            <p className="text-slate-700 dark:text-slate-300">
+              {t('workerDashboard.location', 'Location')}: {bookingRequest.address} ·{' '}
+              {bookingRequest.pincode}
+            </p>
+            <div>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">
+                {t('workerDashboard.problemDescription', 'Problem Description')}
+              </p>
+              <p className="whitespace-pre-wrap break-words text-slate-700 dark:text-slate-300">
+                {bookingRequest.notes ||
+                  t('workerDashboard.noProblemDescription', 'No description provided.')}
+              </p>
+            </div>
+          </section>
+        )}
         {error && (
           <p className="rounded-xl bg-gray-900 border border-red-800 p-3 text-xs text-red-300 shadow-md">
             {error}

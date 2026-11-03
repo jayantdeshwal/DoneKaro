@@ -303,7 +303,7 @@ export default function Register() {
                 setCustomerError('')
               }}
               className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'customer'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
@@ -321,7 +321,7 @@ export default function Register() {
                 setAlreadyRegisteredNotice(null)
               }}
               className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'worker'
-                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                   : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
@@ -352,7 +352,7 @@ export default function Register() {
                   <div className="pt-1">
                     <Link
                       to={`/login?role=customer&phone=${alreadyRegisteredNotice.phone}`}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-red-700 hover:bg-red-600 text-white font-bold text-xs shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold text-xs shadow-md transition-transform hover:scale-[1.01] active:scale-[0.99]"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       <span>{t('auth.goToCustomerLogin', 'Sign In with OTP')}</span>
@@ -573,7 +573,7 @@ export default function Register() {
 
               <Link
                 to={`/register/worker${customerPhone ? `?phone=${customerPhone}` : ''}`}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold text-sm shadow-lg shadow-amber-600/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
               >
                 <span>{t('auth.workerRegistration.proceedToRegistration', 'Proceed to Service Partner Registration')}</span>
                 <ArrowRight className="w-4 h-4" />

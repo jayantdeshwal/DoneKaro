@@ -157,7 +157,7 @@ export function DiscoveryResults({
                           </span>
                           <Link
                             to={`/worker/${worker.id}`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-xs active:scale-95 transition-all"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-xs active:scale-95 transition-all disabled:opacity-50"
                           >
                             <span>{t('home.viewAndCall', 'View & Call')}</span>
                             <ArrowRight className="w-3.5 h-3.5" />

@@ -114,13 +114,13 @@ export function AdminHeaderBanner({
           </div>
 
           {/* Global Actions */}
-          <div className="flex items-center gap-2.5 self-start lg:self-center flex-wrap">
+          <div className="grid w-full grid-cols-2 gap-2.5 self-start lg:w-auto lg:flex lg:self-center">
             <Button
               variant="outline"
               size="sm"
               onClick={refreshAll}
               disabled={isLoading}
-              className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
+              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`}
@@ -135,7 +135,7 @@ export function AdminHeaderBanner({
                 setActiveTab('management')
                 setSearchParams({ tab: 'management' })
               }}
-              className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
+              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
             >
               <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
               Management
@@ -149,7 +149,7 @@ export function AdminHeaderBanner({
                 setActiveTab('management')
                 setSearchParams({ tab: 'management' })
               }}
-              className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-rose-500/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
+              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-rose-500/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
             >
               <span className="relative inline-flex">
                 <Bell className="w-3.5 h-3.5 text-rose-500" />
@@ -166,7 +166,7 @@ export function AdminHeaderBanner({
               variant="primary"
               size="sm"
               onClick={() => navigate('/search')}
-              className="flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition-all"
+              className="min-h-12 flex items-center justify-center gap-2 text-xs font-bold px-3 py-2 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 shadow-md shadow-amber-500/20 transition-all"
             >
               <Compass className="w-3.5 h-3.5" />
               Live Public Portal

@@ -66,7 +66,7 @@ export const WorkerActionTiles: React.FC<WorkerActionTilesProps> = ({
       <button
         type="button"
         onClick={onSelectJobs}
-        aria-label={t('workerDashboard.jobRequests', 'Job Requests')}
+        aria-label={t('nav.myBookings', 'My Bookings')}
         className="p-3 sm:p-4 rounded-2xl bg-surface-100 border border-semantic-border-light hover:border-brand-500/40 hover:bg-surface-200/80 transition-all flex flex-col items-center justify-center text-center group shadow-sm active:scale-95"
       >
         <div className="w-10 h-10 rounded-xl bg-surface-200 group-hover:bg-brand-500/15 flex items-center justify-center text-brand-400 mb-2 transition-colors relative">
@@ -78,11 +78,7 @@ export const WorkerActionTiles: React.FC<WorkerActionTilesProps> = ({
           )}
         </div>
         <span className="text-xs font-bold text-slate-900 dark:text-zinc-200 group-hover:text-amber-600 dark:group-hover:text-brand-400 leading-tight">
-          {pendingCount > 0
-            ? t('workerDashboard.newRequests', '{{count}} new requests', {
-                count: pendingCount,
-              })
-            : t('workerDashboard.jobRequests', 'Job Requests')}
+          {t('nav.myBookings', 'My Bookings')}
         </span>
       </button>
 

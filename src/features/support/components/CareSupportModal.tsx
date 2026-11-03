@@ -73,7 +73,7 @@ export const CareSupportModal: React.FC = () => {
             onClick={() => switchTab('complaint')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'complaint'
-                ? 'bg-rose-600 text-white font-bold shadow-xs'
+                ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
             }`}
           >
@@ -86,7 +86,7 @@ export const CareSupportModal: React.FC = () => {
             onClick={() => switchTab('suggestion')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'suggestion'
-                ? 'bg-amber-600 text-white font-bold shadow-xs'
+                ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
             }`}
           >
@@ -99,7 +99,7 @@ export const CareSupportModal: React.FC = () => {
             onClick={() => switchTab('history')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold shadow-xs'
+                ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
             }`}
           >
@@ -122,7 +122,7 @@ export const CareSupportModal: React.FC = () => {
                 closeSupport()
                 navigate('/login')
               }}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] whitespace-nowrap transition-colors cursor-pointer shadow-xs shrink-0"
+              className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-semibold text-[11px] whitespace-nowrap transition-colors cursor-pointer shadow-xs shrink-0"
             >
               {isHindi ? 'लॉगिन' : 'Sign In'}
             </button>

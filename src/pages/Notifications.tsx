@@ -419,7 +419,7 @@ export default function Notifications() {
                               e.stopPropagation()
                               handleActionClick(notification, action.url)
                             }}
-                            className="text-xs font-bold py-1.5 px-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-xs cursor-pointer"
+                            className="text-xs font-bold py-1.5 px-3.5 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 shadow-xs cursor-pointer disabled:opacity-50"
                           >
                             {actionLabel}
                           </Button>

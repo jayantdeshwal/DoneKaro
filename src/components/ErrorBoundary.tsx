@@ -95,7 +95,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.handleReload}
-                className="flex-1 py-2.5 px-4 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md cursor-pointer"
+                className="flex-1 py-2.5 px-4 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Reload Page</span>
@@ -229,7 +229,7 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Route
               <button
                 type="button"
                 onClick={this.handleRetry}
-                className="py-2.5 px-4 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="py-2.5 px-4 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Try Again / पुनः प्रयास</span>

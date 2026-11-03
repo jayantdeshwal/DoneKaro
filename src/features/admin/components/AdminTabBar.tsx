@@ -2,21 +2,18 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
-  Truck,
   Users,
   Calendar,
   Bell,
   Shield,
   ShieldAlert,
 } from 'lucide-react'
-import type { AdminTabType, AdminWorkerRow, AdminTeamMember } from '../types'
+import type { AdminTabType, AdminTeamMember } from '../types'
 
 interface AdminTabBarProps {
   activeTab: AdminTabType
   setActiveTab: (tab: AdminTabType) => void
-  setWorkerStatusFilter: (status: 'all' | 'pending' | 'approved' | 'rejected') => void
   setSearchParams: (params: { tab: string }) => void
-  pendingWorkers: AdminWorkerRow[]
   unreadNotifsCount: number
   adminTeam: AdminTeamMember[]
 }
@@ -24,9 +21,7 @@ interface AdminTabBarProps {
 export function AdminTabBar({
   activeTab,
   setActiveTab,
-  setWorkerStatusFilter,
   setSearchParams,
-  pendingWorkers,
   unreadNotifsCount,
   adminTeam,
 }: AdminTabBarProps) {
@@ -34,13 +29,6 @@ export function AdminTabBar({
 
   const tabs = [
     { key: 'dashboard', label: t('admin.dashboard', 'Dashboard'), icon: LayoutDashboard },
-    {
-      key: 'workers',
-      label: t('admin.approvals', 'Approvals'),
-      icon: Truck,
-      badge: pendingWorkers.length,
-      badgeVariant: 'warning',
-    },
     { key: 'customers', label: t('admin.allCustomers', 'Customers'), icon: Users },
     { key: 'bookings', label: t('admin.allBookings', 'All Bookings'), icon: Calendar },
     {
@@ -78,9 +66,6 @@ export function AdminTabBar({
           <button
             key={tab.key}
             onClick={() => {
-              if (tab.key === 'workers') {
-                setWorkerStatusFilter('all')
-              }
               setActiveTab(tab.key as any)
               setSearchParams({ tab: tab.key })
             }}

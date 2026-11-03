@@ -12,9 +12,12 @@ import {
   AdminComplaintFilter,
   AdminSuggestionFilter,
   AdminUserProfile,
+  AdminSupportHistoryEntry,
+  AdminComplaintAttachment,
   UpdateComplaintParams,
   UpdateSuggestionParams,
 } from '../types'
+import { getProblemImageSignedUrl } from '@/services/storage'
 
 /**
  * Helper to fetch profiles for an array of user IDs under admin RLS.
@@ -282,6 +285,59 @@ export async function fetchAdminSuggestionDetails(id: string): Promise<AdminSugg
     resolved_at: data.resolved_at,
     submitter: profiles.get(data.submitted_by),
   }
+}
+
+export async function fetchAdminUserSupportHistory(userId: string): Promise<AdminSupportHistoryEntry[]> {
+  const supabase = getSupabaseClient()
+  const [complaintsResult, suggestionsResult] = await Promise.all([
+    (supabase.from('complaints') as any)
+      .select('id, status, created_at')
+      .eq('opened_by', userId)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    (supabase.from('suggestions') as any)
+      .select('id, status, created_at')
+      .eq('submitted_by', userId)
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ])
+
+  if (complaintsResult.error) throw complaintsResult.error
+  if (suggestionsResult.error) throw suggestionsResult.error
+
+  return [
+    ...(complaintsResult.data ?? []).map((item: any) => ({ ...item, type: 'complaint' as const })),
+    ...(suggestionsResult.data ?? []).map((item: any) => ({ ...item, type: 'suggestion' as const })),
+  ]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
+}
+
+export async function fetchAdminComplaintAttachments(bookingId: string): Promise<AdminComplaintAttachment[]> {
+  const supabase = getSupabaseClient()
+  const { data: quotes, error: quotesError } = await (supabase.from('booking_quotes') as any)
+    .select('service_request_id')
+    .eq('booking_id', bookingId)
+
+  if (quotesError) throw quotesError
+  const serviceRequestIds = [...new Set((quotes ?? []).map((quote: any) => quote.service_request_id).filter(Boolean))]
+  if (serviceRequestIds.length === 0) return []
+
+  const { data: attachments, error: attachmentsError } = await (supabase.from('service_request_attachments') as any)
+    .select('id, storage_path, mime_type, created_at')
+    .in('service_request_id', serviceRequestIds)
+    .order('created_at', { ascending: true })
+
+  if (attachmentsError) throw attachmentsError
+
+  return Promise.all(
+    (attachments ?? []).map(async (attachment: any) => ({
+      id: attachment.id,
+      signed_url: await getProblemImageSignedUrl(attachment.storage_path),
+      mime_type: attachment.mime_type,
+      created_at: attachment.created_at,
+    })),
+  )
 }
 
 /**

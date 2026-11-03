@@ -11,9 +11,10 @@ import {
   Loader2,
   Shield,
   Sparkles,
+  MessageSquare,
 } from 'lucide-react'
-import { AdminSuggestion, SuggestionStatus, SuggestionCategory } from '../types'
-import { updateSuggestionStatus } from '../services/adminSupportService'
+import { AdminSuggestion, AdminSupportHistoryEntry, SuggestionStatus, SuggestionCategory } from '../types'
+import { fetchAdminUserSupportHistory, updateSuggestionStatus } from '../services/adminSupportService'
 import { SupportStatusBadge } from './SupportStatusBadge'
 
 interface SuggestionDetailsProps {
@@ -45,6 +46,9 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [history, setHistory] = useState<AdminSupportHistoryEntry[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
 
   useEffect(() => {
     if (suggestion) {
@@ -52,6 +56,15 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
       setResolutionNote(suggestion.resolution_note || '')
       setErrorMsg(null)
       setSuccessMsg(null)
+      setHistory([])
+      setHistoryError(null)
+      setHistoryLoading(true)
+      fetchAdminUserSupportHistory(suggestion.submitted_by)
+        .then(userHistory => setHistory(userHistory.filter(item => item.id !== suggestion.id)))
+        .catch(err => {
+          setHistoryError(err instanceof Error ? err.message : 'Unable to load user support history.')
+        })
+        .finally(() => setHistoryLoading(false))
     }
   }, [suggestion])
 
@@ -99,7 +112,13 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/90 dark:border-zinc-800 p-5 sm:p-6 space-y-6 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Suggestion SUG-${suggestion.id.slice(0, 8)}`}
+      className="fixed inset-0 z-[100] overflow-y-auto bg-white p-5 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100 sm:p-8"
+    >
+      <div className="mx-auto max-w-4xl space-y-6 pb-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
         <div>
@@ -121,8 +140,10 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
           </p>
         </div>
         <button
+          type="button"
           onClick={onClose}
-          className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors"
+          aria-label="Close suggestion details"
+          className="flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -170,8 +191,39 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
         </div>
       </div>
 
+      <section className="space-y-3">
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-amber-500" />
+          Submitter Support History
+        </h4>
+        {historyLoading ? (
+          <p className="text-sm text-slate-500 dark:text-zinc-400">Loading user history...</p>
+        ) : historyError ? (
+          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+            {historyError}
+          </p>
+        ) : history.length > 0 ? (
+          <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-zinc-800 dark:border-zinc-800">
+            {history.map(item => (
+              <li key={`${item.type}-${item.id}`} className="flex items-center justify-between gap-3 p-3 text-sm">
+                <span className="min-w-0 truncate text-slate-700 dark:text-zinc-300">
+                  {item.type === 'complaint' ? 'Complaint' : 'Suggestion'} · {item.id.slice(0, 8).toUpperCase()}
+                </span>
+                <span className="shrink-0 text-xs capitalize text-slate-500 dark:text-zinc-400">
+                  {item.status} · {new Date(item.created_at).toLocaleDateString('en-IN')}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-zinc-900 dark:text-zinc-400">
+            No other support history found.
+          </p>
+        )}
+      </section>
+
       {/* Admin Action & Status Form */}
-      <form onSubmit={handleSave} className="space-y-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
+      <form onSubmit={handleSave} className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
             <Shield className="w-4 h-4 text-amber-500" />
@@ -206,7 +258,7 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
             <select
               value={selectedStatus}
               onChange={e => setSelectedStatus(e.target.value as SuggestionStatus)}
-              className="w-full py-2 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="min-h-[48px] w-full py-3 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="open">Open (New suggestion)</option>
               <option value="in_review">In Review (Under operations review)</option>
@@ -225,15 +277,15 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
             onChange={e => setResolutionNote(e.target.value)}
             placeholder="Record team decision or public feedback response..."
             rows={4}
-            className="w-full text-xs rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white placeholder-slate-400 resize-none"
+            className="w-full text-sm rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white placeholder-slate-400 resize-y"
           />
         </div>
 
-        <div className="flex justify-end gap-2.5 pt-1">
+        <div className="sticky bottom-0 -mx-5 border-t border-slate-200 bg-white/95 p-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:-mx-8">
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
           >
             {saving ? (
               <>
@@ -249,6 +301,7 @@ export const SuggestionDetails: React.FC<SuggestionDetailsProps> = ({
           </button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

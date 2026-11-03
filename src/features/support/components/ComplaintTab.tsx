@@ -252,7 +252,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           <button
             type="button"
             onClick={closeSupport}
-            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
+            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-sm"
           >
             {isHindi ? 'समाप्त' : 'Done'}
           </button>
@@ -356,7 +356,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           <button
             type="submit"
             disabled={submitting || reason.trim().length < 10 || !bookingContext}
-            className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
             {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             <span>{isHindi ? 'शिकायत दर्ज करें' : 'Submit Complaint'}</span>
@@ -405,7 +405,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
                 closeSupport()
                 navigate('/login')
               }}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer shadow-xs"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors cursor-pointer shadow-xs"
             >
               {isHindi ? 'लॉगिन / पंजीकरण करें' : 'Sign In / Register'}
             </button>
@@ -434,7 +434,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           <button
             type="button"
             onClick={() => switchTab('suggestion')}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors"
           >
             {isHindi ? 'सुझाव भेजें' : 'Send a Suggestion Instead'}
           </button>

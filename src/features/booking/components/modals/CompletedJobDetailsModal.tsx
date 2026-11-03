@@ -239,7 +239,7 @@ export function CompletedJobDetailsModal({
                 variant="primary"
                 size="sm"
                 onClick={() => onRateWorker(booking)}
-                className="text-xs font-bold flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 cursor-pointer"
+                className="text-xs font-bold flex items-center gap-1 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 cursor-pointer disabled:opacity-50"
               >
                 <Star className="w-3.5 h-3.5" />
                 {t('bookings.rateWorker', 'Rate Artisan')}
@@ -262,7 +262,7 @@ export function CompletedJobDetailsModal({
             variant="primary"
             size="sm"
             onClick={() => onBookAgain(booking)}
-            className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 text-xs font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             {t('bookings.bookAgain', 'Book Again')}

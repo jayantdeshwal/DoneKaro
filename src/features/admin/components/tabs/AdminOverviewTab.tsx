@@ -360,7 +360,7 @@ export function AdminOverviewTab({
                       size="sm"
                       onClick={() => handleOpenActionModal(worker, 'approve')}
                       title="Quick Approve"
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white p-2"
+                      className="p-2"
                     >
                       <Check className="w-4 h-4" />
                     </Button>

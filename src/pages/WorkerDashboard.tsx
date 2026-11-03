@@ -19,9 +19,6 @@ import { useWorkerRealtime } from '@/features/worker/hooks/useWorkerRealtime'
 import { WorkerTopBar } from '@/features/worker/components/dashboard/WorkerTopBar'
 import { WorkerHeader } from '@/features/worker/components/dashboard/WorkerHeader'
 import { WorkerActionTiles } from '@/features/worker/components/dashboard/WorkerActionTiles'
-import { SarathiAiCard } from '@/features/worker/components/dashboard/SarathiAiCard'
-import { WorkerMetricsStrip } from '@/features/worker/components/dashboard/WorkerMetricsStrip'
-import { MobileLeadsHeader } from '@/features/worker/components/dashboard/MobileLeadsHeader'
 import { QuoteRequestsFeed } from '@/features/worker/components/quotes/QuoteRequestsFeed'
 import { SendQuoteModal } from '@/features/worker/components/quotes/SendQuoteModal'
 import { BookingFeedTabs } from '@/features/worker/components/bookings/BookingFeedTabs'
@@ -236,42 +233,7 @@ export default function WorkerDashboard() {
           onOpenSupport={() => openSupport()}
         />
 
-        {/* 3.5 Sarathi AI Card */}
-        <SarathiAiCard
-          isLeadsTab={isLeadsTab}
-          onOpenAssistant={() => openAssistant('worker_sarathi', undefined, activeJob?.id)}
-        />
-
-        {/* 4. Worker Metrics Strip */}
-        <WorkerMetricsStrip
-          profile={profile}
-          completedCount={completedCount}
-          isLeadsTab={isLeadsTab}
-          onSelectCompleted={() => setActiveTab('completed')}
-          onViewAllReviews={() => navigate('/worker/reviews')}
-        />
-
-        {/* Divider */}
-        <div className={`border-t border-semantic-border-light/60 my-4 ${isLeadsTab ? 'hidden md:block' : 'block'}`} />
-
-        {/* Dedicated Mobile Leads Header */}
-        <MobileLeadsHeader
-          isLeadsTab={isLeadsTab}
-          pendingCount={pendingCount}
-          isLoading={isLoading}
-          onRefresh={loadDashboardData}
-        />
-
-        {/* 5. Provider Quote Requests Feed */}
-        <QuoteRequestsFeed
-          quoteRequests={quoteRequests}
-          quoteServices={quoteServices}
-          onOpenSendQuote={request => setQuoteRequestToRespond(request)}
-          onRefreshData={loadDashboardData}
-          onError={setError}
-        />
-
-        {/* 6. Booking Feed Tabs */}
+        {/* 4. Booking Feed Tabs */}
         <BookingFeedTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -282,7 +244,16 @@ export default function WorkerDashboard() {
           onRefresh={loadDashboardData}
         />
 
-        {/* 7. Phase 9 Business Summary */}
+        {/* Provider Quote Requests */}
+        <QuoteRequestsFeed
+          quoteRequests={quoteRequests}
+          quoteServices={quoteServices}
+          onOpenSendQuote={request => setQuoteRequestToRespond(request)}
+          onRefreshData={loadDashboardData}
+          onError={setError}
+        />
+
+        {/* 5. Phase 9 Business Summary */}
         {activeTab === 'completed' && (
           <BusinessSummary
             completedJobsCount={completedJobsCount}
@@ -367,6 +338,11 @@ export default function WorkerDashboard() {
 
       <SendQuoteModal
         request={quoteRequestToRespond}
+        bookingRequest={
+          quoteRequestToRespond
+            ? quoteServices.get(quoteRequestToRespond.service_request_id) ?? null
+            : null
+        }
         isOpen={Boolean(quoteRequestToRespond)}
         onClose={() => setQuoteRequestToRespond(null)}
         onSuccess={loadDashboardData}

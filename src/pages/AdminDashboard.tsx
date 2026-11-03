@@ -80,9 +80,7 @@ export default function AdminDashboard() {
         <AdminTabBar
           activeTab={admin.activeTab}
           setActiveTab={admin.setActiveTab}
-          setWorkerStatusFilter={admin.setWorkerStatusFilter}
           setSearchParams={admin.setSearchParams}
-          pendingWorkers={admin.pendingWorkers}
           unreadNotifsCount={admin.unreadNotifsCount}
           adminTeam={admin.adminTeam}
         />

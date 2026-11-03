@@ -258,7 +258,7 @@ export const CompletedJobModal: React.FC<CompletedJobModalProps> = ({
             variant="primary"
             size="sm"
             onClick={onClose}
-            className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+            className="flex-1 text-xs font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50"
           >
             {t('common.close', 'Close')}
           </Button>

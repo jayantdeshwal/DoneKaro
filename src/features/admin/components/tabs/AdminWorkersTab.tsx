@@ -113,8 +113,99 @@ export function AdminWorkersTab({
           </div>
         </div>
 
+        <div className="block divide-y divide-slate-200 dark:divide-zinc-800 md:hidden">
+          {isLoadingWorkers ? (
+            <p className="p-6 text-center text-sm text-slate-500 dark:text-zinc-400">
+              Loading workers directory...
+            </p>
+          ) : filteredWorkers.length === 0 ? (
+            <div className="p-6 text-center">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
+                No workers found matching the "{workerStatusFilter}" filter.
+              </p>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mb-4">
+                {allWorkers.length} total worker(s) registered on the platform.
+              </p>
+              {workerStatusFilter !== 'all' && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={() => {
+                    setWorkerStatusFilter('all')
+                    setWorkerSearch('')
+                  }}
+                  className="min-h-[48px]"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Show All Workers ({allWorkers.length})
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3 p-3">
+              {filteredWorkers.map(worker => (
+                <Card
+                  key={worker.id}
+                  className={`p-4 border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 ${
+                    worker.approval_status === 'pending' ? 'ring-1 ring-amber-500/30' : ''
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar name={worker.name} src={worker.avatar_url || undefined} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900 dark:text-white truncate">
+                        {worker.name}
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-600 dark:text-zinc-400 capitalize">
+                        {worker.categories.join(', ') || 'None'}
+                      </p>
+                      <Badge
+                        variant={
+                          worker.approval_status === 'approved'
+                            ? 'success'
+                            : worker.approval_status === 'pending'
+                            ? 'warning'
+                            : 'danger'
+                        }
+                        className="mt-2"
+                      >
+                        {worker.approval_status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="md"
+                      onClick={() => setInspectWorker(worker)}
+                      className={`min-h-[48px] ${
+                        worker.approval_status === 'approved' ? 'col-span-2' : ''
+                      }`}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Dossier
+                    </Button>
+                    {worker.approval_status !== 'approved' && (
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => handleOpenActionModal(worker, 'approve')}
+                        className="min-h-[48px]"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        {worker.approval_status === 'rejected' ? 'Re-approve' : 'Approve'}
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Workers Table */}
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full">
             <thead className="bg-slate-100/90 dark:bg-zinc-800/90 border-b border-slate-200/90 dark:border-zinc-800">
               <tr>
@@ -164,7 +255,7 @@ export function AdminWorkersTab({
                           setWorkerStatusFilter('all')
                           setWorkerSearch('')
                         }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 text-xs font-bold hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
                         Show All Workers ({allWorkers.length})

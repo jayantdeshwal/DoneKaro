@@ -13,9 +13,14 @@ import {
   Loader2,
   Shield,
   MessageSquare,
+  Image as ImageIcon,
 } from 'lucide-react'
-import { AdminComplaint, ComplaintStatus } from '../types'
-import { updateComplaintStatus } from '../services/adminSupportService'
+import { AdminComplaint, AdminComplaintAttachment, AdminSupportHistoryEntry, ComplaintStatus } from '../types'
+import {
+  fetchAdminComplaintAttachments,
+  fetchAdminUserSupportHistory,
+  updateComplaintStatus,
+} from '../services/adminSupportService'
 import { SupportStatusBadge } from './SupportStatusBadge'
 
 interface ComplaintDetailsProps {
@@ -34,6 +39,10 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [history, setHistory] = useState<AdminSupportHistoryEntry[]>([])
+  const [attachments, setAttachments] = useState<AdminComplaintAttachment[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
 
   useEffect(() => {
     if (complaint) {
@@ -41,6 +50,22 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
       setResolutionNote(complaint.resolution_note || '')
       setErrorMsg(null)
       setSuccessMsg(null)
+      setHistory([])
+      setAttachments([])
+      setHistoryError(null)
+      setHistoryLoading(true)
+      Promise.all([
+        fetchAdminUserSupportHistory(complaint.opened_by),
+        fetchAdminComplaintAttachments(complaint.booking_id),
+      ])
+        .then(([userHistory, complaintAttachments]) => {
+          setHistory(userHistory.filter(item => item.id !== complaint.id))
+          setAttachments(complaintAttachments)
+        })
+        .catch(err => {
+          setHistoryError(err instanceof Error ? err.message : 'Unable to load user history or attachments.')
+        })
+        .finally(() => setHistoryLoading(false))
     }
   }, [complaint])
 
@@ -88,7 +113,13 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/90 dark:border-zinc-800 p-5 sm:p-6 space-y-6 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Complaint CMP-${complaint.id.slice(0, 8)}`}
+      className="fixed inset-0 z-[100] overflow-y-auto bg-white p-5 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100 sm:p-8"
+    >
+      <div className="mx-auto max-w-4xl space-y-6 pb-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
         <div>
@@ -110,8 +141,10 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
           </p>
         </div>
         <button
+          type="button"
           onClick={onClose}
-          className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors"
+          aria-label="Close complaint details"
+          className="flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -201,8 +234,74 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
         </div>
       </div>
 
+      <section className="space-y-3">
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <ImageIcon className="h-4 w-4 text-amber-500" />
+          Attached Images
+        </h4>
+        {historyLoading ? (
+          <p className="text-sm text-slate-500 dark:text-zinc-400">Loading complaint evidence and user history...</p>
+        ) : attachments.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {attachments.map(attachment => attachment.signed_url ? (
+              <a
+                key={attachment.id}
+                href={attachment.signed_url}
+                target="_blank"
+                rel="noreferrer"
+                className="block overflow-hidden rounded-xl border border-slate-200 dark:border-zinc-700"
+              >
+                <img
+                  src={attachment.signed_url}
+                  alt="Complaint evidence"
+                  className="aspect-square w-full object-cover"
+                />
+              </a>
+            ) : (
+              <div key={attachment.id} className="flex aspect-square items-center justify-center rounded-xl border border-slate-200 dark:border-zinc-700 text-xs text-slate-500 dark:text-zinc-400">
+                Image preview unavailable
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-zinc-900 dark:text-zinc-400">
+            No images were attached to this booking request.
+          </p>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-amber-500" />
+          Complainant Support History
+        </h4>
+        {historyError && (
+          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+            {historyError}
+          </p>
+        )}
+        {!historyLoading && !historyError && (history.length > 0 ? (
+          <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-zinc-800 dark:border-zinc-800">
+            {history.map(item => (
+              <li key={`${item.type}-${item.id}`} className="flex items-center justify-between gap-3 p-3 text-sm">
+                <span className="min-w-0 truncate text-slate-700 dark:text-zinc-300">
+                  {item.type === 'complaint' ? 'Complaint' : 'Suggestion'} · {item.id.slice(0, 8).toUpperCase()}
+                </span>
+                <span className="shrink-0 text-xs capitalize text-slate-500 dark:text-zinc-400">
+                  {item.status} · {new Date(item.created_at).toLocaleDateString('en-IN')}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-zinc-900 dark:text-zinc-400">
+            No other support history found.
+          </p>
+        ))}
+      </section>
+
       {/* Admin Action & Resolution Form */}
-      <form onSubmit={handleSave} className="space-y-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
+      <form onSubmit={handleSave} className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
             <Shield className="w-4 h-4 text-amber-500" />
@@ -237,7 +336,7 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
             <select
               value={selectedStatus}
               onChange={e => setSelectedStatus(e.target.value as ComplaintStatus)}
-              className="w-full py-2 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="min-h-[48px] w-full py-3 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="open">Open (Awaiting review)</option>
               <option value="investigating">Investigating (In progress)</option>
@@ -256,15 +355,15 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
             onChange={e => setResolutionNote(e.target.value)}
             placeholder="Document administrative findings, actions taken, or reasons for closure..."
             rows={4}
-            className="w-full text-xs rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white placeholder-slate-400 resize-none"
+            className="w-full text-sm rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white placeholder-slate-400 resize-y"
           />
         </div>
 
-        <div className="flex justify-end gap-2.5 pt-1">
+        <div className="sticky bottom-0 -mx-5 border-t border-slate-200 bg-white/95 p-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:-mx-8">
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
           >
             {saving ? (
               <>
@@ -280,6 +379,7 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
           </button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

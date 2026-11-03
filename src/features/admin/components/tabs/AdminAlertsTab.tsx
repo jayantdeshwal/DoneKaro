@@ -278,7 +278,7 @@ export function AdminAlertsTab({
                         variant="primary"
                         size="sm"
                         onClick={() => handleInspectWorkerFromNotification(notif)}
-                        className="text-xs flex items-center gap-1.5 shadow-sm font-semibold px-3 py-1.5 rounded-xl bg-brand-500 text-surface-950 hover:bg-brand-600"
+                        className="text-xs flex items-center gap-1.5 shadow-sm font-semibold px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         {t('admin.reviewWorker', 'Review Worker')}

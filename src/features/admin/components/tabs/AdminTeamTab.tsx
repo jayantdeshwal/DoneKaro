@@ -84,7 +84,7 @@ export function AdminTeamTab({
               setAddAdminSuccess('')
               setShowAddAdminModal(true)
             }}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center gap-2 self-start sm:self-auto shadow-md shadow-amber-500/20"
+            className="font-bold flex items-center gap-2 self-start sm:self-auto shadow-md shadow-amber-500/20"
           >
             <UserPlus className="w-4 h-4" />
             Add Sub Administrator

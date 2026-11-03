@@ -1,15 +1,16 @@
 import { createPortal } from 'react-dom'
 import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'danger-outline'
 
 export function Button({ variant = 'primary', size = 'md', loading, className = '', children, disabled, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'md' | 'lg'; loading?: boolean }) {
   const variants: Record<Variant, string> = {
-    primary: 'bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 active:bg-amber-600 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5',
-    secondary: 'bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-100 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-700 active:bg-slate-200 shadow-xs transition-all',
-    outline: 'border border-amber-500/80 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 active:bg-amber-500/20 transition-all',
-    ghost: 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all',
-    danger: 'bg-rose-600 text-white hover:bg-rose-500 active:bg-rose-700 shadow-sm transition-all',
+    primary: 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500',
+    secondary: 'border border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800',
+    outline: 'border border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800',
+    ghost: 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+    danger: 'bg-rose-500 text-white dark:bg-rose-600 dark:text-white hover:bg-rose-600 dark:hover:bg-rose-500',
+    'danger-outline': 'text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900',
   }
   const sizes = { sm: 'px-2.5 py-1 text-xs', md: 'px-3.5 py-2 text-xs sm:text-sm', lg: 'px-4.5 py-2.5 text-sm' }
   return <button className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-semantic-bg-primary disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`} disabled={disabled || loading} {...props}>{loading ? 'Loading...' : children}</button>
@@ -22,7 +23,7 @@ export function Input({ label, error, helperText, leftIcon, rightIcon, className
       {label && <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1.5" htmlFor={inputId}>{label}</label>}
       <div className="relative">
         {leftIcon && <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500">{leftIcon}</span>}
-        <input id={inputId} className={`w-full rounded-xl bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 shadow-xs transition-all ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''} ${className}`} aria-invalid={Boolean(error)} {...props} />
+        <input id={inputId} className={`min-h-[48px] w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3.5 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 shadow-xs transition-all ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''} ${className}`} aria-invalid={Boolean(error)} {...props} />
         {rightIcon && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500">{rightIcon}</span>}
       </div>
       {error ? <p className="mt-1.5 rounded-lg border border-red-800 bg-gray-900 px-2.5 py-1.5 text-xs text-red-300 font-medium shadow-md" role="alert">{error}</p> : helperText && <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">{helperText}</p>}
@@ -79,7 +80,7 @@ export function Badge({ variant = 'default', size = 'md', dot, className = '', c
 }
 
 export function Chip({ selected, variant, className = '', children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { selected?: boolean; variant?: string }) {
-  return <button className={`rounded-full border px-3 py-1 text-sm font-medium transition-all ${selected ? 'border-amber-500 bg-amber-500 text-slate-950 font-bold shadow-xs' : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-750'} ${className}`} {...props}>{children}</button>
+  return <button className={`rounded-full border px-3 py-1 text-sm font-medium transition-all ${selected ? 'border-amber-500 bg-amber-500 text-slate-950 dark:border-amber-400 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'} ${className}`} {...props}>{children}</button>
 }
 
 export function RatingStars({ rating, showValue = false, className = '', interactive, onChange, size }: { rating: number; showValue?: boolean; className?: string; interactive?: boolean; onChange?: (rating: number) => void; size?: string }) {

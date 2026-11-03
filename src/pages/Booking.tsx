@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Button, Card, Modal, Avatar, Badge } from '@kaamgar/ui'
+import { Button, Card, Avatar, Badge } from '@kaamgar/ui'
 import { CATEGORIES, getCategoryName, getServiceById } from '@kaamgar/shared'
-import { ArrowLeft, Calendar, Clock, MapPin, Check, AlertCircle, Info } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, MapPin, Check, AlertCircle, ChevronDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { fetchApprovedWorker } from '@/services/workers'
@@ -33,11 +33,10 @@ export default function Booking() {
     notes: location.state?.bookingDraft?.notes || '',
   }))
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [isOptionalOpen, setIsOptionalOpen] = useState(false)
   const [quoteRequested, setQuoteRequested] = useState(false)
   const [responseHours, setResponseHours] = useState('6')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [bookingError, setBookingError] = useState('')
   const [createdServiceRequestId, setCreatedServiceRequestId] = useState<string | null>(null)
   const [problemImage, setProblemImage] = useState<File | null>(null)
   const [problemImagePreview, setProblemImagePreview] = useState<string | null>(null)
@@ -110,6 +109,7 @@ export default function Booking() {
     if (!file) return
     const validation = validateFile(file, { maxSizeMb: 8, allowedTypes: ['image/jpeg', 'image/png', 'image/webp'] })
     if (!validation.valid) {
+      setIsOptionalOpen(true)
       setErrors(prev => ({ ...prev, image: validation.error || t('booking.problemImageInvalid', 'Please choose a valid image.') }))
       return
     }
@@ -156,13 +156,12 @@ export default function Booking() {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validateStep()) {
-      setShowConfirm(true)
-    }
+    void confirmBooking()
   }
   
   const confirmBooking = async () => {
     if (isSubmitting || isSubmittingRef.current) return
+    if (!validateStep()) return
 
     if (!isAuthenticated || !user || !worker) {
       navigate('/login')
@@ -171,14 +170,12 @@ export default function Booking() {
 
     if (!effectiveServiceId) {
       const msg = t('booking.selectServiceRequired', 'Please select a specific service to continue booking.')
-      setBookingError(msg)
       setErrors(prev => ({ ...prev, service: msg }))
       return
     }
 
     isSubmittingRef.current = true
     setIsSubmitting(true)
-    setBookingError('')
     setErrors({})
     let newlyCreatedRequestId: string | null = null
 
@@ -230,7 +227,6 @@ export default function Booking() {
       })
 
       setQuoteRequested(true)
-      setShowConfirm(false)
     } catch (bookingErr) {
       if (newlyCreatedRequestId) {
         try {
@@ -251,8 +247,6 @@ export default function Booking() {
       const message = rawMessage.includes('ACTIVE_SERVICE_REQUEST_EXISTS')
         ? t('booking.activeServiceRequestExists', 'You already have an active request for this service. Please complete or cancel it before creating another one.')
         : sanitizeErrorMessage(bookingErr, 'Unable to create booking. Please try again.')
-      setBookingError(message)
-      setShowConfirm(false)
       setErrors(prev => ({ ...prev, form: message }))
     } finally {
       isSubmittingRef.current = false
@@ -286,10 +280,14 @@ export default function Booking() {
     <div className="min-h-screen bg-semantic-bg-primary">
       <div className="bg-semantic-bg-secondary border-b border-semantic-border-light">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link to="/search" className="inline-flex items-center gap-2 text-semantic-text-secondary hover:text-semantic-text-primary text-sm font-medium transition-colors">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-semantic-text-secondary hover:text-semantic-text-primary text-sm font-medium transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" />
             <span>{t('common.back', 'Back')} / {t('nav.search', 'Find Workers')}</span>
-          </Link>
+          </button>
         </div>
       </div>
       
@@ -386,7 +384,7 @@ export default function Booking() {
                   </div>
                 ) : null}
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="label text-semantic-text-secondary">{t('booking.selectDate')}</label>
                     <div className="relative">
@@ -454,41 +452,77 @@ export default function Booking() {
                 </div>
                 
                 <div className="mb-6">
-                  <label className="label text-semantic-text-secondary">{t('booking.notesPlaceholder')}</label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder={t('booking.notesPlaceholder')}
-                    rows={3}
-                    className="input bg-surface-200 border-semantic-border-light text-semantic-text-primary placeholder:text-semantic-text-tertiary"
-                  />
+                  <label className="label text-semantic-text-secondary">
+                    {t('booking.providerResponseDeadline', 'Provider response deadline')}
+                  </label>
+                  <select
+                    value={responseHours}
+                    onChange={event => setResponseHours(event.target.value)}
+                    className="input w-full bg-surface-200 border-semantic-border-light text-semantic-text-primary"
+                  >
+                    <option value="6">6 Hours</option>
+                    <option value="12">12 Hours</option>
+                    <option value="24">24 Hours</option>
+                  </select>
                 </div>
 
-                <div className="mb-6 rounded-xl border border-semantic-border-light bg-surface-200/40 p-4">
-                  <p className="text-sm font-semibold text-semantic-text-primary">{t('booking.problemImageTitle', 'Add photo of the problem (optional)')}</p>
-                  <p className="mt-1 text-xs text-semantic-text-secondary">{t('booking.problemImageHint', 'A clear photo can help the worker understand the issue before responding.')}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <input ref={cameraPickerRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
-                    <input ref={imagePickerRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
-                    <Button type="button" variant="outline" size="sm" onClick={() => cameraPickerRef.current?.click()}>
-                      {t('booking.takePhoto', 'Take Photo')}
-                    </Button>
-                    <Button type="button" variant="secondary" size="sm" onClick={() => imagePickerRef.current?.click()}>
-                      {t('booking.chooseImage', 'Choose Image')}
-                    </Button>
-                  </div>
-                  {problemImagePreview && (
-                    <div className="mt-4 flex items-start gap-3">
-                      <img src={problemImagePreview} alt={t('booking.problemImagePreview', 'Selected problem')} className="h-24 w-24 rounded-xl object-cover border border-semantic-border-light" />
-                      <div className="space-y-2">
-                        <p className="text-xs text-semantic-text-secondary break-all">{problemImage?.name}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={clearProblemImage}>
-                          {t('common.remove', 'Remove')}
-                        </Button>
+                <div className="mb-6 overflow-hidden rounded-xl border border-semantic-border-light">
+                  <button
+                    type="button"
+                    onClick={() => setIsOptionalOpen(open => !open)}
+                    aria-expanded={isOptionalOpen}
+                    aria-controls="booking-optional-details"
+                    className="flex min-h-12 w-full items-center justify-between gap-3 bg-surface-200/40 px-4 py-3 text-left text-sm font-semibold text-semantic-text-primary transition-colors hover:bg-surface-200/70"
+                  >
+                    <span>+ Add Photos &amp; Specific Instructions (Optional)</span>
+                    <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${isOptionalOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <div
+                    id="booking-optional-details"
+                    className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isOptionalOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="space-y-5 border-t border-semantic-border-light p-4">
+                        <div>
+                          <label className="label text-semantic-text-secondary">{t('booking.notesPlaceholder')}</label>
+                          <textarea
+                            value={formData.notes}
+                            onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder={t('booking.notesPlaceholder')}
+                            rows={3}
+                            className="input bg-surface-200 border-semantic-border-light text-semantic-text-primary placeholder:text-semantic-text-tertiary"
+                          />
+                        </div>
+
+                        <div className="rounded-xl border border-semantic-border-light bg-surface-200/40 p-4">
+                          <p className="text-sm font-semibold text-semantic-text-primary">{t('booking.problemImageTitle', 'Add photo of the problem (optional)')}</p>
+                          <p className="mt-1 text-xs text-semantic-text-secondary">{t('booking.problemImageHint', 'A clear photo can help the worker understand the issue before responding.')}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <input ref={cameraPickerRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
+                            <input ref={imagePickerRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
+                            <Button type="button" variant="outline" size="sm" onClick={() => cameraPickerRef.current?.click()}>
+                              {t('booking.takePhoto', 'Take Photo')}
+                            </Button>
+                            <Button type="button" variant="secondary" size="sm" onClick={() => imagePickerRef.current?.click()}>
+                              {t('booking.chooseImage', 'Choose Image')}
+                            </Button>
+                          </div>
+                          {problemImagePreview && (
+                            <div className="mt-4 flex items-start gap-3">
+                              <img src={problemImagePreview} alt={t('booking.problemImagePreview', 'Selected problem')} className="h-24 w-24 rounded-xl object-cover border border-semantic-border-light" />
+                              <div className="space-y-2">
+                                <p className="text-xs text-semantic-text-secondary break-all">{problemImage?.name}</p>
+                                <Button type="button" variant="ghost" size="sm" onClick={clearProblemImage}>
+                                  {t('common.remove', 'Remove')}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          {errors.image && <p className="mt-2 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.image}</p>}
+                        </div>
                       </div>
                     </div>
-                  )}
-                  {errors.image && <p className="mt-2 rounded-md border border-red-800 bg-gray-900 px-2 py-1 text-xs text-red-300 shadow-md">{errors.image}</p>}
+                  </div>
                 </div>
               </div>
               
@@ -500,6 +534,7 @@ export default function Booking() {
                   variant="primary" 
                   type="submit" 
                   disabled={worker.available === false} 
+                  loading={isSubmitting}
                   className="flex-1"
                 >
                   {t('booking.requestQuote', 'Request Quote')}
@@ -509,73 +544,6 @@ export default function Booking() {
           </Card>
         )}
       </div>
-      
-      <Modal
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        title={t('booking.confirmBooking')}
-        description={t('booking.bookingConfirmDesc', { name: worker.name })}
-      >
-        <div className="space-y-4">
-          {bookingError && (
-            <div className="p-3 rounded-lg border border-red-800 bg-gray-900 shadow-md text-red-300 text-sm">
-              {bookingError}
-            </div>
-          )}
-          <div className="flex items-center gap-3 p-4 bg-surface-200/80 border border-semantic-border-light rounded-lg">
-            <div className="w-10 h-10 bg-brand-500/10 rounded-lg flex items-center justify-center">
-              <Info className="w-5 h-5 text-brand-400" />
-            </div>
-            <div>
-              <p className="font-medium text-semantic-text-primary">{t('booking.confirmTitle')}</p>
-              <p className="text-xs text-semantic-text-secondary">{t('booking.confirmDesc')}</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm bg-surface-200/40 p-4 rounded-lg border border-semantic-border-light">
-            <div className="col-span-2">
-              <p className="text-xs text-semantic-text-secondary">{t('booking.service', 'Service')}</p>
-              <p className="font-medium text-semantic-text-primary mt-0.5">{selectedServiceName}</p>
-            </div>
-            <div>
-              <p className="text-xs text-semantic-text-secondary">{t('booking.selectDate')}</p>
-              <p className="font-medium text-semantic-text-primary mt-0.5">{formData.date}</p>
-            </div>
-            <div>
-              <p className="text-xs text-semantic-text-secondary">{t('booking.selectTime')}</p>
-              <p className="font-medium text-semantic-text-primary mt-0.5">{formData.time}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-xs text-semantic-text-secondary">{t('booking.pincode')}</p>
-              <p className="font-medium text-semantic-text-primary mt-0.5">{formData.pincode}</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="label text-semantic-text-secondary">
-              {t('booking.providerResponseDeadline', 'Provider response deadline')}
-            </label>
-            <select
-              value={responseHours}
-              onChange={event => setResponseHours(event.target.value)}
-              className="input w-full bg-surface-200 border-semantic-border-light text-semantic-text-primary"
-            >
-              <option value="6">{t('booking.hours6', '6 hours')}</option>
-              <option value="12">{t('booking.hours12', '12 hours')}</option>
-              <option value="24">{t('booking.hours24', '24 hours')}</option>
-            </select>
-          </div>
-          
-          <div className="flex gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setShowConfirm(false)} className="flex-1">
-              {t('common.cancel')}
-            </Button>
-            <Button variant="primary" onClick={confirmBooking} loading={isSubmitting} className="flex-1">
-              {t('booking.requestQuote', 'Request Quote')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   )
 }

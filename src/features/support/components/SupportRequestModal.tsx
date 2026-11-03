@@ -254,7 +254,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
                 )}
                 <button
                   onClick={onClose}
-                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 transition-colors shadow-sm"
                 >
                   {isHindi ? 'समाप्त' : 'Done'}
                 </button>
@@ -348,7 +348,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
                 <button
                   type="submit"
                   disabled={submitting || reason.trim().length < 10 || !bookingContext}
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isHindi ? 'सहायता अनुरोध सबमिट करें' : 'Submit Support Request'}</span>

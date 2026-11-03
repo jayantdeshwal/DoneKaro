@@ -66,7 +66,7 @@ export function EditProfileModal({
               type="button"
               onClick={() => avatarInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className="absolute -bottom-1 -right-1 p-1.5 bg-amber-500 text-slate-950 rounded-full shadow hover:bg-amber-400 cursor-pointer"
+              className="absolute -bottom-1 -right-1 p-1.5 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 rounded-full shadow hover:bg-amber-600 dark:hover:bg-amber-500 cursor-pointer disabled:opacity-50"
               title={t('profile.changePhoto', 'Change photo')}
             >
               {isUploadingAvatar ? (

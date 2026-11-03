@@ -7,13 +7,9 @@ import {
   fetchBookingChangeRequests,
   fetchBookingPaymentSummaries,
 } from '@/services/changeRequests'
-import {
-  type BookingQuote,
-  type BookingQuoteRequest,
-  fetchCustomerQuoteData,
-} from '@/services/quotes'
+import { type BookingQuote, type BookingQuoteRequest, fetchCustomerQuoteData } from '@/services/quotes'
 import { sanitizeErrorMessage } from '@/utils/errors'
-import type { BookingRow, BookingTab, CustomerBookingReview, WorkerDirectoryRow } from '../types'
+import type { BookingRow, CustomerBookingReview, WorkerDirectoryRow } from '../types'
 
 interface UseCustomerBookingsProps {
   userId?: string | null
@@ -23,12 +19,19 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
   const [allBookings, setAllBookings] = useState<BookingRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
-  const [activeTab, setActiveTab] = useState<BookingTab>('all')
-
   const [quoteRequests, setQuoteRequests] = useState<BookingQuoteRequest[]>([])
   const [quotes, setQuotes] = useState<BookingQuote[]>([])
   const [quoteWorkers, setQuoteWorkers] = useState<
-    Map<string, { name: string; avatar: string | null; rating: number; reviews: number; experience: number }>
+    Map<
+      string,
+      {
+        name: string
+        avatar: string | null
+        rating: number
+        reviews: number
+        experience: number
+      }
+    >
   >(new Map())
 
   const loadBookings = useCallback(async () => {
@@ -168,9 +171,7 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
   const upcomingBookings = allBookings.filter(b =>
     ['pending', 'accepted', 'in_progress', 'payment_pending'].includes(b.status)
   )
-  const pastBookings = allBookings.filter(b =>
-    ['completed', 'rejected', 'cancelled', 'disputed'].includes(b.status)
-  )
+  const pastBookings = allBookings.filter(b => ['completed', 'rejected', 'cancelled', 'disputed'].includes(b.status))
 
   return {
     allBookings,
@@ -183,8 +184,6 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
     isLoading,
     loadError,
     setLoadError,
-    activeTab,
-    setActiveTab,
     loadBookings,
   }
 }

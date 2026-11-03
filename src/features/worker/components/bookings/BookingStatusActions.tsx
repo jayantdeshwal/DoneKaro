@@ -30,19 +30,19 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
         <div className="flex items-center gap-2 pt-1 border-t border-semantic-border-light/40">
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             onClick={() => onUpdateStatus(booking.id, 'accepted')}
             disabled={isUpdating}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 shadow-sm"
+            className="min-h-12 flex-1 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-sm disabled:opacity-50"
           >
             Accept Booking
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant="danger-outline"
+            size="md"
             onClick={() => onUpdateStatus(booking.id, 'rejected')}
             disabled={isUpdating}
-            className="flex-1 text-xs border-red-500/40 text-red-400 hover:bg-red-500/10 py-1.5"
+            className="min-h-12 flex-1 text-xs disabled:opacity-50"
           >
             Decline
           </Button>
@@ -54,10 +54,10 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
         <div className="pt-1 border-t border-semantic-border-light/40">
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             onClick={() => onUpdateStatus(booking.id, 'in_progress')}
             disabled={isUpdating}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 shadow-sm flex items-center justify-center gap-1.5"
+            className="min-h-12 w-full bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
           >
             <Play className="w-3.5 h-3.5" />
             <span>{t('workerDashboard.startService', 'Start Service')}</span>
@@ -71,10 +71,10 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
           <div className="pt-1 border-t border-semantic-border-light/40">
             <Button
               variant="primary"
-              size="sm"
+              size="md"
               onClick={() => onUpdateStatus(booking.id, 'payment_pending')}
               disabled={isUpdating}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 shadow-sm flex items-center justify-center gap-1.5"
+              className="min-h-12 w-full bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               <Check className="w-3.5 h-3.5" />
               <span>
@@ -93,9 +93,9 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
           <div className="pt-1 border-t border-semantic-border-light/40">
             <Button
               variant="primary"
-              size="sm"
+              size="md"
               onClick={() => onConfirmCash(booking)}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-1.5 shadow-sm flex items-center justify-center gap-1.5"
+              className="min-h-12 w-full bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}</span>
@@ -139,7 +139,7 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               onClick={() => onViewDetails(booking)}
               className="flex-1 text-xs font-semibold border-semantic-border-medium hover:border-brand-500 text-semantic-text-primary py-1.5 flex items-center justify-center gap-1.5"
             >
@@ -150,9 +150,9 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
             {booking.paymentSummary?.receipt_number && (
               <Button
                 variant="outline"
-                size="sm"
+                size="md"
                 onClick={() => onViewReceipt(booking)}
-                className="flex-1 text-xs font-semibold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 py-1.5 flex items-center justify-center gap-1.5"
+                className="min-h-12 flex-1 text-xs font-semibold border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-center gap-1.5"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>{t('workerDashboard.viewReceipt', 'View Receipt')}</span>

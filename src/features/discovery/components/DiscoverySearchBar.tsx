@@ -90,7 +90,7 @@ export function DiscoverySearchBar({
               <button
                 type="button"
                 onClick={onBackToLogin}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 mr-1 pr-1.5 border-r border-slate-200 dark:border-zinc-700 cursor-pointer shrink-0 transition-colors"
+                className="inline-flex min-h-12 items-center gap-1 px-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 mr-1 border-r border-slate-200 dark:border-zinc-700 cursor-pointer shrink-0 transition-colors"
                 title={t('common.backToLogin', 'Back to Login')}
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -110,7 +110,7 @@ export function DiscoverySearchBar({
             onClick={() => setIsFilterOpen(prev => !prev)}
             aria-expanded={isFilterOpen}
             aria-label="Toggle filter options"
-            className={`text-[11px] font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+            className={`min-h-12 min-w-12 text-[11px] font-semibold flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border transition-all cursor-pointer ${
               isFilterOpen || activeFilterCount > 0
                 ? 'bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400 dark:bg-amber-500/15'
                 : 'bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300'
@@ -150,7 +150,7 @@ export function DiscoverySearchBar({
                 setSearchQuery('')
                 searchInputRef.current?.focus()
               }}
-              className="p-1 text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-200 mr-1.5 cursor-pointer transition-colors"
+              className="flex h-12 w-12 shrink-0 items-center justify-center text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-200 mr-1 cursor-pointer transition-colors"
               aria-label="Clear search text"
             >
               <X className="w-4 h-4" />

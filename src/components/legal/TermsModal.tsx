@@ -124,7 +124,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
             <button
               type="button"
               onClick={toggleLanguage}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title={language === 'en' ? 'Switch to Hindi' : 'Switch to English'}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -226,11 +226,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
               variant="primary"
               disabled={!hasScrolledToBottom}
               onClick={handleAcceptClick}
-              className={`flex-1 sm:flex-initial text-xs sm:text-sm py-2 sm:py-2.5 font-bold shadow-md ${
-                hasScrolledToBottom
-                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/25'
-                  : 'opacity-50 cursor-not-allowed'
-              }`}
+              className="flex-1 sm:flex-initial text-xs sm:text-sm py-2 sm:py-2.5 font-bold shadow-md shadow-amber-500/25 disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4 mr-1.5 inline" />
               <span>{language === 'hi' ? 'सहमत हूँ और आगे बढ़ें' : 'Agree & Continue'}</span>

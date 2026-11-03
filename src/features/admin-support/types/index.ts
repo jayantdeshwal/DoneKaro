@@ -51,6 +51,20 @@ export interface AdminSuggestion {
   submitter?: AdminUserProfile
 }
 
+export interface AdminSupportHistoryEntry {
+  id: string
+  type: 'complaint' | 'suggestion'
+  status: ComplaintStatus | SuggestionStatus
+  created_at: string
+}
+
+export interface AdminComplaintAttachment {
+  id: string
+  signed_url: string | null
+  mime_type: string
+  created_at: string
+}
+
 export type AdminSupportTab = 'complaints' | 'suggestions'
 export type AdminComplaintFilter = 'all' | 'open' | 'investigating' | 'resolved' | 'dismissed'
 export type AdminSuggestionFilter = 'all' | 'open' | 'in_review' | 'resolved' | 'dismissed'

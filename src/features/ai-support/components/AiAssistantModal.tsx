@@ -359,7 +359,7 @@ export default function AiAssistantModal() {
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="w-9 h-9 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-slate-950 flex items-center justify-center transition-colors shadow-xs shrink-0 cursor-pointer"
+            className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 flex items-center justify-center transition-colors shadow-xs shrink-0 cursor-pointer"
             aria-label="Send Message"
           >
             <Send className="w-4 h-4" />

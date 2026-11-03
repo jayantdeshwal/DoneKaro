@@ -34,7 +34,7 @@ export const BookingFeedTabs: React.FC<BookingFeedTabsProps> = ({
         <button
           type="button"
           onClick={() => void onRefresh()}
-          className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1 font-semibold"
+          className="text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center gap-1 font-semibold rounded-lg px-2 py-1"
         >
           <RefreshCw className="w-3 h-3" />
           <span>{t('common.refresh', 'Refresh')}</span>
@@ -48,8 +48,8 @@ export const BookingFeedTabs: React.FC<BookingFeedTabsProps> = ({
           onClick={() => onTabChange('all')}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
             activeTab === 'all'
-              ? 'bg-amber-500 text-slate-950 font-bold'
-              : 'bg-surface-100 text-semantic-text-secondary hover:text-slate-900 dark:hover:text-white border border-semantic-border-light'
+              ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800'
           }`}
         >
           {t('common.all', 'All')} ({totalCount})
@@ -59,8 +59,8 @@ export const BookingFeedTabs: React.FC<BookingFeedTabsProps> = ({
           onClick={() => onTabChange('pending')}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
             activeTab === 'pending'
-              ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-              : 'bg-surface-100 text-semantic-text-secondary hover:text-slate-900 dark:hover:text-white border border-semantic-border-light'
+              ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold shadow-xs'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800'
           }`}
         >
           <span>{t('workerDashboard.pending', 'Pending')}</span>
@@ -75,8 +75,8 @@ export const BookingFeedTabs: React.FC<BookingFeedTabsProps> = ({
           onClick={() => onTabChange('active')}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
             activeTab === 'active'
-              ? 'bg-blue-500 text-white font-bold'
-              : 'bg-surface-100 text-semantic-text-secondary hover:text-slate-900 dark:hover:text-white border border-semantic-border-light'
+              ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800'
           }`}
         >
           {t('workerDashboard.activeInProgress', 'Active / In Progress')} ({activeCount})
@@ -86,8 +86,8 @@ export const BookingFeedTabs: React.FC<BookingFeedTabsProps> = ({
           onClick={() => onTabChange('completed')}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
             activeTab === 'completed'
-              ? 'bg-emerald-500 text-white font-bold'
-              : 'bg-surface-100 text-semantic-text-secondary hover:text-slate-900 dark:hover:text-white border border-semantic-border-light'
+              ? 'bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 font-bold'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-800'
           }`}
         >
           {t('workerDashboard.completed', 'Completed')} ({completedCount})

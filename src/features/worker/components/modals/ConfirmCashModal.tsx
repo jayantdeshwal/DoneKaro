@@ -170,7 +170,7 @@ export const ConfirmCashModal: React.FC<ConfirmCashModalProps> = ({
             disabled={isSubmitting}
             loading={isSubmitting}
             onClick={() => void handleConfirm()}
-            className="flex-1 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+            className="flex-1 text-xs font-bold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50"
           >
             <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
             {t('workerDashboard.confirmCashReceived', 'Confirm Cash Received')}

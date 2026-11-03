@@ -123,8 +123,77 @@ export function AdminBookingsTab({
           </div>
         </div>
 
+        <div className="block divide-y divide-slate-200 dark:divide-zinc-800 md:hidden">
+          {isLoadingBookings ? (
+            <p className="p-6 text-center text-sm text-slate-500 dark:text-zinc-400">
+              Loading bookings directory...
+            </p>
+          ) : filteredBookings.length === 0 ? (
+            <p className="p-6 text-center text-sm text-slate-500 dark:text-zinc-400">
+              No bookings found matching your filters.
+            </p>
+          ) : (
+            <div className="space-y-3 p-3">
+              {filteredBookings.map(booking => (
+                <Card
+                  key={booking.id}
+                  className="p-4 border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs font-bold text-slate-500 dark:text-zinc-400">
+                        {formatJobReference(booking.id)}
+                      </p>
+                      <h3 className="mt-1 font-semibold text-slate-900 dark:text-white capitalize">
+                        {booking.category_id}
+                      </h3>
+                    </div>
+                    <Badge
+                      variant={bookingStatusVariant(booking.status)}
+                      className="shrink-0 capitalize"
+                    >
+                      {t(
+                        BOOKING_STATUS_OPTIONS.find(status => status.key === booking.status)?.labelKey ?? '',
+                        BOOKING_STATUS_OPTIONS.find(status => status.key === booking.status)?.fallback ?? booking.status,
+                      )}
+                    </Badge>
+                  </div>
+                  <dl className="mt-3 space-y-2 text-sm">
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-slate-500 dark:text-zinc-400">Customer</dt>
+                      <dd className="text-right font-medium text-slate-900 dark:text-white">
+                        {booking.customerName}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-slate-500 dark:text-zinc-400">Scheduled</dt>
+                      <dd className="text-right text-slate-700 dark:text-zinc-300">
+                        {booking.scheduled_at
+                          ? new Date(booking.scheduled_at).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            })
+                          : 'Immediate Dispatch'}
+                      </dd>
+                    </div>
+                  </dl>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => setSelectedJobId(booking.id)}
+                    className="mt-4 min-h-[48px] w-full"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Job Details
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Bookings Table */}
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full">
             <thead className="bg-slate-100/90 dark:bg-zinc-800/90 border-b border-slate-200/90 dark:border-zinc-800">
               <tr>
@@ -198,19 +267,6 @@ export function AdminBookingsTab({
                           BOOKING_STATUS_OPTIONS.find(status => status.key === booking.status)?.fallback ?? booking.status,
                         )}
                       </Badge>
-                      {booking.payment_details_unavailable ? (
-                        <p className="mt-1 text-xs font-semibold text-amber-600 dark:text-amber-300">Payment details unavailable</p>
-                      ) : booking.payment_status ? (
-                        <p className="mt-1 text-xs font-semibold text-semantic-text-secondary">
-                          {booking.payment_currency ?? 'INR'} {booking.payment_amount?.toFixed(2)} · {t(`bookings.paymentStatuses.${booking.payment_status}`, booking.payment_status)}
-                          {booking.payment_method ? ` · ${booking.payment_method === 'cash' ? t('bookings.paymentMethodCash', 'Cash') : 'Historical payment'}` : ''}
-                          {booking.paid_at ? ` · ${new Date(booking.paid_at).toLocaleString('en-IN')}` : ''}
-                          {booking.receipt_number ? ` · ${t('bookings.receiptNumber', 'Receipt')}: ${booking.receipt_number}` : ''}
-                          {booking.receipt_details_unavailable ? ' · Receipt details unavailable' : ''}
-                        </p>
-                      ) : booking.receipt_details_unavailable ? (
-                        <p className="mt-1 text-xs font-semibold text-amber-600 dark:text-amber-300">Receipt details unavailable</p>
-                      ) : null}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Button

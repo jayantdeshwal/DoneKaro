@@ -86,7 +86,7 @@ export default function AuthChoice() {
               variant="primary"
               size="lg"
               onClick={() => navigate('/login')}
-              className="w-full justify-center group-hover:bg-brand-400 transition-colors shadow-lg shadow-brand-500/20 py-3 text-sm font-semibold"
+              className="w-full justify-center transition-colors shadow-lg shadow-amber-500/20 py-3 text-sm font-semibold"
             >
               <span>{t('authChoice.loginBtn', 'Go to Login')}</span>
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -139,7 +139,7 @@ export default function AuthChoice() {
               variant="primary"
               size="lg"
               onClick={() => navigate('/register')}
-              className="w-full justify-center bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-lg shadow-emerald-600/20 py-3 text-sm font-semibold border-none"
+              className="w-full justify-center transition-colors shadow-lg shadow-amber-600/20 py-3 text-sm font-semibold"
             >
               <span>{t('authChoice.registerBtn', 'Create Account (Sign Up)')}</span>
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

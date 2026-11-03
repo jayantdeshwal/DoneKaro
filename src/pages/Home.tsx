@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { motion, useScroll } from 'framer-motion'
-import { Sparkles, ArrowLeft } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { fetchCategoryWorkerStats, fetchApprovedWorkers, CategoryWorkerStat, PublicWorker } from '@/services/workers'
 import {
   getCategoryName,
@@ -159,19 +159,11 @@ export default function Home() {
       {/* Exploration Guest Mode Banner with 1-Tap Back Button */}
       {isGuestMode && (
         <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 dark:from-brand-500/15 dark:via-zinc-900 dark:to-brand-500/15 border-b border-amber-500/30 py-2 px-3 sm:px-6">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
+          <div className="max-w-4xl mx-auto flex items-center gap-2">
             <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-brand-300 font-medium truncate">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span className="truncate">{t('guestBar.exploringAsGuest', 'You are exploring DoneKaro in Guest Mode')}</span>
             </div>
-            <button
-              type="button"
-              onClick={handleBackToLogin}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 text-xs font-bold text-slate-900 dark:text-white transition-all cursor-pointer border border-amber-500/40 shrink-0 shadow-xs active:scale-95"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-amber-500" />
-              <span>{t('common.backToLogin', 'Sign In / Register')}</span>
-            </button>
           </div>
         </div>
       )}
