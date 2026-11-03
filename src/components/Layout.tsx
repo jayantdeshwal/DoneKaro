@@ -34,12 +34,33 @@ export default function Layout() {
     location.pathname.startsWith('/register') ||
     location.pathname === '/signup'
   const showFooter = ['/', '/home', '/worker/dashboard', '/admin'].includes(location.pathname)
+  const currentPath = location.pathname.replace(/\/+$/, '') || '/'
   const topLevelNavigationPaths = isAdmin
-    ? ['/admin']
+    ? ['/admin', '/admin/workers', '/admin/bookings', '/admin/customers', '/admin/alerts']
     : isWorker
-      ? ['/home', '/worker/dashboard', '/notifications', '/profile']
-      : ['/', '/home', '/search', '/categories', '/bookings', '/notifications', '/profile']
-  const showBottomNavigation = topLevelNavigationPaths.includes(location.pathname)
+      ? [
+          '/worker',
+          '/worker/bookings',
+          '/worker/account',
+          '/home',
+          '/worker/dashboard',
+          '/notifications',
+          '/profile',
+        ]
+      : [
+          '/customer',
+          '/customer/bookings',
+          '/customer/alerts',
+          '/customer/account',
+          '/',
+          '/home',
+          '/search',
+          '/categories',
+          '/bookings',
+          '/notifications',
+          '/profile',
+        ]
+  const showBottomNavigation = topLevelNavigationPaths.includes(currentPath)
 
   if (isLoading) {
     return (
