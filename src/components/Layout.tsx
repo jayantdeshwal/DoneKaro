@@ -15,7 +15,7 @@ import {
 } from './layout/index'
 
 export default function Layout() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, isWorker, isAdmin } = useAuth()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -34,6 +34,12 @@ export default function Layout() {
     location.pathname.startsWith('/register') ||
     location.pathname === '/signup'
   const showFooter = ['/', '/home', '/worker/dashboard', '/admin'].includes(location.pathname)
+  const topLevelNavigationPaths = isAdmin
+    ? ['/admin']
+    : isWorker
+      ? ['/home', '/worker/dashboard', '/notifications', '/profile']
+      : ['/', '/home', '/search', '/categories', '/bookings', '/notifications', '/profile']
+  const showBottomNavigation = topLevelNavigationPaths.includes(location.pathname)
 
   if (isLoading) {
     return (
@@ -65,7 +71,7 @@ export default function Layout() {
       </main>
       {showFooter && <AppFooter />}
       <GuestActionBar />
-      <BottomNavigation />
+      {showBottomNavigation && <BottomNavigation />}
       <MobileDrawer isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <NotificationToast />
       <PWAInstallPrompt />

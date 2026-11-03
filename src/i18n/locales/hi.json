@@ -857,7 +857,7 @@
     "reviews": "समीक्षाएँ",
     "noAreas": "कोई क्षेत्र दर्ज नहीं",
     "coverage": "सेवा क्षेत्र",
-    "newLeads": "नए काम",
+    "newLeads": "मेरी बुकिंग",
     "newCount": "{{count}} नए",
     "leadsSubtitle": "मुजफ्फरनगर में ग्राहकों के नए सेवा अनुरोध",
     "quoteRequests": "कोटेशन अनुरोध",
@@ -1416,7 +1416,7 @@
     "ambulance": "एम्बुलेंस"
   },
   "worker": {
-    "newLeads": "नए काम"
+    "newLeads": "मेरी बुकिंग"
   },
   "quotes": {
     "acceptQuote": "कोटेशन स्वीकार करें",

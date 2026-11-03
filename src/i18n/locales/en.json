@@ -857,7 +857,7 @@
     "reviews": "Reviews",
     "noAreas": "No areas listed",
     "coverage": "Coverage",
-    "newLeads": "New Job Leads",
+    "newLeads": "My Bookings",
     "newCount": "{{count}} new",
     "leadsSubtitle": "New customer service requests in Muzaffarnagar",
     "quoteRequests": "Quote Requests",
@@ -1416,7 +1416,7 @@
     "ambulance": "Ambulance"
   },
   "worker": {
-    "newLeads": "Leads"
+    "newLeads": "My Bookings"
   },
   "quotes": {
     "acceptQuote": "Accept Quote",

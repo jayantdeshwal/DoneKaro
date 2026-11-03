@@ -111,7 +111,9 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
 
 function RootRoute() {
   const { isAuthenticated, isLoading, user, isAdmin, isWorker, isRegistering } = useAuth()
+  const location = useLocation()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
+  const showPublicHome = location.state?.showPublicHome === true
 
   if (isLoading) {
     return <PageLoader />
@@ -121,7 +123,7 @@ function RootRoute() {
     return isRegistering ? <PageLoader /> : <Navigate to="/register?incomplete=true" replace />
   }
 
-  if (isAdmin) {
+  if (isAdmin && !showPublicHome) {
     return <Navigate to="/admin" replace />
   }
 

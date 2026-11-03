@@ -79,7 +79,7 @@ export function getBottomTabs(
     return [
       { id: 'home', label: t('nav.home', 'Home'), path: '/home', icon: Home },
       { id: 'dashboard', label: t('nav.workerDashboard', 'Dashboard'), path: '/worker/dashboard', icon: Briefcase },
-      { id: 'leads', label: t('worker.newLeads', 'Leads'), path: '/worker/dashboard?tab=leads', icon: Zap },
+      { id: 'leads', label: t('worker.newLeads', 'My Bookings'), path: '/worker/dashboard?tab=leads', icon: Zap },
       { id: 'alerts', label: t('nav.alerts', 'Alerts'), path: '/notifications', icon: Bell, badge: unreadCount },
       { id: 'account', label: t('nav.account', 'Account'), path: '/profile', icon: User },
     ]

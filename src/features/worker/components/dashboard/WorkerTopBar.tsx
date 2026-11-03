@@ -27,7 +27,7 @@ export const WorkerTopBar: React.FC<WorkerTopBarProps> = ({
       </button>
 
       <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-        {isLeadsTab ? t('worker.newLeads', 'Incoming Leads') : t('nav.workerDashboard', 'Worker Workspace')}
+        {isLeadsTab ? t('worker.newLeads', 'My Bookings') : t('nav.workerDashboard', 'Worker Workspace')}
       </span>
 
       {/* Quick Online / Offline Pill */}

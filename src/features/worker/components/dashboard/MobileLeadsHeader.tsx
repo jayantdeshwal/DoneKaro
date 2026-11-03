@@ -27,7 +27,7 @@ export const MobileLeadsHeader: React.FC<MobileLeadsHeaderProps> = ({
             <Zap className="w-4 h-4" />
           </div>
           <h2 className="text-base font-black text-slate-900 dark:text-white">
-            {t('workerDashboard.newLeads', 'New Job Leads')}
+            {t('workerDashboard.newLeads', 'My Bookings')}
           </h2>
           {pendingCount > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-slate-950">
