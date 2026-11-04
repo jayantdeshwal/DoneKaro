@@ -64,8 +64,16 @@ export function AdminReverifyModal({
         identifier: phone,
         onSuccess: async accessToken => {
           try {
-            const { data, error } = await getSupabaseClient().functions.invoke('verify-admin-2fa', {
+            const supabase = getSupabaseClient()
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+            const accessTokenForSession = sessionData.session?.access_token
+            if (sessionError || !accessTokenForSession) {
+              throw new Error('Your administrator sign-in session is missing or expired. Please sign in again.')
+            }
+
+            const { data, error } = await supabase.functions.invoke('verify-admin-2fa', {
               body: { accessToken },
+              headers: { Authorization: `Bearer ${accessTokenForSession}` },
             })
             if (error) {
               const message = await getFunctionErrorMessage(error)

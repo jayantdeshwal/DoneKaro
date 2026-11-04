@@ -61,7 +61,7 @@ serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    const { data: userData, error: userError } = await adminClient.auth.admin.getUser(jwt)
+    const { data: userData, error: userError } = await adminClient.auth.getUser(jwt)
     if (userError || !userData?.user) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired session.' }), {
         status: 401,
