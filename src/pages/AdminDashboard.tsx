@@ -7,7 +7,6 @@ import {
   AdminSessionGuard,
   AdminHeaderBanner,
   AdminStatsCards,
-  AdminTabBar,
   AdminOverviewTab,
   AdminWorkersTab,
   AdminCustomersTab,
@@ -69,15 +68,6 @@ export default function AdminDashboard() {
           setActiveTab={admin.setActiveTab}
           setWorkerStatusFilter={admin.setWorkerStatusFilter}
           setSearchParams={admin.setSearchParams}
-        />
-
-        {/* Tab Navigation Strip */}
-        <AdminTabBar
-          activeTab={admin.activeTab}
-          setActiveTab={admin.setActiveTab}
-          setSearchParams={admin.setSearchParams}
-          setWorkerStatusFilter={admin.setWorkerStatusFilter}
-          unreadNotifsCount={admin.unreadNotifsCount}
         />
 
         {/* Tab 1: Dashboard Overview */}

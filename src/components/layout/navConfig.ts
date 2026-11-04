@@ -1,6 +1,6 @@
 import {
   Home, Search, List, Bell, Briefcase, Shield, Grid,
-  User, ClipboardList, Zap, Calendar, UserCheck, Bot, LogIn
+  User, ClipboardList, Zap, UserCheck, Bot, LogIn
 } from 'lucide-react'
 import type { TFunction } from 'i18next'
 
@@ -68,10 +68,10 @@ export function getBottomTabs(
   }
   if (isAdmin) {
     return [
+      { id: 'home', label: 'Homepage', path: '/', icon: Home },
       { id: 'dashboard', label: t('admin.dashboard', 'Dashboard'), path: '/admin', icon: Shield },
-      { id: 'approvals', label: t('admin.approvals', 'Approvals'), path: '/admin?tab=workers', icon: UserCheck },
-      { id: 'alerts', label: t('admin.alerts', 'Alerts'), path: '/admin?tab=notifications', icon: Bell, badge: unreadCount },
-      { id: 'bookings', label: t('admin.allBookings', 'All Bookings'), path: '/admin?tab=bookings', icon: Calendar },
+      { id: 'alerts', label: 'Platform Alerts', path: '/admin?tab=notifications', icon: Bell, badge: unreadCount },
+      { id: 'approvals', label: 'Approvals', path: '/admin?tab=workers', icon: UserCheck },
       { id: 'account', label: t('nav.account', 'Account'), path: '/profile', icon: User },
     ]
   }
