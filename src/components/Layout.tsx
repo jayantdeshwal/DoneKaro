@@ -33,7 +33,8 @@ export default function Layout() {
     location.pathname === '/auth' ||
     location.pathname.startsWith('/register') ||
     location.pathname === '/signup'
-  const showFooter = ['/', '/home', '/worker/dashboard', '/admin'].includes(location.pathname)
+  const isWorkerRoute = location.pathname.startsWith('/worker')
+  const showFooter = !isWorkerRoute && ['/', '/home', '/admin'].includes(location.pathname)
   const currentPath = location.pathname.replace(/\/+$/, '') || '/'
   const topLevelNavigationPaths = isAdmin
     ? ['/admin', '/admin/workers', '/admin/bookings', '/admin/customers', '/admin/alerts']

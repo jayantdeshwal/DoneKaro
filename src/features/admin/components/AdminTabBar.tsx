@@ -2,17 +2,15 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
-  Users,
   Bell,
-  Shield,
-  ShieldAlert,
   House,
+  UserRound,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import type { AdminTabType, AdminTeamMember } from '../types'
+import type { AdminTabType } from '../types'
 
 type AdminTabBarItem = {
-  key: AdminTabType | 'homepage'
+  key: AdminTabType | 'homepage' | 'account'
   label: string
   icon: typeof LayoutDashboard
   badge?: number
@@ -23,42 +21,36 @@ interface AdminTabBarProps {
   activeTab: AdminTabType
   setActiveTab: (tab: AdminTabType) => void
   setSearchParams: (params: { tab: string }) => void
+  setWorkerStatusFilter: (status: 'all' | 'pending' | 'approved' | 'rejected') => void
   unreadNotifsCount: number
-  adminTeam: AdminTeamMember[]
 }
 
 export function AdminTabBar({
   activeTab,
   setActiveTab,
   setSearchParams,
+  setWorkerStatusFilter,
   unreadNotifsCount,
-  adminTeam,
 }: AdminTabBarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   const tabs: AdminTabBarItem[] = [
-    { key: 'dashboard', label: t('admin.dashboard', 'Dashboard'), icon: LayoutDashboard },
-    { key: 'customers', label: t('admin.allCustomers', 'Customers'), icon: Users },
     { key: 'homepage', label: 'Homepage', icon: House },
+    { key: 'dashboard', label: t('admin.dashboard', 'Dashboard'), icon: LayoutDashboard },
     {
       key: 'notifications',
-      label: t('admin.alerts', 'Alerts'),
+      label: 'Platform Alerts',
       icon: Bell,
       badge: unreadNotifsCount > 0 ? unreadNotifsCount : undefined,
       badgeVariant: 'danger',
     },
     {
-      key: 'admins',
-      label: 'Administrators',
-      icon: Shield,
-      badge: adminTeam.length > 0 ? adminTeam.length : undefined,
+      key: 'workers',
+      label: 'Approvals',
+      icon: UserRound,
     },
-    {
-      key: 'management',
-      label: 'Management',
-      icon: ShieldAlert,
-    },
+    { key: 'account', label: 'Account', icon: UserRound },
   ]
 
   return (
@@ -71,16 +63,21 @@ export function AdminTabBar({
     >
       {tabs.map(tab => {
         const isActive =
-          (tab.key !== 'homepage' && activeTab === tab.key) ||
+          (tab.key !== 'homepage' && tab.key !== 'account' && activeTab === tab.key) ||
           (tab.key === 'dashboard' && (activeTab === 'dashboard' || activeTab === 'overview'))
 
         return (
           <button
             key={tab.key}
             onClick={() => {
-              if (tab.key === 'homepage') {
-                navigate('/', { state: { showPublicHome: true } })
+              if (tab.key === 'homepage' || tab.key === 'account') {
+                navigate(tab.key === 'homepage' ? '/' : '/profile',
+                  tab.key === 'homepage' ? { state: { showPublicHome: true } } : undefined,
+                )
                 return
+              }
+              if (tab.key === 'workers') {
+                setWorkerStatusFilter('pending')
               }
               setActiveTab(tab.key)
               setSearchParams({ tab: tab.key })

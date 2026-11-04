@@ -268,7 +268,9 @@ export function BookingCard({
                           <Clock className="h-4 w-4 animate-spin text-amber-700" />
                           <p className="text-sm font-bold text-amber-900">{t('bookings.cashPaymentSubmitted', 'Cash Payment Submitted')}</p>
                         </div>
-                        <Badge variant="warning" size="sm">{t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation')}</Badge>
+                        <span className="rounded-full px-2.5 py-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400 font-medium">
+                          {t('bookings.waitingForWorkerConfirmation', 'Waiting for worker confirmation')}
+                        </span>
                       </div>
                       <p className="mt-2 text-xs text-amber-900">{t('bookings.waitingForWorkerConfirmationDesc', 'Waiting for worker confirmation. Your receipt will appear once the payment is confirmed.')}</p>
                     </div>

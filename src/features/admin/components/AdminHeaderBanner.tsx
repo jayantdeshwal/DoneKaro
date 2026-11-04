@@ -1,16 +1,9 @@
-import { useNavigate } from 'react-router-dom'
-import { Button } from '@kaamgar/ui'
 import {
   ShieldCheck,
   Sparkles,
   MapPin,
-  RefreshCw,
-  ShieldAlert,
-  Compass,
-  ArrowUpRight,
   AlertCircle,
   CheckCircle,
-  Bell,
 } from 'lucide-react'
 import type { AdminTabType } from '../types'
 
@@ -18,11 +11,6 @@ interface AdminHeaderBannerProps {
   user: { name?: string | null; email?: string | null } | null
   isSuperAdmin?: boolean
   activeTab: AdminTabType
-  setActiveTab: (tab: AdminTabType) => void
-  setSearchParams: (params: { tab: string }) => void
-  refreshAll: () => Promise<void>
-  isLoading: boolean
-  openSupportAlertCount: number | null
   supportAlertsError: string
   workerError: string
   setWorkerError: (err: string) => void
@@ -40,11 +28,6 @@ export function AdminHeaderBanner({
   user,
   isSuperAdmin,
   activeTab,
-  setActiveTab,
-  setSearchParams,
-  refreshAll,
-  isLoading,
-  openSupportAlertCount,
   supportAlertsError,
   workerError,
   setWorkerError,
@@ -57,8 +40,6 @@ export function AdminHeaderBanner({
   deleteSuccessMessage,
   setDeleteSuccessMessage,
 }: AdminHeaderBannerProps) {
-  const navigate = useNavigate()
-
   return (
     <>
       {/* 1. EXECUTIVE IDENTITY BANNER (Profile-Aligned Glassmorphic Design) */}
@@ -113,66 +94,6 @@ export function AdminHeaderBanner({
             </div>
           </div>
 
-          {/* Global Actions */}
-          <div className="grid w-full grid-cols-2 gap-2.5 self-start lg:w-auto lg:flex lg:self-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshAll}
-              disabled={isLoading}
-              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`}
-              />
-              Refresh Live Data
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setActiveTab('management')
-                setSearchParams({ tab: 'management' })
-              }}
-              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-              Management
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label={`Support alerts: ${openSupportAlertCount ?? 'loading'} open tickets`}
-              onClick={() => {
-                setActiveTab('management')
-                setSearchParams({ tab: 'management' })
-              }}
-              className="min-h-12 flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border-slate-200 dark:border-zinc-700 hover:border-rose-500/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-700 dark:text-zinc-200 transition-all shadow-xs"
-            >
-              <span className="relative inline-flex">
-                <Bell className="w-3.5 h-3.5 text-rose-500" />
-                {openSupportAlertCount !== null && (
-                  <span className="absolute -top-2 -right-3 min-w-4 h-4 px-1 rounded-full bg-rose-600 text-white text-[9px] leading-4 text-center font-bold">
-                    {openSupportAlertCount}
-                  </span>
-                )}
-              </span>
-              Support Alerts
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => navigate('/search')}
-              className="min-h-12 flex items-center justify-center gap-2 text-xs font-bold px-3 py-2 rounded-xl bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 shadow-md shadow-amber-500/20 transition-all"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              Live Public Portal
-              <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
-            </Button>
-          </div>
         </div>
       </div>
 

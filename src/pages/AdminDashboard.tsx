@@ -47,11 +47,6 @@ export default function AdminDashboard() {
           user={user}
           isSuperAdmin={isSuperAdmin}
           activeTab={admin.activeTab}
-          setActiveTab={admin.setActiveTab}
-          setSearchParams={admin.setSearchParams}
-          refreshAll={admin.refreshAll}
-          isLoading={admin.isLoadingWorkers || admin.isLoadingBookings || admin.isLoadingNotifications}
-          openSupportAlertCount={admin.openSupportAlertCount}
           supportAlertsError={admin.supportAlertsError}
           workerError={admin.workerError}
           setWorkerError={admin.setWorkerError}
@@ -81,8 +76,8 @@ export default function AdminDashboard() {
           activeTab={admin.activeTab}
           setActiveTab={admin.setActiveTab}
           setSearchParams={admin.setSearchParams}
+          setWorkerStatusFilter={admin.setWorkerStatusFilter}
           unreadNotifsCount={admin.unreadNotifsCount}
-          adminTeam={admin.adminTeam}
         />
 
         {/* Tab 1: Dashboard Overview */}
