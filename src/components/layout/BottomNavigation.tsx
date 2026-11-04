@@ -67,6 +67,7 @@ export function BottomNavigation() {
             <NavLink
               key={tab.id}
               to={tab.path || '/'}
+              state={tab.state}
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }}

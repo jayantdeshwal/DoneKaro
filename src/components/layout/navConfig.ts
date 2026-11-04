@@ -16,6 +16,7 @@ export interface BottomTabItem {
   label: string
   path?: string
   icon: any
+  state?: { showPublicHome?: boolean }
   badge?: number
   action?: () => void
 }
@@ -68,7 +69,7 @@ export function getBottomTabs(
   }
   if (isAdmin) {
     return [
-      { id: 'home', label: 'Homepage', path: '/', icon: Home },
+      { id: 'home', label: 'Homepage', path: '/', icon: Home, state: { showPublicHome: true } },
       { id: 'dashboard', label: t('admin.dashboard', 'Dashboard'), path: '/admin', icon: Shield },
       { id: 'alerts', label: 'Platform Alerts', path: '/admin?tab=notifications', icon: Bell, badge: unreadCount },
       { id: 'approvals', label: 'Approvals', path: '/admin?tab=workers', icon: UserCheck },
