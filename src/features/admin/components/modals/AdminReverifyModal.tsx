@@ -14,6 +14,36 @@ interface AdminReverifyModalProps {
   onVerified: () => Promise<void>
 }
 
+async function getFunctionErrorMessage(error: unknown): Promise<string> {
+  if (!error || typeof error !== 'object') return ''
+
+  const context = (error as { context?: unknown }).context
+  if (context instanceof Response) {
+    try {
+      const body = await context.clone().json() as { error?: unknown; message?: unknown }
+      if (typeof body.error === 'string') return body.error
+      if (typeof body.message === 'string') return body.message
+    } catch {
+      try {
+        const text = await context.clone().text()
+        if (text) {
+          try {
+            const body = JSON.parse(text) as { error?: unknown; message?: unknown }
+            if (typeof body.error === 'string') return body.error
+            if (typeof body.message === 'string') return body.message
+          } catch {
+            return text
+          }
+        }
+      } catch {
+        // Fall back to the Supabase Functions error message.
+      }
+    }
+  }
+
+  return (error as { message?: string }).message || ''
+}
+
 export function AdminReverifyModal({
   isOpen,
   phone,
@@ -37,7 +67,10 @@ export function AdminReverifyModal({
             const { data, error } = await getSupabaseClient().functions.invoke('verify-admin-2fa', {
               body: { accessToken },
             })
-            if (error) throw error
+            if (error) {
+              const message = await getFunctionErrorMessage(error)
+              throw new Error(message || error.message)
+            }
             if (!data?.success) {
               throw new Error(data?.error || 'Session verification could not be completed.')
             }

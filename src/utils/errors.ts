@@ -69,6 +69,14 @@ const KNOWN_SAFE_SUBSTRINGS = [
   'government id proof is required',
   'a worker cannot be registered for more than 2 services',
   'bucket not found',
+  'invalid otp',
+  'otp verification failed or expired',
+  'otp verification failed',
+  'otp has expired',
+  'otp expired',
+  'verified phone does not match the administrator account phone',
+  'admin session has expired. please sign in again',
+  'the maximum admin session lifetime has expired. please sign in again',
 ]
 
 /**

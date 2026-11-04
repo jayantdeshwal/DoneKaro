@@ -1,7 +1,7 @@
 // Supabase Edge Function: verify-admin-2fa
 // Server-side admin 2FA authorization.
 // Flow: valid Supabase JWT -> admin role check -> MSG91 token verification ->
-//       phone binding check -> refresh 30-minute authorization within the original 6-hour limit.
+//       phone binding check -> refresh authorization within the session's hard expiry.
 // The session_id is extracted from the JWT server-side — never trusted from the client.
 
 declare const Deno: {
@@ -18,7 +18,7 @@ const MSG91_AUTH_KEY            = Deno.env.get('MSG91_AUTH_KEY') || ''
 const SUPABASE_URL              = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-const TWO_FA_LIFETIME_MINUTES = 30
+const TWO_FA_LIFETIME_MINUTES = 24 * 60
 
 /** Decode JWT payload without verifying signature (GoTrue already verified it via getUser). */
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -186,7 +186,7 @@ serve(async (req: Request) => {
 
     const hardExpiresAt = Date.parse(currentAuth.hard_expires_at)
     if (!Number.isFinite(hardExpiresAt) || hardExpiresAt <= nowMs) {
-      return new Response(JSON.stringify({ error: 'The six-hour admin session limit has expired. Please sign in again.' }), {
+      return new Response(JSON.stringify({ error: 'The maximum admin session lifetime has expired. Please sign in again.' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

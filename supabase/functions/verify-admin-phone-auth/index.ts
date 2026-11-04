@@ -30,8 +30,8 @@ const SUPABASE_URL              = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const SUPABASE_ANON_KEY         = Deno.env.get('SUPABASE_ANON_KEY') || ''
 
-const TWO_FA_LIFETIME_MINUTES = 30
-const ADMIN_HARD_LIFETIME_HOURS = 6
+const TWO_FA_LIFETIME_MINUTES = 24 * 60
+const ADMIN_HARD_LIFETIME_HOURS = 24
 
 /** Decode JWT payload without verifying signature (GoTrue already verified it). */
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
