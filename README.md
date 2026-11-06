@@ -2,6 +2,8 @@
 
 DoneKaro is a hyper-local service platform connecting residents of Muzaffarnagar with verified electricians, plumbers, carpenters, AC technicians, and painters with 0% commission.
 
+Production Status: Successfully completed the 14-day Google Play closed testing phase with 12 opted-in users and is currently staged for public production release.
+
 Built with performance, accessibility, and real-world utility in mind, the platform provides a complete end-to-end booking lifecycle, transparent quoting, and passwordless authentication.
 
 ✨ Core Features & Flows
@@ -36,7 +38,7 @@ Command Center: Full oversight of pending approvals, active jobs, and platform a
 
 Data & Analytics: 14-day booking demand trends and user registration metrics.
 
-High Security: 24-hour JWT-backed session limits with required OTP re-verification for sensitive actions.
+High Security: 24-hour JWT-backed session limits (enforced at the backend via Supabase Edge Functions) with required OTP re-verification for sensitive actions.
 
 🌐 Cross-Platform Features
 
@@ -48,7 +50,7 @@ Frontend Framework: React 18 with TypeScript
 
 Build Tool: Vite
 
-Styling: Tailwind CSS (Custom Amber Design System, WCAG compliant contrast)
+Styling: Tailwind CSS (Custom Amber Design System with strict WCAG-compliant contrast ratios, ensuring critical UI like payment badges are legible in direct sunlight).
 
 Routing: React Router v6 (with role-based route guards and dynamic layout unmounting)
 
@@ -60,12 +62,12 @@ Authentication: Supabase Auth + Edge Functions (Passwordless OTP via MSG91)
 
 public/       Static assets
 src/
-  components/ Shared layout
-  context/    Local mock application state & global providers
+  components/ Shared layout and route guards
+  context/    Global application state and Supabase Auth providers
   i18n/       English and Hindi translations
   pages/      Customer, worker, and admin screens
-  shared/     Frontend constants and types
-  ui/         Reusable interface controls
+  shared/     Frontend constants, schemas, and types
+  ui/         Reusable interface controls and design system elements
 
 
 🚀 Getting Started
@@ -82,8 +84,8 @@ Run Locally
 
 Clone the repository and install dependencies:
 
-git clone https://github.com/yourusername/muzaffarnagar-kaamgar.git
-cd muzaffarnagar-kaamgar
+git clone https://github.com/jayantdeshwal/DoneKaro.git
+cd DoneKaro
 npm install
 
 
@@ -106,6 +108,8 @@ Open http://localhost:3000 (or http://localhost:5173 depending on your Vite conf
 🔐 Security & Architecture
 
 Passwordless Auth: All users authenticate via robust phone-number validation (+91/10-digit sanitization) leveraging MSG91 through secure Supabase Edge Functions.
+
+Session Management: Admin sessions are issued with a 24-hour lifetime. Re-verification processes explicitly validate the attached JWT Authorization header against the Supabase Admin API via Edge Functions.
 
 Row Level Security (RLS): Strict PostgreSQL RLS policies ensure users can only access their own bookings and profile data.
 
