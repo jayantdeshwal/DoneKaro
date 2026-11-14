@@ -30,6 +30,9 @@ const SUPABASE_URL              = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const SUPABASE_ANON_KEY         = Deno.env.get('SUPABASE_ANON_KEY') || ''
 
+// Static Google Play Reviewer Accounts eligible for automated OTP bypass
+const REVIEWER_ACCOUNTS = ['+919999999999', '+918888888888', '+917777777777']
+
 const TWO_FA_LIFETIME_MINUTES = 24 * 60
 const ADMIN_HARD_LIFETIME_HOURS = 24
 
@@ -61,7 +64,7 @@ serve(async (req: Request) => {
   try {
     const body = await req.json().catch(() => ({}))
     const rawPhone    = String(body.phone || '').trim()
-    const accessToken = String(body.accessToken || '').trim()
+    const accessToken = String(body.accessToken || body.otp || '').trim()
 
     // ── 1. Validate phone ──────────────────────────────────────────────────────
     const cleanDigits = rawPhone.replace(/\D/g, '').slice(-10)
@@ -72,58 +75,85 @@ serve(async (req: Request) => {
       )
     }
 
-    if (!accessToken) {
+    const formattedPhone = `+91${cleanDigits}`
+    const isReviewer = REVIEWER_ACCOUNTS.includes(formattedPhone)
+
+    // Send OTP Phase: If requested number is in REVIEWER_ACCOUNTS, DO NOT trigger MSG91 API.
+    // Instantly return 200 OK so frontend proceeds to OTP entry screen.
+    if (body.action === 'send_otp' || body.sendOtp === true) {
+      if (isReviewer) {
+        console.log(`[verify-admin-phone-auth] Send OTP bypass triggered for reviewer: ${formattedPhone}`)
+        return new Response(
+          JSON.stringify({ success: true, message: 'Reviewer admin OTP triggered successfully', isReviewer: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // Verify OTP Phase:
+    const providedOtp = String(body.otp || accessToken || '').trim()
+    if (!providedOtp) {
       return new Response(
         JSON.stringify({ error: 'Missing OTP verification token. Please verify OTP first.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!MSG91_AUTH_KEY) {
-      console.error('[verify-admin-phone-auth] MSG91_AUTH_KEY secret is not configured!')
-      return new Response(
-        JSON.stringify({ error: 'Authentication service misconfigured. Contact support.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    if (isReviewer) {
+      console.log(`[verify-admin-phone-auth] Reviewer admin OTP verification bypass active for: ${formattedPhone}`)
+      // Accept ANY 6-digit OTP (e.g. 123456) or reviewer test token
+      if (providedOtp.length !== 6 && providedOtp.length < 4) {
+        return new Response(
+          JSON.stringify({ error: 'Please enter a valid 6-digit administrator OTP code.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      // DO NOT call MSG91 API. Proceed directly to admin session generation.
+    } else {
+      if (!MSG91_AUTH_KEY) {
+        console.error('[verify-admin-phone-auth] MSG91_AUTH_KEY secret is not configured!')
+        return new Response(
+          JSON.stringify({ error: 'Authentication service misconfigured. Contact support.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
 
-    const formattedPhone = `+91${cleanDigits}`
+      // ── 2. Verify MSG91 access token server-side ───────────────────────────────
+      console.log('[verify-admin-phone-auth] Verifying MSG91 token for phone:', cleanDigits)
+      const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
+        method: 'POST',
+        headers: { 'authkey': MSG91_AUTH_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 'access-token': accessToken }),
+      })
 
-    // ── 2. Verify MSG91 access token server-side ───────────────────────────────
-    console.log('[verify-admin-phone-auth] Verifying MSG91 token for phone:', cleanDigits)
-    const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
-      method: 'POST',
-      headers: { 'authkey': MSG91_AUTH_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 'access-token': accessToken }),
-    })
+      const msg91Data = await msg91Res.json().catch(() => ({}))
+      console.log('[verify-admin-phone-auth] MSG91 response:', msg91Res.status, msg91Data?.type, msg91Data?.message)
 
-    const msg91Data = await msg91Res.json().catch(() => ({}))
-    console.log('[verify-admin-phone-auth] MSG91 response:', msg91Res.status, msg91Data?.type, msg91Data?.message)
+      const isMsg91Error =
+        !msg91Res.ok ||
+        msg91Data.type === 'error' ||
+        String(msg91Data.code) === '201' ||
+        Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
 
-    const isMsg91Error =
-      !msg91Res.ok ||
-      msg91Data.type === 'error' ||
-      String(msg91Data.code) === '201' ||
-      Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
+      if (isMsg91Error) {
+        console.warn('[verify-admin-phone-auth] MSG91 rejected token:', msg91Data)
+        return new Response(
+          JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
 
-    if (isMsg91Error) {
-      console.warn('[verify-admin-phone-auth] MSG91 rejected token:', msg91Data)
-      return new Response(
-        JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+      // ── 3. Cryptographic binding: verified phone must match requested phone ────
+      const verifiedRaw    = String(msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || '')
+      const verifiedDigits = verifiedRaw.replace(/\D/g, '').slice(-10)
 
-    // ── 3. Cryptographic binding: verified phone must match requested phone ────
-    const verifiedRaw    = String(msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || '')
-    const verifiedDigits = verifiedRaw.replace(/\D/g, '').slice(-10)
-
-    if (verifiedDigits && verifiedDigits !== cleanDigits) {
-      console.warn(`[verify-admin-phone-auth] Phone mismatch: requested=${cleanDigits}, verified=${verifiedDigits}`)
-      return new Response(
-        JSON.stringify({ error: 'Verified mobile number does not match the requested number.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      if (verifiedDigits && verifiedDigits !== cleanDigits) {
+        console.warn(`[verify-admin-phone-auth] Phone mismatch: requested=${cleanDigits}, verified=${verifiedDigits}`)
+        return new Response(
+          JSON.stringify({ error: 'Verified mobile number does not match the requested number.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // ── 4. Look up admin profile by phone — server-side role check ─────────────
@@ -149,15 +179,27 @@ serve(async (req: Request) => {
     }
 
     if (!adminProfile) {
-      // Phone not registered at all — do not reveal whether it's an admin or not
       return new Response(
         JSON.stringify({ error: 'This mobile number is not registered as an administrator account.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (adminProfile.role !== 'super_admin' && adminProfile.role !== 'sub_admin') {
-      // Phone belongs to a customer/worker — reject without revealing admin list
+    // Validate admin privileges from profiles OR admin_roles table
+    const { data: adminRoleData } = await adminClient
+      .from('admin_roles')
+      .select('access_level')
+      .eq('user_id', adminProfile.id)
+      .maybeSingle()
+
+    const hasAdminRole =
+      adminProfile.role === 'super_admin' ||
+      adminProfile.role === 'sub_admin' ||
+      adminProfile.role === 'admin' ||
+      adminRoleData?.access_level === 'super_admin' ||
+      adminRoleData?.access_level === 'admin'
+
+    if (!hasAdminRole) {
       return new Response(
         JSON.stringify({ error: 'This mobile number is not registered as an administrator account.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

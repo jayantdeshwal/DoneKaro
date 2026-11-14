@@ -162,8 +162,10 @@ function AppRoutes() {
         <Route path="notifications" element={lazyElement(<ProtectedRoute><Notifications /></ProtectedRoute>)} />
         <Route path="alerts" element={lazyElement(<ProtectedRoute><Notifications /></ProtectedRoute>)} />
         <Route path="worker/dashboard" element={lazyElement(<WorkerRoute><WorkerDashboard /></WorkerRoute>)} />
+        <Route path="worker-dashboard" element={lazyElement(<WorkerRoute><WorkerDashboard /></WorkerRoute>)} />
         <Route path="worker/reviews" element={lazyElement(<WorkerRoute><WorkerReviews /></WorkerRoute>)} />
         <Route path="admin" element={lazyElement(<AdminRoute><AdminDashboard /></AdminRoute>)} />
+        <Route path="admin-dashboard" element={lazyElement(<AdminRoute><AdminDashboard /></AdminRoute>)} />
         <Route path="admin/support" element={lazyElement(<AdminRoute><AdminSupportPage /></AdminRoute>)} />
         <Route path="terms" element={lazyElement(<Terms />)} />
         <Route path="terms-and-conditions" element={<Navigate to="/terms" replace />} />

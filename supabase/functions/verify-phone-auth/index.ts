@@ -18,6 +18,9 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 
+// Static Google Play Reviewer Accounts eligible for automated OTP bypass
+const REVIEWER_ACCOUNTS = ['+919999999999', '+918888888888', '+917777777777']
+
 serve(async (req: Request) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
@@ -33,7 +36,7 @@ serve(async (req: Request) => {
   try {
     const body = await req.json().catch(() => ({}))
     const rawPhone = String(body.phone || '').trim()
-    const accessToken = String(body.accessToken || '').trim()
+    const accessToken = String(body.accessToken || body.otp || '').trim()
     const fullName = typeof body.fullName === 'string' ? body.fullName.trim() : undefined
     const personalEmail = typeof body.email === 'string' && body.email.includes('@')
       ? body.email.trim().toLowerCase()
@@ -48,69 +51,94 @@ serve(async (req: Request) => {
       )
     }
 
-    if (!accessToken) {
+    const formattedPhone = `+91${cleanDigits}`
+    const canonicalEmail = personalEmail || `${cleanDigits}@phone.donekaro.local`
+    const isReviewer = REVIEWER_ACCOUNTS.includes(formattedPhone)
+
+    // Send OTP Phase: If requested number is in REVIEWER_ACCOUNTS, DO NOT trigger MSG91 API.
+    // Instantly return 200 OK so frontend proceeds to OTP entry screen.
+    if (body.action === 'send_otp' || body.sendOtp === true) {
+      if (isReviewer) {
+        console.log(`[verify-phone-auth] Send OTP bypass triggered for reviewer: ${formattedPhone}`)
+        return new Response(
+          JSON.stringify({ success: true, message: 'Reviewer OTP triggered successfully', isReviewer: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // Verify OTP Phase:
+    const providedOtp = String(body.otp || accessToken || '').trim()
+    if (!providedOtp) {
       return new Response(
         JSON.stringify({ error: 'Missing OTP verification token. Please verify OTP first.' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!MSG91_AUTH_KEY) {
-      console.error('[verify-phone-auth] MSG91_AUTH_KEY secret is not configured!')
-      return new Response(
-        JSON.stringify({ error: 'Authentication service temporarily misconfigured. Please contact support.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    if (isReviewer) {
+      console.log(`[verify-phone-auth] Reviewer account verification bypass active for: ${formattedPhone}`)
+      // Accept ANY 6-digit OTP (e.g. 123456) or reviewer test token
+      if (providedOtp.length !== 6 && providedOtp.length < 4) {
+        return new Response(
+          JSON.stringify({ error: 'Please enter a valid 6-digit OTP code.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      // DO NOT call MSG91 API. Proceed directly to Supabase Auth session generation.
+    } else {
+      if (!MSG91_AUTH_KEY) {
+        console.error('[verify-phone-auth] MSG91_AUTH_KEY secret is not configured!')
+        return new Response(
+          JSON.stringify({ error: 'Authentication service temporarily misconfigured. Please contact support.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // 2. Server-side verification of MSG91 widget access token
+      console.log('[verify-phone-auth] Verifying token with MSG91 for phone:', cleanDigits)
+      const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
+        method: 'POST',
+        headers: {
+          'authkey': MSG91_AUTH_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'access-token': accessToken,
+        }),
+      })
+
+      const msg91Data = await msg91Res.json().catch(() => ({}))
+      console.log('[verify-phone-auth] MSG91 response status:', msg91Res.status, 'data type:', msg91Data?.type, 'message:', msg91Data?.message)
+
+      // Robust MSG91 error detection:
+      const isMsg91Error =
+        !msg91Res.ok ||
+        msg91Data.type === 'error' ||
+        String(msg91Data.code) === '201' ||
+        Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
+
+      if (isMsg91Error) {
+        console.warn('[verify-phone-auth] MSG91 verification rejected:', msg91Data)
+        return new Response(
+          JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // 3. Cryptographic binding assertion: verified mobile must match requested phone
+      const verifiedMobileRaw = String(
+        msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || ''
       )
-    }
+      const verifiedDigits = verifiedMobileRaw.replace(/\D/g, '').slice(-10)
 
-    const formattedPhone = `+91${cleanDigits}`
-    const canonicalEmail = personalEmail || `${cleanDigits}@phone.donekaro.local`
-
-    // 2. Server-side verification of MSG91 widget access token
-    console.log('[verify-phone-auth] Verifying token with MSG91 for phone:', cleanDigits)
-    const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
-      method: 'POST',
-      headers: {
-        'authkey': MSG91_AUTH_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        'access-token': accessToken,
-      }),
-    })
-
-    const msg91Data = await msg91Res.json().catch(() => ({}))
-    console.log('[verify-phone-auth] MSG91 response status:', msg91Res.status, 'data type:', msg91Data?.type, 'message:', msg91Data?.message)
-
-    // Robust MSG91 error detection:
-    // On failure: HTTP non-200, type === 'error', code === '201', or message indicates failure/AuthenticationFailure.
-    // On success: MSG91 returns HTTP 200 with { "mobile": "91...", "type": "mobile" }.
-    const isMsg91Error =
-      !msg91Res.ok ||
-      msg91Data.type === 'error' ||
-      String(msg91Data.code) === '201' ||
-      Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
-
-    if (isMsg91Error) {
-      console.warn('[verify-phone-auth] MSG91 verification rejected:', msg91Data)
-      return new Response(
-        JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // 3. Cryptographic binding assertion: verified mobile must match requested phone
-    const verifiedMobileRaw = String(
-      msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || ''
-    )
-    const verifiedDigits = verifiedMobileRaw.replace(/\D/g, '').slice(-10)
-
-    if (verifiedDigits && verifiedDigits !== cleanDigits) {
-      console.warn(`[verify-phone-auth] Phone mismatch: requested ${cleanDigits}, verified ${verifiedDigits}`)
-      return new Response(
-        JSON.stringify({ error: 'Verified mobile number does not match requested login number.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      if (verifiedDigits && verifiedDigits !== cleanDigits) {
+        console.warn(`[verify-phone-auth] Phone mismatch: requested ${cleanDigits}, verified ${verifiedDigits}`)
+        return new Response(
+          JSON.stringify({ error: 'Verified mobile number does not match requested login number.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // 4. Initialize Supabase Admin & Anon clients
@@ -171,8 +199,8 @@ serve(async (req: Request) => {
     }
 
     if (existingProfile) {
-      // Reject admin accounts from the customer/worker OTP path
-      if (existingProfile.role === 'super_admin' || existingProfile.role === 'sub_admin' || existingProfile.role === 'admin') {
+      // Reject non-reviewer admin accounts from the customer/worker OTP path
+      if (!isReviewer && (existingProfile.role === 'super_admin' || existingProfile.role === 'sub_admin' || existingProfile.role === 'admin')) {
         return new Response(
           JSON.stringify({
             error: 'Administrator accounts must sign in through the Administrator portal.',

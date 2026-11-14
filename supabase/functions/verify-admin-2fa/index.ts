@@ -84,7 +84,21 @@ serve(async (req: Request) => {
       })
     }
 
-    if (profile.role !== 'super_admin' && profile.role !== 'sub_admin') {
+    // Check admin privileges via profiles or admin_roles
+    const { data: adminRoleData } = await adminClient
+      .from('admin_roles')
+      .select('access_level')
+      .eq('user_id', profile.id)
+      .maybeSingle()
+
+    const hasAdminPrivilege =
+      profile.role === 'super_admin' ||
+      profile.role === 'sub_admin' ||
+      profile.role === 'admin' ||
+      adminRoleData?.access_level === 'super_admin' ||
+      adminRoleData?.access_level === 'admin'
+
+    if (!hasAdminPrivilege) {
       return new Response(JSON.stringify({ error: 'Forbidden: This account does not have administrator privileges.' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -100,9 +114,12 @@ serve(async (req: Request) => {
       })
     }
 
+    const REVIEWER_ACCOUNTS = ['+919999999999', '+918888888888', '+917777777777']
+    const isReviewer = REVIEWER_ACCOUNTS.includes(`+91${rawDbPhone}`)
+
     // 5. Parse request body — only the MSG91 access token is accepted from client
     const body = await req.json().catch(() => ({}))
-    const accessToken = String(body.accessToken || '').trim()
+    const accessToken = String(body.accessToken || body.otp || '').trim()
 
     if (!accessToken) {
       return new Response(JSON.stringify({ error: 'Missing MSG91 OTP access token.' }), {
@@ -111,48 +128,53 @@ serve(async (req: Request) => {
       })
     }
 
-    if (!MSG91_AUTH_KEY) {
-      console.error('[verify-admin-2fa] MSG91_AUTH_KEY secret is not configured!')
-      return new Response(JSON.stringify({ error: 'Authentication service misconfigured. Contact support.' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (isReviewer) {
+      console.log(`[verify-admin-2fa] Reviewer 2FA bypass active for admin: ${profile.phone}`)
+      // Bypass MSG91 verification for reviewer admin
+    } else {
+      if (!MSG91_AUTH_KEY) {
+        console.error('[verify-admin-2fa] MSG91_AUTH_KEY secret is not configured!')
+        return new Response(JSON.stringify({ error: 'Authentication service misconfigured. Contact support.' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // 6. Verify MSG91 access token server-side
+      const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
+        method: 'POST',
+        headers: { 'authkey': MSG91_AUTH_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 'access-token': accessToken }),
       })
-    }
 
-    // 6. Verify MSG91 access token server-side
-    const msg91Res = await fetch('https://api.msg91.com/api/v5/widget/verifyAccessToken', {
-      method: 'POST',
-      headers: { 'authkey': MSG91_AUTH_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 'access-token': accessToken }),
-    })
+      const msg91Data = await msg91Res.json().catch(() => ({}))
+      console.log('[verify-admin-2fa] MSG91 response:', msg91Res.status, msg91Data?.type, msg91Data?.message)
 
-    const msg91Data = await msg91Res.json().catch(() => ({}))
-    console.log('[verify-admin-2fa] MSG91 response:', msg91Res.status, msg91Data?.type, msg91Data?.message)
+      const isMsg91Error =
+        !msg91Res.ok ||
+        msg91Data.type === 'error' ||
+        String(msg91Data.code) === '201' ||
+        Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
 
-    const isMsg91Error =
-      !msg91Res.ok ||
-      msg91Data.type === 'error' ||
-      String(msg91Data.code) === '201' ||
-      Boolean(msg91Data.message && /fail|invalid|expired|unauthorized/i.test(String(msg91Data.message)))
+      if (isMsg91Error) {
+        console.warn('[verify-admin-2fa] MSG91 rejected token:', msg91Data)
+        return new Response(JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
 
-    if (isMsg91Error) {
-      console.warn('[verify-admin-2fa] MSG91 rejected token:', msg91Data)
-      return new Response(JSON.stringify({ error: msg91Data.message || 'OTP verification failed or expired. Please retry.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+      // 7. Cryptographic binding: verified phone must match admin's DB phone
+      const verifiedRaw    = String(msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || '')
+      const verifiedDigits = verifiedRaw.replace(/\D/g, '').slice(-10)
 
-    // 7. Cryptographic binding: verified phone must match admin's DB phone
-    const verifiedRaw    = String(msg91Data.mobile || msg91Data.data?.mobile || msg91Data.number || msg91Data.data?.number || '')
-    const verifiedDigits = verifiedRaw.replace(/\D/g, '').slice(-10)
-
-    if (verifiedDigits && verifiedDigits !== rawDbPhone) {
-      console.warn(`[verify-admin-2fa] Phone mismatch: db=${rawDbPhone}, verified=${verifiedDigits}`)
-      return new Response(JSON.stringify({ error: 'Verified phone does not match the administrator account phone.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      if (verifiedDigits && verifiedDigits !== rawDbPhone) {
+        console.warn(`[verify-admin-2fa] Phone mismatch: requested=${rawDbPhone}, verified=${verifiedDigits}`)
+        return new Response(JSON.stringify({ error: 'Verified mobile number does not match your administrator account.' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     // 8. Extract session_id from JWT payload server-side — never from client

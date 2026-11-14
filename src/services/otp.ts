@@ -258,6 +258,13 @@ export interface OtpWidgetOptions {
   onFailure: (error: string | OtpFailureDetail | unknown) => void
 }
 
+export const REVIEWER_ACCOUNTS = ['+919999999999', '+918888888888', '+917777777777']
+
+export function isReviewerPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, '').slice(-10)
+  return ['9999999999', '8888888888', '7777777777'].includes(digits)
+}
+
 /**
  * Triggers the MSG91 OTP Widget modal.
  */
@@ -274,6 +281,15 @@ export async function openOtpWidget(options: OtpWidgetOptions): Promise<boolean>
     console.error('[MSG91] openOtpWidget received invalid identifier:', normalized.error)
     options.onFailure(normalized.error)
     return false
+  }
+
+  // Google Play Reviewer Bypass: DO NOT trigger MSG91 API or external widget
+  if (isReviewerPhone(normalized.digits)) {
+    console.log('[MSG91] Reviewer account bypass in openOtpWidget:', normalized.digits)
+    setTimeout(() => {
+      options.onSuccess('123456')
+    }, 50)
+    return true
   }
 
   // Prepend India country code 91 exactly once — canonical MSG91 format is 12 digits (e.g. '919876543210')
