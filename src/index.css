@@ -151,10 +151,10 @@
     @apply inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-normal ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  .btn-sm { @apply px-3 py-1.5 text-sm gap-1.5; }
-  .btn-md { @apply px-4 py-2.5 text-sm gap-2; }
-  .btn-lg { @apply px-6 py-3 text-base gap-2.5; }
-  .btn-xl { @apply px-8 py-4 text-lg gap-3; }
+  .btn-sm { @apply px-3 py-1.5 text-sm gap-1.5 min-h-[36px]; }
+  .btn-md { @apply px-4 py-2.5 text-sm gap-2 min-h-[48px]; }
+  .btn-lg { @apply px-6 py-3 text-base gap-2.5 min-h-[48px]; }
+  .btn-xl { @apply px-8 py-4 text-lg gap-3 min-h-[52px]; }
 
   .btn-primary {
     @apply btn bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 focus-visible:ring-amber-500 shadow-sm;
@@ -409,6 +409,38 @@
 
   .shadow-glow-brand-lg {
     box-shadow: 0 0 40px rgb(34 197 94 / 0.4);
+  }
+
+  /* Safe Area Insets for Mobile / Android Notches & Navbars */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .p-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .mt-safe {
+    margin-top: env(safe-area-inset-top, 0px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .min-h-screen-dvh {
+    min-height: 100dvh;
+  }
+  .h-screen-dvh {
+    height: 100dvh;
   }
 
   @media print {

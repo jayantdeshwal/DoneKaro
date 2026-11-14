@@ -466,7 +466,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col justify-between relative overflow-hidden px-4 py-4 sm:py-6 transition-colors">
+    <div className="min-h-[100dvh] bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col justify-between relative overflow-y-auto px-4 py-4 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] transition-colors">
       {/* Ambient Theme Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-32 left-1/4 w-96 h-96 bg-amber-500/8 dark:bg-brand-500/8 rounded-full blur-3xl" />
@@ -639,7 +639,7 @@ export default function Login() {
                       {isReviewerPhone(customerPhone) ? (
                         <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Google Play Reviewer Account recognized (Instant sign-in)</span>
+                          <span>{t('auth.reviewerAccountNotice', 'Google Play Reviewer Account recognized (Instant sign-in)')}</span>
                         </p>
                       ) : (
                         <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-500">
@@ -719,7 +719,7 @@ export default function Login() {
                       {isReviewerPhone(workerPhone) ? (
                         <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Google Play Reviewer Account recognized (Instant sign-in)</span>
+                          <span>{t('auth.reviewerAccountNotice', 'Google Play Reviewer Account recognized (Instant sign-in)')}</span>
                         </p>
                       ) : (
                         <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-500">
@@ -788,7 +788,7 @@ export default function Login() {
                       {isReviewerPhone(adminPhone) ? (
                         <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Google Play Reviewer Account recognized (Instant sign-in)</span>
+                          <span>{t('auth.reviewerAccountNotice', 'Google Play Reviewer Account recognized (Instant sign-in)')}</span>
                         </p>
                       ) : (
                         <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-500">

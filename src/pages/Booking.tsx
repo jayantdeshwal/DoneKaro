@@ -277,7 +277,7 @@ export default function Booking() {
   }
   
   return (
-    <div className="min-h-screen bg-semantic-bg-primary">
+    <div className="min-h-[100dvh] bg-semantic-bg-primary pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))]">
       <div className="bg-semantic-bg-secondary border-b border-semantic-border-light">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
@@ -527,7 +527,7 @@ export default function Booking() {
               </div>
               
               <div className="flex gap-3">
-                <Button variant="secondary" type="button" onClick={() => navigate(-1)} className="flex-1">
+                <Button variant="secondary" type="button" onClick={() => navigate(-1)} className="flex-1 min-h-[48px]">
                   {t('common.cancel')}
                 </Button>
                 <Button 
@@ -535,7 +535,7 @@ export default function Booking() {
                   type="submit" 
                   disabled={worker.available === false} 
                   loading={isSubmitting}
-                  className="flex-1"
+                  className="flex-1 min-h-[48px]"
                 >
                   {t('booking.requestQuote', 'Request Quote')}
                 </Button>

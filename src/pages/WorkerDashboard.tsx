@@ -177,7 +177,7 @@ export default function WorkerDashboard() {
   )
 
   return (
-    <div className="min-h-screen bg-semantic-bg-primary pb-24 text-semantic-text-primary">
+    <div className="min-h-[100dvh] bg-semantic-bg-primary pb-[max(6rem,calc(5.5rem+env(safe-area-inset-bottom)))] text-semantic-text-primary">
       <div className="max-w-xl mx-auto px-4 sm:px-6 pt-5">
         {/* 1. Top Bar */}
         <WorkerTopBar

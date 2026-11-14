@@ -45,7 +45,7 @@ export function BottomNavigation() {
                 key={tab.id}
                 type="button"
                 onClick={tab.action}
-                className="flex flex-col items-center justify-center py-1 px-0.5 text-slate-500 dark:text-zinc-400 hover:text-amber-500 active:scale-95 transition-all relative cursor-pointer"
+                className="flex flex-col items-center justify-center min-h-[48px] py-1 px-0.5 text-slate-500 dark:text-zinc-400 hover:text-amber-500 active:scale-95 transition-all relative cursor-pointer"
                 aria-label={tab.label}
               >
                 <div className="relative p-1 rounded-xl transition-all">
@@ -72,7 +72,7 @@ export function BottomNavigation() {
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }}
               className={() =>
-                `flex flex-col items-center justify-center py-1 px-0.5 transition-all relative ${
+                `flex flex-col items-center justify-center min-h-[48px] py-1 px-0.5 transition-all relative ${
                   isTabActive
                     ? 'text-amber-600 dark:text-amber-400 font-bold'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 font-medium'

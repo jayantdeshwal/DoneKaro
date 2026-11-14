@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-semantic-bg-primary text-semantic-text-primary pb-20">
+    <div className="min-h-[100dvh] bg-semantic-bg-primary text-semantic-text-primary pb-[max(5rem,calc(4.5rem+env(safe-area-inset-bottom)))]">
       <AdminSessionGuard phone={user?.phone ?? ''} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* Top Executive Header Banner */}
