@@ -49,7 +49,11 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
 
       <div className="space-y-3">
         {pendingRequests.map(request => {
+          if (!request || !request.id) return null
           const service = quoteServices.get(request.service_request_id)
+          const scheduledDate = service?.scheduled_for ? new Date(service.scheduled_for) : null
+          const isValidDate = scheduledDate && !isNaN(scheduledDate.getTime())
+
           return (
             <div
               key={request.id}
@@ -63,13 +67,13 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
                           CATEGORIES.find(c => c.id === service.category_id) || CATEGORIES[0],
                           i18n.language === 'hi' ? 'hi' : 'en'
                         )
-                      : t('workerDashboard.serviceRequest', 'Service request')}
+                      : t('workerDashboard.jobUnavailable', 'This job is no longer available')}
                   </p>
                   {service && (
                     <p className="text-xs text-semantic-text-secondary mt-1">
-                      {new Date(service.scheduled_for).toLocaleString(
-                        i18n.language === 'hi' ? 'hi-IN' : 'en-IN'
-                      )}{' '}
+                      {isValidDate
+                        ? scheduledDate.toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')
+                        : t('common.dateUnavailable', 'Date not available')}{' '}
                       · {service.pincode}
                     </p>
                   )}
@@ -99,6 +103,7 @@ export const QuoteRequestsFeed: React.FC<QuoteRequestsFeedProps> = ({
                               ? err.message
                               : t('workerDashboard.rejectQuoteError', 'Unable to reject quote request')
                           )
+                          await onRefreshData()
                         }
                       })()
                     }

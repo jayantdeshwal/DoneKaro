@@ -29,6 +29,15 @@ export const HistoricalWorkerJobSummaryCard: React.FC<HistoricalWorkerJobSummary
   onViewReceipt,
 }) => {
   const { t, i18n } = useTranslation()
+
+  if (!booking || !booking.id) {
+    return (
+      <div className="p-4 rounded-xl bg-surface-100 border border-semantic-border-light shadow-sm text-center py-6 text-sm text-semantic-text-secondary">
+        {t('workerDashboard.jobUnavailable', 'This job is no longer available')}
+      </div>
+    )
+  }
+
   const catObj = CATEGORIES.find(c => c.id === booking.category_id)
   const catName = catObj
     ? getCategoryName(catObj, i18n.language === 'hi' ? 'hi' : 'en')
@@ -36,22 +45,21 @@ export const HistoricalWorkerJobSummaryCard: React.FC<HistoricalWorkerJobSummary
 
   const jobReference = formatJobReference(booking.id)
 
-  const formattedDate = new Date(booking.scheduled_at).toLocaleDateString(
-    i18n.language === 'hi' ? 'hi-IN' : 'en-IN',
-    {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    }
-  )
-
-  const formattedTime = new Date(booking.scheduled_at).toLocaleTimeString(
-    i18n.language === 'hi' ? 'hi-IN' : 'en-IN',
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-    }
-  )
+  const scheduledDate = booking.scheduled_at ? new Date(booking.scheduled_at) : null
+  const isValidDate = scheduledDate && !isNaN(scheduledDate.getTime())
+  const formattedDate = isValidDate
+    ? scheduledDate.toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      })
+    : t('common.dateUnavailable', 'Date not available')
+  const formattedTime = isValidDate
+    ? scheduledDate.toLocaleTimeString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : ''
 
   const summary = booking.paymentSummary
   const finalAmount = summary?.final_payable_amount ?? summary?.initial_quote_amount ?? null

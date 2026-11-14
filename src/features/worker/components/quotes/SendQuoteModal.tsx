@@ -41,7 +41,7 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
   }
 
   const handleSubmit = async () => {
-    if (!request) return
+    if (!request || !bookingRequest) return
     const numericAmount = Number(amount)
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       setError(t('workerDashboard.quoteAmountError', 'Enter the quote amount submitted by you.'))
@@ -70,6 +70,26 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
     }
   }
 
+  if (!request) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={t('workerDashboard.sendProviderQuote', 'Send Provider Quote')}
+      >
+        <div className="py-6 text-center text-sm text-semantic-text-secondary space-y-4">
+          <p>{t('workerDashboard.jobUnavailable', 'This job or quote request is no longer available.')}</p>
+          <Button variant="secondary" onClick={handleClose}>
+            {t('common.close', 'Close')}
+          </Button>
+        </div>
+      </Modal>
+    )
+  }
+
+  const scheduledDate = bookingRequest?.scheduled_for ? new Date(bookingRequest.scheduled_for) : null
+  const isValidDate = scheduledDate && !isNaN(scheduledDate.getTime())
+
   return (
     <Modal
       isOpen={isOpen}
@@ -81,7 +101,14 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
       )}
     >
       <div className="space-y-4">
-        {bookingRequest && (
+        {!bookingRequest ? (
+          <section className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-800 dark:text-amber-200">
+            {t(
+              'workerDashboard.requestDetailsUnavailable',
+              'This job is no longer available or was cancelled by the customer.'
+            )}
+          </section>
+        ) : (
           <section className="space-y-2 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800">
             <h4 className="font-bold text-slate-900 dark:text-slate-100">
               {t('workerDashboard.customerRequestSummary', 'Customer Request Summary')}
@@ -94,9 +121,9 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
             </p>
             <p className="text-slate-700 dark:text-slate-300">
               {t('workerDashboard.scheduledFor', 'Date & Time')}:{' '}
-              {new Date(bookingRequest.scheduled_for).toLocaleString(
-                i18n.language === 'hi' ? 'hi-IN' : 'en-IN'
-              )}
+              {isValidDate
+                ? scheduledDate.toLocaleString(i18n.language === 'hi' ? 'hi-IN' : 'en-IN')
+                : t('common.dateUnavailable', 'Date not available')}
             </p>
             <p className="text-slate-700 dark:text-slate-300">
               {t('workerDashboard.location', 'Location')}: {bookingRequest.address} ·{' '}
@@ -157,6 +184,7 @@ export const SendQuoteModal: React.FC<SendQuoteModalProps> = ({
             variant="primary"
             className="flex-1"
             loading={isSubmitting}
+            disabled={isSubmitting || !bookingRequest}
             onClick={() => void handleSubmit()}
           >
             {t('workerDashboard.submitQuote', 'Submit Quote')}

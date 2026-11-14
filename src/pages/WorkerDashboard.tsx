@@ -286,8 +286,10 @@ export default function WorkerDashboard() {
               </p>
             </div>
           ) : (
-            filteredBookings.map(booking => {
-              const isHistorical =
+            filteredBookings
+              .filter(b => b && b.id)
+              .map(booking => {
+                const isHistorical =
                 booking.status === 'completed' ||
                 booking.status === 'cancelled' ||
                 booking.status === 'rejected'

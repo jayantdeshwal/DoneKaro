@@ -13,6 +13,7 @@ interface AuthContextType {
   isLoading: boolean
   login: (user: User) => void
   logout: () => Promise<void>
+  refreshUser: () => Promise<User | null>
   updateUser: (updates: Partial<User>) => void
   signInWithGoogle: (redirectTo?: string) => Promise<void>
   verifyAndLoginWithOtp: (phone: string, accessToken: string, fullName?: string, email?: string) => Promise<PhoneAuthResult>
@@ -233,6 +234,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return resolvedUser
   }
 
+  const refreshUser = async (): Promise<User | null> => {
+    try {
+      const supabase = getSupabaseClient()
+      const { data, error } = await supabase.auth.getSession()
+      if (error || !data.session?.user) {
+        return null
+      }
+      return await loadSupabaseUser(data.session.user)
+    } catch (err) {
+      console.warn('[AuthContext] Failed to refresh user profile:', err)
+      return null
+    }
+  }
+
+  // Realtime subscription and window focus listener for dynamic role updates
+  useEffect(() => {
+    if (!user?.id) return
+    const userId = user.id
+    const supabase = getSupabaseClient()
+
+    const channel = supabase
+      .channel(`profile-sync-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`,
+        },
+        () => {
+          void refreshUser()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'worker_profiles',
+          filter: `id=eq.${userId}`,
+        },
+        () => {
+          void refreshUser()
+        }
+      )
+      .subscribe()
+
+    const handleSyncOnVisible = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        void refreshUser()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleSyncOnVisible)
+    window.addEventListener('focus', handleSyncOnVisible)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleSyncOnVisible)
+      window.removeEventListener('focus', handleSyncOnVisible)
+      void supabase.removeChannel(channel)
+    }
+  }, [user?.id])
+
   const login = (userData: User) => {
     setUser(userData)
     if (typeof window !== 'undefined') {
@@ -383,6 +448,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
+        refreshUser,
         updateUser,
         signInWithGoogle,
         verifyAndLoginWithOtp,

@@ -56,11 +56,12 @@ const lazyElement = (element: React.ReactNode) => (
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth()
+  const location = useLocation()
   if (isLoading) {
     return <PageLoader />
   }
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login?role=admin" state={{ from: location }} replace />
   }
   if (!isAdmin) {
     return <Navigate to="/" replace />
@@ -70,11 +71,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user, isRegistering } = useAuth()
+  const location = useLocation()
   if (isLoading) {
     return <PageLoader />
   }
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
   if (user?.role === 'customer' && user?.registration_completed === false) {
     return isRegistering ? <PageLoader /> : <Navigate to="/register?incomplete=true" replace />
@@ -84,14 +86,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function WorkerRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isWorker } = useAuth()
+  const location = useLocation()
   if (isLoading) return <PageLoader />
-  if (!isAuthenticated) return <Navigate to="/login?role=worker" replace />
+  if (!isAuthenticated) return <Navigate to="/login?role=worker" state={{ from: location }} replace />
   if (!isWorker) return <Navigate to="/profile" replace />
   return <>{children}</>
 }
 
 function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user, isRegistering } = useAuth()
+  const location = useLocation()
   const isGuestMode = typeof window !== 'undefined' && sessionStorage.getItem('donekaro_guest_mode') === 'true'
 
   if (isLoading) {
@@ -106,7 +110,7 @@ function GuestOrAuthRoute({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  return <Navigate to="/login" replace />
+  return <Navigate to="/login" state={{ from: location }} replace />
 }
 
 function RootRoute() {
