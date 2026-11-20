@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext'
 import { fetchApprovedWorker } from '@/services/workers'
 import { getSupabaseClient } from '@/lib/supabase'
 import { cancelServiceRequest, createBookingQuoteRequest, createServiceRequest } from '@/services/quotes'
-import { attachProblemImage, removeProblemImage, uploadProblemImage, validateFile } from '@/services/storage'
+import { attachProblemImage, removeProblemImage, uploadProblemImage, validateFile, getImageMimeAndExt } from '@/services/storage'
 import { sanitizeErrorMessage } from '@/utils/errors'
 
 export default function Booking() {
@@ -205,12 +205,13 @@ export default function Booking() {
 
       if (problemImage && !problemImagePath) {
         const storagePath = await uploadProblemImage(problemImage, user.id, serviceRequestId)
+        const { mimeType } = getImageMimeAndExt(problemImage)
         try {
           await attachProblemImage({
             serviceRequestId,
             customerId: user.id,
             storagePath,
-            mimeType: problemImage.type,
+            mimeType,
             fileSize: problemImage.size,
           })
         } catch (attachmentError) {
@@ -498,8 +499,8 @@ export default function Booking() {
                           <p className="text-sm font-semibold text-semantic-text-primary">{t('booking.problemImageTitle', 'Add photo of the problem (optional)')}</p>
                           <p className="mt-1 text-xs text-semantic-text-secondary">{t('booking.problemImageHint', 'A clear photo can help the worker understand the issue before responding.')}</p>
                           <div className="mt-3 flex flex-wrap gap-2">
-                            <input ref={cameraPickerRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
-                            <input ref={imagePickerRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
+                            <input ref={cameraPickerRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" capture="environment" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
+                            <input ref={imagePickerRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" className="hidden" onChange={event => handleProblemImage(event.target.files?.[0])} />
                             <Button type="button" variant="outline" size="sm" onClick={() => cameraPickerRef.current?.click()}>
                               {t('booking.takePhoto', 'Take Photo')}
                             </Button>

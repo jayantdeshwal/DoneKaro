@@ -65,7 +65,7 @@ export const CustomerAddressProofUpload: React.FC<CustomerAddressProofUploadProp
           <span>{t('registerPage.addressProofLabel', 'Address Proof (Mandatory) *')}</span>
         </label>
         <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-          {t('registerPage.addressProofFormats', 'JPG, PNG, or PDF up to 10MB')}
+          {t('registerPage.addressProofFormats', 'JPG, PNG, WEBP, or PDF up to 10MB')}
         </span>
       </div>
 
@@ -106,7 +106,7 @@ export const CustomerAddressProofUpload: React.FC<CustomerAddressProofUploadProp
             <input
               type="file"
               id="customer-address-proof"
-              accept="image/jpeg, image/png, application/pdf"
+              accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf"
               className="hidden"
               disabled={disabled}
               onChange={e => handleFileChange(e.target.files?.[0])}

@@ -197,25 +197,42 @@ export interface OtpFailureDetail {
 
 /**
  * Normalizes widget failure events into user-friendly details.
+ * Correctly detects user modal cancellations, auto-closes, and dismissals
+ * so that modal unmount events are NEVER reported as false "OTP verification failed" errors.
  */
 export function normalizeWidgetError(error: unknown): OtpFailureDetail {
   if (!error) {
-    return { message: 'OTP verification failed or was cancelled.' }
+    return {
+      cancelled: true,
+      message: 'OTP verification was cancelled.',
+    }
   }
 
   if (typeof error === 'object' && error !== null) {
     const obj = error as Record<string, unknown>
-    // User cancelled or closed the modal
-    if (obj.closeByUser === true || obj.closeByUser === 1 || String(obj.message).toLowerCase().includes('close')) {
+
+    // Exhaustive check for modal close, dismiss, or cancellation payloads from MSG91 / browser
+    const rawMsg = String(obj.message || obj.error || obj.data || obj.type || obj.event || obj.action || '').trim()
+    const lower = rawMsg.toLowerCase()
+
+    const isCloseOrCancel =
+      obj.closeByUser === true ||
+      obj.closeByUser === 1 ||
+      obj.closed === true ||
+      obj.cancelled === true ||
+      lower.includes('close') ||
+      lower.includes('dismiss') ||
+      lower.includes('cancel') ||
+      lower.includes('hide') ||
+      lower.includes('abort')
+
+    if (isCloseOrCancel) {
       return {
         cancelled: true,
         message: 'OTP verification was cancelled.',
         raw: error,
       }
     }
-
-    const rawMsg = String(obj.message || obj.error || obj.data || '').trim()
-    const lower = rawMsg.toLowerCase()
 
     if (lower.includes('invalid mobile') || lower.includes('invalid identifier')) {
       return {
@@ -230,10 +247,24 @@ export function normalizeWidgetError(error: unknown): OtpFailureDetail {
         raw: error,
       }
     }
+
+    // Empty object payload received on modal unmount
+    return {
+      cancelled: true,
+      message: 'OTP verification was cancelled.',
+      raw: error,
+    }
   }
 
   if (typeof error === 'string') {
     const lower = error.toLowerCase()
+    if (lower.includes('close') || lower.includes('dismiss') || lower.includes('cancel')) {
+      return {
+        cancelled: true,
+        message: 'OTP verification was cancelled.',
+        raw: error,
+      }
+    }
     if (lower.includes('invalid mobile') || lower.includes('invalid identifier')) {
       return {
         message: "We couldn't process your mobile number. Please try again.",
@@ -311,12 +342,20 @@ export async function openOtpWidget(options: OtpWidgetOptions): Promise<boolean>
 
   if (isLoaded && typeof window.initSendOTP === 'function') {
     try {
+      let isSuccessHandled = false
+      let isFailureHandled = false
+
       const configuration = {
         widgetId: MSG91_WIDGET_ID,
         tokenAuth: MSG91_TOKEN_AUTH,
         identifier: cleanPhone,
         exposeMethods: false,
         success: (data: unknown) => {
+          if (isSuccessHandled) {
+            console.log('[MSG91 OTP Success] Duplicate success callback ignored.')
+            return
+          }
+
           // Normalize possible callback shapes to extract the access token
           let token = ''
           if (typeof data === 'string' && data.trim().length > 0) {
@@ -336,16 +375,35 @@ export async function openOtpWidget(options: OtpWidgetOptions): Promise<boolean>
 
           if (!token) {
             console.error('[MSG91 OTP Success] Missing access token in widget callback payload:', data)
-            options.onFailure('Verification succeeded but verification token was missing. Please retry.')
+            if (!isFailureHandled) {
+              isFailureHandled = true
+              options.onFailure('Verification succeeded but verification token was missing. Please retry.')
+            }
             return
           }
 
+          // Mark success as authoritative; completely suppress subsequent modal-close/failure callbacks
+          isSuccessHandled = true
           console.log('[MSG91 OTP Success] Verified with access token (length):', token.length)
-          options.onSuccess(token)
+          try {
+            options.onSuccess(token)
+          } catch (onSuccessErr) {
+            console.error('[MSG91 OTP Success] Error inside onSuccess handler:', onSuccessErr)
+          }
         },
         failure: (error: unknown) => {
+          // If verification has already succeeded, the subsequent close/dismiss event MUST NOT fail the flow
+          if (isSuccessHandled) {
+            console.log('[MSG91 OTP Failure] Suppressing failure callback because success is already handled.')
+            return
+          }
+          if (isFailureHandled) {
+            return
+          }
+
           console.warn('[MSG91 OTP Failure]', error)
           const failureDetail = normalizeWidgetError(error)
+          isFailureHandled = true
           options.onFailure(failureDetail)
         },
       }

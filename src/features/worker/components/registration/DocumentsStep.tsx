@@ -96,7 +96,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             <>
               <input
                 type="file"
-                accept="image/jpeg, image/png, application/pdf"
+                accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf"
                 className="hidden"
                 id="idproof-upload"
                 onChange={e => onIdProofChange(e.target.files?.[0])}
@@ -110,7 +110,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
                   {t('auth.workerRegistration.clickUploadId', 'Click to upload Aadhaar or Voter ID')}
                 </span>
                 <span className="text-xs text-semantic-text-tertiary">
-                  {t('auth.workerRegistration.idFormatHint', 'JPG, PNG, or PDF up to 10MB')}
+                  {t('auth.workerRegistration.idFormatHint', 'JPG, PNG, WEBP, or PDF up to 10MB')}
                 </span>
               </label>
             </>
@@ -153,7 +153,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
             <>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.jpg,.jpeg,.png,.webp"
                 className="hidden"
                 id="avatar-upload"
                 onChange={e => onAvatarChange(e.target.files?.[0])}
@@ -167,7 +167,7 @@ export const DocumentsStep: React.FC<DocumentsStepProps> = ({
                   {t('auth.workerRegistration.clickUploadPhoto', 'Click to upload profile photo')}
                 </span>
                 <span className="text-xs text-semantic-text-tertiary">
-                  {t('auth.workerRegistration.photoFormatHint', 'JPG, PNG up to 5MB')}
+                  {t('auth.workerRegistration.photoFormatHint', 'JPG, PNG, WEBP up to 5MB')}
                 </span>
               </label>
             </>

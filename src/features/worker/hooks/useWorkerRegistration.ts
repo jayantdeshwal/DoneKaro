@@ -7,7 +7,7 @@ import {
 } from '@kaamgar/shared'
 import { useAuth } from '@/context/AuthContext'
 import { getSupabaseClient } from '@/lib/supabase'
-import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES } from '@/services/storage'
+import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES, DEFAULT_IMAGE_TYPES } from '@/services/storage'
 import { notifyAdminsOfWorkerRegistration } from '@/services/admin'
 import { openOtpWidget } from '@/services/otp'
 import { sanitizeErrorMessage } from '@/utils/errors'
@@ -18,7 +18,7 @@ import type { RegistrationFormData } from '../types'
 export function useWorkerRegistration() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user, updateUser, verifyAndLoginWithOtp, signInWithGoogle, setIsRegistering } = useAuth()
+  const { user, updateUser, verifyAndLoginWithOtp, signInWithGoogle, isRegistering, setIsRegistering } = useAuth()
   const [currentStep, setCurrentStep] = useState(0)
 
   // Initialize form state
@@ -119,7 +119,7 @@ export function useWorkerRegistration() {
     if (!file) return
     const result = validateFile(file, {
       maxSizeMb: 5,
-      allowedTypes: ['image/jpeg', 'image/png'],
+      allowedTypes: DEFAULT_IMAGE_TYPES,
     })
     if (!result.valid) {
       setErrors(prev => ({ ...prev, avatar: result.error || 'Invalid file' }))
@@ -272,6 +272,8 @@ export function useWorkerRegistration() {
       setCurrentStep(2)
       return
     }
+
+    if (loading || isRegistering) return
 
     setLoading(true)
     setUploadProgress('')

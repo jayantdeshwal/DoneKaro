@@ -376,7 +376,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       const errorMsg =
-        serverErrorMsg || error?.message || 'OTP verification failed on server. Please check and retry.'
+        serverErrorMsg || error?.message || 'Server authentication failed. Please check your connection and retry.'
       console.error('[verifyAndLoginWithOtp] Edge Function error:', { errorMsg, error, data })
       throw new Error(errorMsg)
     }
@@ -391,8 +391,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(sessionErr?.message || 'Failed to install authenticated session. Please retry.')
     }
 
-    // Load authoritative profile from database
-    const authoritativeUser = await loadSupabaseUser(sessionData.user)
+    // Load authoritative profile from database with non-fatal resilience
+    let authoritativeUser: User | null = null
+    try {
+      authoritativeUser = await loadSupabaseUser(sessionData.user)
+    } catch (loadErr) {
+      console.warn('[verifyAndLoginWithOtp] Non-fatal profile load error during initial verification:', loadErr)
+    }
 
     const finalUser: User = authoritativeUser || {
       id: data.user.id,

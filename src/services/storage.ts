@@ -5,13 +5,66 @@ export interface FileValidationOptions {
   allowedTypes?: string[]
 }
 
-const DEFAULT_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif']
-const PROBLEM_IMAGE_TYPES = ['image/jpeg', 'image/png']
-export const DEFAULT_DOCUMENT_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
+export const DEFAULT_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]
+export const PROBLEM_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]
+export const DEFAULT_DOCUMENT_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+]
+
+/**
+ * Resolves a normalized MIME type and file extension for image uploads.
+ * Handles mobile Android WebView / Capacitor where file.type can be empty or generic.
+ */
+export function getImageMimeAndExt(file: File): { mimeType: string; ext: string } {
+  const rawExt = file.name && file.name.includes('.')
+    ? file.name.split('.').pop()?.toLowerCase().trim() || ''
+    : ''
+  const rawType = file.type?.toLowerCase().trim() || ''
+
+  if (rawType === 'image/png' || rawType === 'image/x-png' || rawExt === 'png') {
+    return { mimeType: 'image/png', ext: 'png' }
+  }
+  if (rawType === 'image/webp' || rawExt === 'webp') {
+    return { mimeType: 'image/webp', ext: 'webp' }
+  }
+  if (rawType === 'image/gif' || rawExt === 'gif') {
+    return { mimeType: 'image/gif', ext: 'gif' }
+  }
+  if (
+    rawType === 'image/jpeg' ||
+    rawType === 'image/jpg' ||
+    rawType === 'image/pjpeg' ||
+    rawExt === 'jpg' ||
+    rawExt === 'jpeg'
+  ) {
+    return { mimeType: 'image/jpeg', ext: rawExt === 'jpeg' ? 'jpeg' : 'jpg' }
+  }
+
+  // Fallback default for images
+  return {
+    mimeType: rawType || 'image/jpeg',
+    ext: rawExt || 'jpg',
+  }
+}
 
 /**
  * Resolves a normalized MIME type and file extension for document uploads.
- * Guarantees consistent handling for PDF, PNG, and JPG/JPEG files across browsers and operating systems.
+ * Guarantees consistent handling for PDF, PNG, WEBP, and JPG/JPEG files across browsers and operating systems.
  */
 export function getDocumentMimeAndExt(file: File): { mimeType: string; ext: string; isDocumentType: boolean } {
   const rawExt = file.name && file.name.includes('.')
@@ -28,7 +81,15 @@ export function getDocumentMimeAndExt(file: File): { mimeType: string; ext: stri
     return { mimeType: 'application/pdf', ext: 'pdf', isDocumentType: true }
   }
 
-  // 2. PNG detection
+  // 2. WEBP detection
+  if (
+    rawType === 'image/webp' ||
+    rawExt === 'webp'
+  ) {
+    return { mimeType: 'image/webp', ext: 'webp', isDocumentType: true }
+  }
+
+  // 3. PNG detection
   if (
     rawType === 'image/png' ||
     rawType === 'image/x-png' ||
@@ -37,7 +98,7 @@ export function getDocumentMimeAndExt(file: File): { mimeType: string; ext: stri
     return { mimeType: 'image/png', ext: 'png', isDocumentType: true }
   }
 
-  // 3. JPEG / JPG detection
+  // 4. JPEG / JPG detection
   if (
     rawType === 'image/jpeg' ||
     rawType === 'image/jpg' ||
@@ -106,7 +167,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
   if (!validation.valid) throw new Error(validation.error)
 
   const supabase = getSupabaseClient()
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const { mimeType, ext } = getImageMimeAndExt(file)
   const filePath = `${userId}/avatar-${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
@@ -114,7 +175,7 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: true,
-      contentType: file.type,
+      contentType: mimeType,
     })
 
   if (uploadError) {
@@ -168,8 +229,8 @@ export async function getIdProofSignedUrl(
   }
 
   const supabase = getSupabaseClient()
-  // Clean path in case full storage URL was stored
-  const cleanPath = pathOrUrl.replace(/^.*\/worker-documents\//, '')
+  // Clean path in case full storage URL or leading slashes were stored
+  const cleanPath = pathOrUrl.replace(/^.*\/worker-documents\//, '').replace(/^\/+/, '')
 
   const { data, error } = await supabase.storage
     .from('worker-documents')
@@ -190,11 +251,11 @@ export async function uploadProblemImage(file: File, userId: string, serviceRequ
   if (!userId || !serviceRequestId) throw new Error('A signed-in customer and service request are required')
 
   const supabase = getSupabaseClient()
-  const extension = file.type === 'image/png' ? 'png' : 'jpg'
-  const filePath = `${userId}/${serviceRequestId}/problem-${crypto.randomUUID()}.${extension}`
+  const { mimeType, ext } = getImageMimeAndExt(file)
+  const filePath = `${userId}/${serviceRequestId}/problem-${crypto.randomUUID()}.${ext}`
   const { error } = await supabase.storage
     .from('service-request-images')
-    .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: file.type })
+    .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: mimeType })
 
   if (error) throw new Error(`Failed to upload problem image: ${error.message}`)
   return filePath
@@ -219,14 +280,16 @@ export async function attachProblemImage(params: {
 
 export async function removeProblemImage(storagePath: string): Promise<void> {
   if (!storagePath) return
-  await getSupabaseClient().storage.from('service-request-images').remove([storagePath])
+  const cleanPath = storagePath.replace(/^.*\/service-request-images\//, '').replace(/^\/+/, '')
+  await getSupabaseClient().storage.from('service-request-images').remove([cleanPath])
 }
 
 export async function getProblemImageSignedUrl(storagePath: string, expiresInSeconds = 3600): Promise<string | null> {
   if (!storagePath) return null
+  const cleanPath = storagePath.replace(/^.*\/service-request-images\//, '').replace(/^\/+/, '')
   const { data, error } = await getSupabaseClient().storage
     .from('service-request-images')
-    .createSignedUrl(storagePath, expiresInSeconds)
+    .createSignedUrl(cleanPath, expiresInSeconds)
   if (error) {
     console.warn('Error generating signed URL for problem image:', error.message)
     return null
@@ -278,7 +341,7 @@ export async function getCustomerAddressProofSignedUrl(
   }
 
   const supabase = getSupabaseClient()
-  const cleanPath = pathOrUrl.replace(/^.*\/customer-documents\//, '')
+  const cleanPath = pathOrUrl.replace(/^.*\/customer-documents\//, '').replace(/^\/+/, '')
 
   const { data, error } = await supabase.storage
     .from('customer-documents')

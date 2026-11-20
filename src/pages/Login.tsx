@@ -222,6 +222,7 @@ export default function Login() {
   // ---------------- 1. CUSTOMER PASSWORDLESS OTP LOGIN ----------------
   const handleCustomerOtpLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (customerLoading) return
     setCustomerError('')
 
     const normalizeResult = normalizeIndianPhone(customerPhone)
@@ -282,7 +283,7 @@ export default function Login() {
         },
         onFailure: (err) => {
           setCustomerLoading(false)
-          if (err && typeof err === 'object' && (err as any).cancelled) return
+          if (err && typeof err === 'object' && ((err as any).cancelled || (err as any).closeByUser)) return
           const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
           setCustomerError(msg)
         },
@@ -301,6 +302,7 @@ export default function Login() {
   // ---------------- 2. WORKER PASSWORDLESS OTP LOGIN ----------------
   const handleWorkerOtpLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (workerLoading) return
     setWorkerError('')
 
     const normalizeResult = normalizeIndianPhone(workerPhone)
@@ -355,7 +357,7 @@ export default function Login() {
         },
         onFailure: (err) => {
           setWorkerLoading(false)
-          if (err && typeof err === 'object' && (err as any).cancelled) return
+          if (err && typeof err === 'object' && ((err as any).cancelled || (err as any).closeByUser)) return
           const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
           setWorkerError(msg)
         },
@@ -374,6 +376,7 @@ export default function Login() {
   // ---------------- 3. ADMIN PHONE OTP LOGIN ----------------
   const handleAdminOtpLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (adminLoading) return
     setAdminError('')
 
     const normalizeResult = normalizeIndianPhone(adminPhone)
@@ -443,7 +446,7 @@ export default function Login() {
         },
         onFailure: (err) => {
           setAdminLoading(false)
-          if (err && typeof err === 'object' && (err as any).cancelled) return
+          if (err && typeof err === 'object' && ((err as any).cancelled || (err as any).closeByUser)) return
           const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please retry.'
           setAdminError(msg)
         },
@@ -654,6 +657,7 @@ export default function Login() {
                       className="w-full mt-2"
                       size="lg"
                       loading={customerLoading}
+                      disabled={customerLoading}
                     >
                       <ShieldCheck className="w-4 h-4 mr-2" />
                       <span>{t('loginPage.customerOtpBtn', 'Send OTP & Sign In')}</span>
@@ -734,6 +738,7 @@ export default function Login() {
                       className="w-full mt-2 shadow-lg shadow-amber-600/20"
                       size="lg"
                       loading={workerLoading}
+                      disabled={workerLoading}
                     >
                       <ShieldCheck className="w-4 h-4 mr-2" />
                       <span>{t('loginPage.workerOtpBtn', 'Send OTP & Sign In to Dashboard')}</span>
@@ -803,6 +808,7 @@ export default function Login() {
                       className="w-full mt-2 shadow-lg shadow-amber-600/20"
                       size="lg"
                       loading={adminLoading}
+                      disabled={adminLoading}
                     >
                       <ShieldCheck className="w-4 h-4 mr-2" />
                       <span>Send OTP & Sign In to Admin Portal</span>

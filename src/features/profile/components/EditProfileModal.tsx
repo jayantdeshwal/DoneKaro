@@ -78,7 +78,7 @@ export function EditProfileModal({
             <input
               type="file"
               ref={avatarInputRef}
-              accept="image/*"
+              accept="image/*,.jpg,.jpeg,.png,.webp"
               className="hidden"
               onChange={onAvatarSelect}
             />
@@ -220,7 +220,7 @@ export function EditProfileModal({
                 <input
                   type="file"
                   ref={idProofInputRef}
-                  accept="image/jpeg, image/png, application/pdf"
+                  accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf"
                   className="hidden"
                   onChange={onIdProofSelect}
                 />

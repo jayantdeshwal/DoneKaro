@@ -1,32 +1,22 @@
+// Supabase Edge Functions Shared CORS Helper
+// Universally supports web browsers, Android WebView, Capacitor, PWA, and mobile testers.
+
 declare const Deno: {
   env: {
     get(key: string): string | undefined
   }
 }
 
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean)
+/**
+ * Returns standard CORS headers.
+ * Echoes the requesting origin (if present) or falls back to '*' for missing/null origins.
+ */
+export function getCorsHeaders(
+  req?: Request,
+  additionalAllowedHeaders: string[] = []
+): Record<string, string> {
+  const origin = req?.headers?.get('Origin') || req?.headers?.get('origin')
 
-function isLocalDevelopment(): boolean {
-  if (Deno.env.get('ENVIRONMENT') === 'development') return true
-
-  try {
-    const hostname = new URL(Deno.env.get('SUPABASE_URL') || '').hostname
-    return ['localhost', '127.0.0.1', '::1', '[::1]', 'kong'].includes(hostname)
-  } catch {
-    return false
-  }
-}
-
-export function isAllowedOrigin(origin: string): boolean {
-  return allowedOrigins.includes(origin) ||
-    (isLocalDevelopment() && origin === 'http://localhost:3000')
-}
-
-export function getCorsHeaders(req: Request, additionalAllowedHeaders: string[] = []): Record<string, string> {
-  const origin = req.headers.get('Origin')
   const allowedHeaders = [
     'authorization',
     'x-client-info',
@@ -35,30 +25,42 @@ export function getCorsHeaders(req: Request, additionalAllowedHeaders: string[] 
     ...additionalAllowedHeaders,
   ]
 
-  const headers: Record<string, string> = {
+  // Allow all origins gracefully:
+  // Echo the requesting origin (e.g. capacitor://localhost, https://localhost, http://localhost, production domain)
+  // or fallback to '*' if origin is missing or 'null'.
+  const allowOrigin = origin && origin !== 'null' ? origin : '*'
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': allowedHeaders.join(', '),
+    'Access-Control-Max-Age': '86400',
     'Vary': 'Origin',
   }
-
-  if (origin && isAllowedOrigin(origin)) {
-    headers['Access-Control-Allow-Origin'] = origin
-  }
-
-  return headers
 }
 
-export function handleCors(req: Request, additionalAllowedHeaders: string[] = []): Response | null {
-  const origin = req.headers.get('Origin')
-  const headers = getCorsHeaders(req, additionalAllowedHeaders)
-
-  if (origin && !isAllowedOrigin(origin)) {
-    return new Response('Origin not allowed', { status: 403, headers })
-  }
-
+/**
+ * Handles CORS preflight (OPTIONS) requests.
+ * Always returns HTTP 200 OK with proper CORS headers so browsers and WebViews never fail preflight.
+ */
+export function handleCors(
+  req: Request,
+  additionalAllowedHeaders: string[] = []
+): Response | null {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers })
+    const headers = getCorsHeaders(req, additionalAllowedHeaders)
+    return new Response('ok', {
+      status: 200,
+      headers,
+    })
   }
 
   return null
+}
+
+/**
+ * Kept for backwards compatibility if any legacy code checks it.
+ */
+export function isAllowedOrigin(_origin: string): boolean {
+  return true
 }

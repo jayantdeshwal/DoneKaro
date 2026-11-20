@@ -33,7 +33,7 @@ export default function Register() {
   const initialRole = searchParams.get('role') === 'worker' ? 'worker' : 'customer'
   const [activeTab, setActiveTab] = useState<'customer' | 'worker'>(initialRole)
 
-  const { user, updateUser, verifyAndLoginWithOtp, setIsRegistering } = useAuth()
+  const { user, updateUser, verifyAndLoginWithOtp, isRegistering, setIsRegistering } = useAuth()
 
   const queryPhone = tryNormalizeIndianPhone(searchParams.get('phone') || '') ?? ''
 
@@ -75,9 +75,17 @@ export default function Register() {
   // ---------------- Customer Sign Up Submit ----------------
   const handleCustomerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (customerLoading || isRegistering) return
+
     setCustomerError('')
     setUploadStatusMsg('')
     setAlreadyRegisteredNotice(null)
+
+    // If customer is already authenticated and registration is complete, route immediately
+    if (user && user.role === 'customer' && user.registration_completed === true) {
+      navigate('/', { replace: true })
+      return
+    }
 
     const formSnapshot = {
       name: customerName.trim(),
@@ -143,7 +151,7 @@ export default function Register() {
         setCustomerError(
           sanitizeErrorMessage(
             err,
-            'Address proof upload failed. Please verify the document format (JPG, PNG, or PDF up to 10MB) and retry.'
+            'Address proof upload failed. Please verify the document format (JPG, PNG, WEBP, or PDF up to 10MB) and retry.'
           )
         )
       } finally {
@@ -183,24 +191,40 @@ export default function Register() {
       const widgetOpened = await openOtpWidget({
         identifier: cleanPhone,
         onSuccess: async (accessToken: string) => {
-          try {
-            setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
+          let authResult: { user: { id: string }; role: string } | null = null
 
-            // 1. Authoritative OTP login/signup creating authentic Supabase session
-            const authResult = await verifyAndLoginWithOtp(
+          // Step 1: Authoritative OTP login/signup creating authentic Supabase session
+          try {
+            setUploadStatusMsg(t('registerPage.verifyingAccount', 'Verifying mobile number & creating account...'))
+            authResult = await verifyAndLoginWithOtp(
               cleanPhone,
               accessToken,
               cleanName,
               formSnapshot.email || undefined
             )
+          } catch (authErr) {
+            console.error('[Register] Phone verification / session creation failed:', authErr)
+            setCustomerError(
+              sanitizeErrorMessage(
+                authErr,
+                'Mobile verification could not be completed on server. Please check your network and retry.'
+              )
+            )
+            setCustomerLoading(false)
+            setUploadStatusMsg('')
+            setIsRegistering(false)
+            return
+          }
 
+          // Step 2: Upload mandatory customer address proof to private bucket and complete registration
+          try {
             const customerId = authResult.user.id
             setPendingCustomerId(customerId)
+            setUploadStatusMsg(t('registerPage.uploadingAddressProof', 'Uploading address proof securely...'))
 
-            // 2. Upload mandatory customer address proof to private bucket
             const addressProofPath = await uploadCustomerAddressProof(addressProof, customerId)
 
-            // 3. Update profile authoritatively with address_proof_url reference and registration_completed: true
+            setUploadStatusMsg(t('registerPage.completingRegistration', 'Finalizing registration...'))
             const supabase = getSupabaseClient()
             const { error: rpcErr } = await (supabase as any).rpc('complete_customer_registration', {
               p_address_proof_path: addressProofPath,
@@ -229,10 +253,11 @@ export default function Register() {
 
             updateUser({ address_proof_url: addressProofPath, registration_completed: true })
             navigate('/')
-          } catch (err) {
+          } catch (uploadErr) {
+            console.error('[Register] Address proof upload failed:', uploadErr)
             setCustomerError(
               sanitizeErrorMessage(
-                err,
+                uploadErr,
                 'Mobile verification succeeded, but address proof upload failed. Please click below to retry uploading your document.'
               )
             )
@@ -246,7 +271,7 @@ export default function Register() {
           setIsRegistering(false)
           setCustomerLoading(false)
           setUploadStatusMsg('')
-          if (err && typeof err === 'object' && (err as any).cancelled) return
+          if (err && typeof err === 'object' && ((err as any).cancelled || (err as any).closeByUser)) return
           const msg = typeof err === 'string' ? err : (err as any)?.message || 'OTP verification failed. Please verify to complete sign up.'
           setCustomerError(msg)
         },
@@ -510,7 +535,8 @@ export default function Register() {
                   variant="primary"
                   className="w-full mt-3 py-3 font-semibold shadow-lg shadow-brand-500/20"
                   size="lg"
-                  loading={customerLoading}
+                  loading={customerLoading || isRegistering}
+                  disabled={customerLoading || isRegistering}
                 >
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   {isIncompleteCustomer
