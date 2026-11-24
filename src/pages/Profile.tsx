@@ -44,10 +44,12 @@ export default function Profile() {
     setSaveErrorMsg,
     avatarInputRef,
     isUploadingAvatar,
+    isRemovingAvatar,
     avatarUploadError,
     idProofInputRef,
     isUploadingIdProof,
     handleAvatarFileSelect,
+    handleRemoveAvatar,
     handleIdProofFileSelect,
     handleSaveProfile,
   } = useProfileData({
@@ -117,6 +119,7 @@ export default function Profile() {
         <ProfileHeader
           name={formData.name}
           phone={formData.phone}
+          avatarUrl={formData.avatar_url || user?.avatar_url}
           isWorker={isWorker}
           isAdmin={isAdmin}
           workerApprovalStatus={workerDetails?.approval_status}
@@ -168,11 +171,13 @@ export default function Profile() {
         isWorker={isWorker}
         isSaving={isSaving}
         isUploadingAvatar={isUploadingAvatar}
+        isRemovingAvatar={isRemovingAvatar}
         avatarUploadError={avatarUploadError}
         isUploadingIdProof={isUploadingIdProof}
         avatarInputRef={avatarInputRef}
         idProofInputRef={idProofInputRef}
         onAvatarSelect={handleAvatarFileSelect}
+        onRemoveAvatar={handleRemoveAvatar}
         onIdProofSelect={handleIdProofFileSelect}
         onSave={() => handleSaveProfile(() => setEditMode(false))}
       />

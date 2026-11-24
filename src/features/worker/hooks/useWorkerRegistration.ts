@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import { getSupabaseClient } from '@/lib/supabase'
 import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES, DEFAULT_IMAGE_TYPES } from '@/services/storage'
+import { compressAvatarImage } from '@/utils/imageCompressor'
 import { notifyAdminsOfWorkerRegistration } from '@/services/admin'
 import { openOtpWidget } from '@/services/otp'
 import { sanitizeErrorMessage } from '@/utils/errors'
@@ -115,23 +116,28 @@ export function useWorkerRegistration() {
     }
   }
 
-  const handleAvatarChange = (file?: File) => {
+  const handleAvatarChange = async (file?: File) => {
     if (!file) return
-    const result = validateFile(file, {
-      maxSizeMb: 5,
-      allowedTypes: DEFAULT_IMAGE_TYPES,
-    })
-    if (!result.valid) {
-      setErrors(prev => ({ ...prev, avatar: result.error || 'Invalid file' }))
-      return
+    try {
+      const compressed = await compressAvatarImage(file, { maxDimension: 512, quality: 0.85 })
+      const result = validateFile(compressed, {
+        maxSizeMb: 5,
+        allowedTypes: DEFAULT_IMAGE_TYPES,
+      })
+      if (!result.valid) {
+        setErrors(prev => ({ ...prev, avatar: result.error || 'Invalid file' }))
+        return
+      }
+      setErrors(prev => {
+        const next = { ...prev }
+        delete next.avatar
+        return next
+      })
+      setFormData(prev => ({ ...prev, avatar: compressed }))
+      setAvatarPreview(URL.createObjectURL(compressed))
+    } catch {
+      setErrors(prev => ({ ...prev, avatar: 'Unable to process image' }))
     }
-    setErrors(prev => {
-      const next = { ...prev }
-      delete next.avatar
-      return next
-    })
-    setFormData(prev => ({ ...prev, avatar: file }))
-    setAvatarPreview(URL.createObjectURL(file))
   }
 
   const handleIdProofChange = (file?: File) => {

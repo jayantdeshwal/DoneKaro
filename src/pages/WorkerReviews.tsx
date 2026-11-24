@@ -19,6 +19,7 @@ export default function WorkerReviews() {
   useEffect(() => {
     if (!user?.id || !isWorker) return
     let mounted = true
+
     const load = async () => {
       const supabase = getSupabaseClient()
       const [reviewItems, profileResult] = await Promise.all([
@@ -34,8 +35,42 @@ export default function WorkerReviews() {
       setReviewCount(Number(profileResult.data?.review_count ?? reviewItems.length))
       setIsLoading(false)
     }
+
     void load()
-    return () => { mounted = false }
+
+    const supabase = getSupabaseClient()
+    const channel = supabase
+      .channel(`worker-reviews-realtime-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reviews',
+          filter: `worker_id=eq.${user.id}`,
+        },
+        () => {
+          void load()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'worker_profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        () => {
+          void load()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      mounted = false
+      void supabase.removeChannel(channel)
+    }
   }, [user?.id, isWorker])
 
   if (authLoading) return null

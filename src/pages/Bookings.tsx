@@ -269,7 +269,7 @@ export default function Bookings() {
   }
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
-    if (!selectedBooking) return
+    if (!selectedBooking || isSubmittingReview) return
     setIsSubmittingReview(true)
     setReviewError('')
     try {

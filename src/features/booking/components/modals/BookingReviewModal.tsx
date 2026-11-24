@@ -4,6 +4,21 @@ import { Button, Modal, RatingStars } from '@kaamgar/ui'
 import type { BookingRow } from '../../types'
 import { resolveServiceAndCategory } from '../../utils/bookingFormat'
 
+const POSITIVE_TAGS = [
+  { id: 'on_time', labelKey: 'review.tags.onTime', defaultLabel: 'On Time' },
+  { id: 'polite', labelKey: 'review.tags.polite', defaultLabel: 'Polite & Professional' },
+  { id: 'clean_work', labelKey: 'review.tags.cleanWork', defaultLabel: 'Clean Work' },
+  { id: 'fair_pricing', labelKey: 'review.tags.fairPricing', defaultLabel: 'Fair Pricing' },
+  { id: 'quick_service', labelKey: 'review.tags.quickService', defaultLabel: 'Quick Service' },
+]
+
+const CONSTRUCTIVE_TAGS = [
+  { id: 'late_arrival', labelKey: 'review.tags.lateArrival', defaultLabel: 'Late Arrival' },
+  { id: 'pricing_issue', labelKey: 'review.tags.pricingIssue', defaultLabel: 'Pricing Issue' },
+  { id: 'cleanup_needed', labelKey: 'review.tags.cleanupNeeded', defaultLabel: 'Cleanup Needed' },
+  { id: 'comm_issue', labelKey: 'review.tags.commIssue', defaultLabel: 'Communication Issue' },
+]
+
 interface BookingReviewModalProps {
   isOpen: boolean
   onClose: () => void
@@ -24,17 +39,52 @@ export function BookingReviewModal({
   const { t, i18n } = useTranslation()
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewComment, setReviewComment] = useState('')
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+
+  const handleRatingChange = (newRating: number) => {
+    const wasPositive = reviewRating >= 4
+    const isPositive = newRating >= 4
+    if (wasPositive !== isPositive) {
+      setSelectedTags(new Set())
+    }
+    setReviewRating(newRating)
+  }
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => {
+      const next = new Set(prev)
+      if (next.has(tagId)) {
+        next.delete(tagId)
+      } else {
+        next.add(tagId)
+      }
+      return next
+    })
+  }
 
   const handleClose = () => {
     if (!isSubmittingReview) {
       setReviewRating(5)
       setReviewComment('')
+      setSelectedTags(new Set())
       onClose()
     }
   }
 
   const handleSubmit = async () => {
-    await onSubmitReview(reviewRating, reviewComment)
+    const activeTagsList = reviewRating >= 4 ? POSITIVE_TAGS : CONSTRUCTIVE_TAGS
+    const selectedLabels = activeTagsList
+      .filter(tag => selectedTags.has(tag.id))
+      .map(tag => t(tag.labelKey, tag.defaultLabel))
+
+    let finalComment = reviewComment.trim()
+    if (selectedLabels.length > 0) {
+      const tagsPrefix = `[${selectedLabels.join(', ')}]`
+      finalComment = finalComment ? `${tagsPrefix} ${finalComment}` : tagsPrefix
+    }
+
+    await onSubmitReview(reviewRating, finalComment)
+    setSelectedTags(new Set())
   }
 
   return (
@@ -60,10 +110,37 @@ export function BookingReviewModal({
           <RatingStars
             rating={reviewRating}
             interactive
-            onChange={setReviewRating}
+            onChange={handleRatingChange}
             size="lg"
             showValue
           />
+        </div>
+
+        {/* Quick-tap feedback chips */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-2">
+            {t('review.quickTagsLabel', 'Quick Feedback')} ({t('common.optional', 'Optional')})
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {(reviewRating >= 4 ? POSITIVE_TAGS : CONSTRUCTIVE_TAGS).map(tag => {
+              const isSelected = selectedTags.has(tag.id)
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  disabled={isSubmittingReview}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-95 cursor-pointer disabled:opacity-50 ${
+                    isSelected
+                      ? 'bg-amber-500/15 border-amber-500 text-amber-700 dark:text-amber-300 font-bold'
+                      : 'bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:border-slate-300 dark:hover:border-zinc-600'
+                  }`}
+                >
+                  {t(tag.labelKey, tag.defaultLabel)}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <div>

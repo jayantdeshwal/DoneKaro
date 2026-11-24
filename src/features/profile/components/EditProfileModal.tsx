@@ -7,6 +7,8 @@ import {
   Mail,
   UploadCloud,
   Check,
+  Trash2,
+  Loader2,
 } from 'lucide-react'
 import type { ProfileFormData } from '../types'
 
@@ -18,11 +20,13 @@ interface EditProfileModalProps {
   isWorker: boolean
   isSaving: boolean
   isUploadingAvatar: boolean
+  isRemovingAvatar: boolean
   avatarUploadError: string
   isUploadingIdProof: boolean
   avatarInputRef: React.RefObject<HTMLInputElement>
   idProofInputRef: React.RefObject<HTMLInputElement>
   onAvatarSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onRemoveAvatar: () => void
   onIdProofSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSave: () => void
 }
@@ -35,11 +39,13 @@ export function EditProfileModal({
   isWorker,
   isSaving,
   isUploadingAvatar,
+  isRemovingAvatar,
   avatarUploadError,
   isUploadingIdProof,
   avatarInputRef,
   idProofInputRef,
   onAvatarSelect,
+  onRemoveAvatar,
   onIdProofSelect,
   onSave,
 }: EditProfileModalProps) {
@@ -53,28 +59,15 @@ export function EditProfileModal({
       description={t('profile.editProfileDesc', 'Update your personal details, contact information, and preferences.')}
     >
       <div className="space-y-4 pt-2 max-h-[75vh] overflow-y-auto px-1">
-        {/* Avatar Photo Upload */}
-        <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700">
-          <div className="relative">
+        {/* Avatar Photo Upload & Delete Actions */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700">
+          <div className="relative shrink-0">
             <Avatar
               name={formData.name}
               src={formData.avatar_url || undefined}
               size="lg"
               className="shadow-sm"
             />
-            <button
-              type="button"
-              onClick={() => avatarInputRef.current?.click()}
-              disabled={isUploadingAvatar}
-              className="absolute -bottom-1 -right-1 p-1.5 bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 rounded-full shadow hover:bg-amber-600 dark:hover:bg-amber-500 cursor-pointer disabled:opacity-50"
-              title={t('profile.changePhoto', 'Change photo')}
-            >
-              {isUploadingAvatar ? (
-                <UploadCloud className="w-3.5 h-3.5 animate-bounce" />
-              ) : (
-                <Camera className="w-3.5 h-3.5" />
-              )}
-            </button>
             <input
               type="file"
               ref={avatarInputRef}
@@ -83,9 +76,55 @@ export function EditProfileModal({
               onChange={onAvatarSelect}
             />
           </div>
-          <div>
+
+          <div className="flex-1 min-w-0 text-center sm:text-left">
             <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{t('profile.photo', 'Profile Photo')}</p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-400">PNG or JPG (Max 5MB)</p>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+              {t('profile.photoHint', 'WebP, PNG, or JPG (Auto-optimized)')}
+            </p>
+
+            <div className="mt-2.5 flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isUploadingAvatar || isRemovingAvatar}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-700/80 hover:bg-slate-50 dark:hover:bg-zinc-700 text-xs font-semibold text-slate-800 dark:text-zinc-200 transition-colors shadow-xs active:scale-95 disabled:opacity-50 min-h-[36px] cursor-pointer"
+              >
+                {isUploadingAvatar ? (
+                  <>
+                    <UploadCloud className="w-3.5 h-3.5 animate-bounce text-amber-500" />
+                    <span>{t('profile.uploading', 'Uploading...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{formData.avatar_url ? t('profile.changePhoto', 'Change Photo') : t('profile.uploadPhoto', 'Upload Photo')}</span>
+                  </>
+                )}
+              </button>
+
+              {Boolean(formData.avatar_url) && (
+                <button
+                  type="button"
+                  onClick={onRemoveAvatar}
+                  disabled={isUploadingAvatar || isRemovingAvatar}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-colors shadow-xs active:scale-95 disabled:opacity-50 min-h-[36px] cursor-pointer"
+                  title={t('profile.removePhoto', 'Remove Photo')}
+                >
+                  {isRemovingAvatar ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>{t('common.removing', 'Removing...')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t('profile.removePhoto', 'Remove Photo')}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSupabaseClient } from '@/lib/supabase'
-import { uploadAvatar, uploadIdProof, validateFile, DEFAULT_DOCUMENT_TYPES } from '@/services/storage'
+import { uploadAvatar, uploadIdProof, validateFile, deleteAvatar, DEFAULT_DOCUMENT_TYPES } from '@/services/storage'
 import { recordPhoneRegistered } from '@/services/authCheck'
 import type { LiveWorkerDetails, ProfileFormData } from '../types'
 
@@ -44,9 +44,10 @@ export function useProfileData({
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('')
   const [saveErrorMsg, setSaveErrorMsg] = useState('')
 
-  // Avatar upload
+  // Avatar upload & remove
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [isRemovingAvatar, setIsRemovingAvatar] = useState(false)
   const [avatarUploadError, setAvatarUploadError] = useState('')
 
   // ID proof upload
@@ -152,9 +153,8 @@ export function useProfileData({
     if (!file || !user?.id) return
 
     setAvatarUploadError('')
-    const validation = validateFile(file, { maxSizeMb: 5 })
-    if (!validation.valid) {
-      setAvatarUploadError(validation.error || 'Invalid photo format')
+    if (!file.type.startsWith('image/')) {
+      setAvatarUploadError('Please select a valid image file (JPG, PNG, or WebP)')
       return
     }
 
@@ -176,6 +176,37 @@ export function useProfileData({
       setAvatarUploadError(err instanceof Error ? err.message : 'Unable to upload photo')
     } finally {
       setIsUploadingAvatar(false)
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = ''
+      }
+    }
+  }
+
+  // Avatar remove / delete
+  const handleRemoveAvatar = async () => {
+    if (!user?.id) return
+    setIsRemovingAvatar(true)
+    setAvatarUploadError('')
+    try {
+      await deleteAvatar(user.id)
+      setFormData(prev => ({ ...prev, avatar_url: '' }))
+
+      const supabase = getSupabaseClient()
+      const { error } = await (supabase.from('profiles') as any)
+        .update({ avatar_url: null, updated_at: new Date().toISOString() })
+        .eq('id', user.id)
+
+      if (error) throw error
+      updateUser({ avatar_url: null })
+      setSaveSuccessMsg(t('profile.avatarRemoved', 'Profile photo removed!'))
+      setTimeout(() => setSaveSuccessMsg(''), 3500)
+    } catch (err) {
+      setAvatarUploadError(err instanceof Error ? err.message : 'Unable to remove photo')
+    } finally {
+      setIsRemovingAvatar(false)
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = ''
+      }
     }
   }
 
@@ -270,9 +301,9 @@ export function useProfileData({
         const updatePayload: any = {
           full_name: trimmedName,
           language: formData.language,
+          avatar_url: formData.avatar_url?.trim() || null,
           updated_at: new Date().toISOString(),
         }
-        if (formData.avatar_url) updatePayload.avatar_url = formData.avatar_url
         if (formData.email?.trim()) updatePayload.email = formData.email.trim()
 
         try {
@@ -343,7 +374,7 @@ export function useProfileData({
         name: trimmedName,
         email: formData.email?.trim() || user.email,
         language: formData.language,
-        avatar_url: formData.avatar_url || user.avatar_url,
+        avatar_url: formData.avatar_url?.trim() || null,
       })
 
       // 6. Update phone registration cache
@@ -382,11 +413,13 @@ export function useProfileData({
     setSaveErrorMsg,
     avatarInputRef,
     isUploadingAvatar,
+    isRemovingAvatar,
     avatarUploadError,
     idProofInputRef,
     isUploadingIdProof,
     idProofUploadError,
     handleAvatarFileSelect,
+    handleRemoveAvatar,
     handleIdProofFileSelect,
     handleSaveProfile,
     loadProfileData,

@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { Avatar } from '@kaamgar/ui'
 
 interface ProfileHeaderProps {
   name: string
   phone: string
+  avatarUrl?: string | null
   isWorker: boolean
   isAdmin: boolean
   workerApprovalStatus?: string
@@ -16,6 +18,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({
   name,
   phone,
+  avatarUrl,
   isWorker,
   isAdmin,
   workerApprovalStatus,
@@ -68,7 +71,17 @@ export function ProfileHeader({
       )}
 
       {/* 2. PROFILE IDENTITY HEADER */}
-      <div className="mb-6 px-1 flex items-start justify-between gap-3">
+      <div className="mb-6 px-1 flex items-start gap-3.5 sm:gap-4">
+        {/* User Avatar */}
+        <div className="relative shrink-0">
+          <Avatar
+            name={name || userDisplayName}
+            src={avatarUrl || undefined}
+            size="xl"
+            className="shadow-sm border-2 border-slate-200 dark:border-zinc-700"
+          />
+        </div>
+
         <div className="flex-1 min-w-0">
           {/* Status indicator tag */}
           <div className="flex items-center gap-1.5 mb-1.5">

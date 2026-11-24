@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CATEGORIES, getCategoryName } from '@kaamgar/shared'
@@ -12,7 +12,7 @@ import type { BookingQuoteRequest } from '@/services/quotes'
 import { withdrawBookingChangeRequest } from '@/services/changeRequests'
 
 // Feature imports
-import type { ContactModalData, WorkerBookingRow } from '@/features/worker/types'
+import type { ContactModalData, TabFilter, WorkerBookingRow } from '@/features/worker/types'
 import { useWorkerDashboardData } from '@/features/worker/hooks/useWorkerDashboardData'
 import { useWorkerAvailability } from '@/features/worker/hooks/useWorkerAvailability'
 import { useWorkerRealtime } from '@/features/worker/hooks/useWorkerRealtime'
@@ -109,16 +109,48 @@ export default function WorkerDashboard() {
     roleLabel: 'Customer',
   })
 
-  // Hash target scrolling
+  // Hash target scrolling with automatic tab switching
+  const lastScrolledHashRef = useRef<string>('')
   useEffect(() => {
-    const target = window.location.hash.slice(1)
-    if (!target) return
-    const timer = window.setTimeout(
-      () => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      150
-    )
+    const rawTarget = window.location.hash.slice(1)
+    if (!rawTarget) return
+    const target = decodeURIComponent(rawTarget)
+
+    if (target.startsWith('booking-')) {
+      const targetBookingId = target.replace(/^booking-/, '')
+      const targetBooking = bookings.find(b => b.id === targetBookingId)
+      if (targetBooking) {
+        let requiredTab: TabFilter = 'all'
+        if (targetBooking.status === 'pending') {
+          requiredTab = 'pending'
+        } else if (
+          targetBooking.status === 'accepted' ||
+          targetBooking.status === 'in_progress' ||
+          targetBooking.status === 'payment_pending'
+        ) {
+          requiredTab = 'active'
+        } else if (targetBooking.status === 'completed') {
+          requiredTab = 'completed'
+        }
+
+        if (activeTab !== requiredTab) {
+          setActiveTab(requiredTab)
+          return
+        }
+      }
+    }
+
+    if (lastScrolledHashRef.current === target && document.getElementById(target)) return
+
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(target)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        lastScrolledHashRef.current = target
+      }
+    }, 200)
     return () => window.clearTimeout(timer)
-  }, [])
+  }, [bookings, activeTab, setActiveTab])
 
   const handleOpenContactModal = (booking: WorkerBookingRow) => {
     const formattedDate = new Date(booking.scheduled_at).toLocaleDateString(

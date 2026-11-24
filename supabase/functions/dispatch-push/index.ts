@@ -57,17 +57,21 @@ function constantTimeCompare(a: string, b: string): boolean {
  * Resolves safe internal route path based on notification type and booking ID.
  * Strictly prevents open-redirect vulnerabilities.
  */
-function resolveSafeDestinationUrl(notificationType: string, bookingId?: string | null): string {
+function resolveSafeDestinationUrl(notificationType: string, bookingId?: string | null, isWorkerRecipient: boolean = false): string {
+  if (notificationType === 'review_received') {
+    return '/worker/reviews'
+  }
+
   if (bookingId && typeof bookingId === 'string') {
     const cleanId = encodeURIComponent(bookingId)
-    if (notificationType === 'booking_created') {
+    if (notificationType === 'booking_created' || isWorkerRecipient) {
       return `/worker/dashboard#booking-${cleanId}`
     }
     return `/bookings#booking-${cleanId}`
   }
 
   if (notificationType && notificationType.includes('quote')) {
-    return '/bookings#quote-requests'
+    return isWorkerRecipient ? '/worker/dashboard#quote-requests' : '/bookings#quote-requests'
   }
 
   if (notificationType === 'worker_registration_submitted') {
@@ -205,7 +209,20 @@ serve(async (req: Request) => {
         continue
       }
 
-      const safeUrl = resolveSafeDestinationUrl(item.notification_type, item.booking_id)
+      // Lookup recipient role to orient routing safely between customer and worker portals
+      let isWorkerRecipient = false
+      if (item.user_id) {
+        const { data: recipientProfile } = await serviceClient
+          .from('profiles')
+          .select('role')
+          .eq('id', item.user_id)
+          .maybeSingle()
+        if (recipientProfile?.role === 'worker') {
+          isWorkerRecipient = true
+        }
+      }
+
+      const safeUrl = resolveSafeDestinationUrl(item.notification_type, item.booking_id, isWorkerRecipient)
 
       let deliveredCount = 0
       let failedCount = 0

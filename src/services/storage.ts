@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase'
+import { compressAvatarImage } from '@/utils/imageCompressor'
 
 export interface FileValidationOptions {
   maxSizeMb?: number
@@ -159,20 +160,58 @@ export function validateFile(
 }
 
 /**
+ * Deletes all avatar files for a given user from the 'avatars' storage bucket.
+ */
+export async function deleteAvatar(userId: string): Promise<void> {
+  if (!userId) return
+  const supabase = getSupabaseClient()
+  try {
+    const { data: fileList, error: listError } = await supabase.storage
+      .from('avatars')
+      .list(userId)
+
+    if (listError || !fileList || fileList.length === 0) return
+
+    const filesToRemove = fileList
+      .filter(f => f.name && f.name.startsWith('avatar-'))
+      .map(f => `${userId}/${f.name}`)
+
+    if (filesToRemove.length > 0) {
+      const { error: removeError } = await supabase.storage
+        .from('avatars')
+        .remove(filesToRemove)
+      if (removeError) {
+        console.warn('Notice deleting avatar files:', removeError.message)
+      }
+    }
+  } catch (err) {
+    console.warn('Error during deleteAvatar:', err)
+  }
+}
+
+/**
  * Uploads a profile avatar to the public 'avatars' storage bucket.
+ * Center-crops and downscales to max 512x512 WebP before uploading.
+ * Cleans up old orphaned avatars in ${userId}/ after the new upload succeeds.
  * Returns the public CDN URL of the uploaded image.
  */
 export async function uploadAvatar(file: File, userId: string): Promise<string> {
-  const validation = validateFile(file, { maxSizeMb: 5, allowedTypes: DEFAULT_IMAGE_TYPES })
+  // 1. Client-side crop and WebP compression
+  const compressedFile = await compressAvatarImage(file, { maxDimension: 512, quality: 0.85 })
+
+  // 2. Validate file (compressed file is well under 5MB)
+  const validation = validateFile(compressedFile, { maxSizeMb: 5, allowedTypes: DEFAULT_IMAGE_TYPES })
   if (!validation.valid) throw new Error(validation.error)
 
   const supabase = getSupabaseClient()
-  const { mimeType, ext } = getImageMimeAndExt(file)
-  const filePath = `${userId}/avatar-${Date.now()}.${ext}`
+  const { mimeType, ext } = getImageMimeAndExt(compressedFile)
+  const fileName = `avatar-${Date.now()}.${ext}`
+  const filePath = `${userId}/${fileName}`
 
+  // 3. Upload new compressed avatar
   const { error: uploadError } = await supabase.storage
     .from('avatars')
-    .upload(filePath, file, {
+    .upload(filePath, compressedFile, {
       cacheControl: '3600',
       upsert: true,
       contentType: mimeType,
@@ -180,6 +219,21 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
 
   if (uploadError) {
     throw new Error(`Failed to upload avatar: ${uploadError.message}`)
+  }
+
+  // 4. Clean up old orphaned avatar files after successful upload
+  try {
+    const { data: fileList } = await supabase.storage.from('avatars').list(userId)
+    if (fileList && fileList.length > 0) {
+      const oldFiles = fileList
+        .filter(f => f.name && f.name.startsWith('avatar-') && f.name !== fileName)
+        .map(f => `${userId}/${f.name}`)
+      if (oldFiles.length > 0) {
+        await supabase.storage.from('avatars').remove(oldFiles)
+      }
+    }
+  } catch (cleanupErr) {
+    console.warn('Orphaned avatar cleanup notice:', cleanupErr)
   }
 
   const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)

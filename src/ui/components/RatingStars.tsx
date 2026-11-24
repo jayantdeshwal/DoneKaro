@@ -75,7 +75,7 @@ export const RatingStars = forwardRef<HTMLDivElement, RatingStarsProps>(
               aria-valuemax={max}
               className={cn(
                 'flex items-center justify-center p-0.5 rounded transition-transform duration-100',
-                interactive && !readonly && 'hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1',
+                interactive && !readonly && 'hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1 min-h-[44px] min-w-[44px] p-2 cursor-pointer',
                 !interactive && 'cursor-default'
               )}
               aria-label={`${starValue} star${starValue > 1 ? 's' : ''}`}
