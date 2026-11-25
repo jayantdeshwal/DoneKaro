@@ -63,11 +63,15 @@ export const SupportHistoryTab: React.FC<SupportHistoryTabProps> = ({ isHindi })
     loadHistory()
   }, [loadHistory])
 
-  const handleCopy = (text: string, historyId: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedHistoryId(historyId)
-    if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-    copyTimerRef.current = setTimeout(() => setCopiedHistoryId(null), 2500)
+  const handleCopy = async (text: string, historyId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedHistoryId(historyId)
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      copyTimerRef.current = setTimeout(() => setCopiedHistoryId(null), 2500)
+    } catch {
+      // Clipboard API unavailable in restricted WebView context
+    }
   }
 
   if (!isAuthenticated) {

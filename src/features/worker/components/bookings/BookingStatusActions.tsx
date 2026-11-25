@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, CheckCircle2, FileText, Info, Play, Star } from 'lucide-react'
+import { Check, CheckCircle2, FileText, Info, Play, ShieldAlert, Star } from 'lucide-react'
 import { Button } from '@/ui'
 import type { WorkerBookingRow } from '../../types'
 
@@ -11,6 +11,7 @@ interface BookingStatusActionsProps {
   onConfirmCash: (booking: WorkerBookingRow) => void
   onViewDetails: (booking: WorkerBookingRow) => void
   onViewReceipt: (booking: WorkerBookingRow) => void
+  onOpenSupport?: (bookingId: string) => void
 }
 
 export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
@@ -20,8 +21,10 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
   onConfirmCash,
   onViewDetails,
   onViewReceipt,
+  onOpenSupport,
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isHindi = i18n.language === 'hi'
 
   return (
     <>
@@ -161,6 +164,24 @@ export const BookingStatusActions: React.FC<BookingStatusActionsProps> = ({
           </div>
         </div>
       )}
+
+      {/* Active Booking Care & Support / Report Issue Entry Point */}
+      {onOpenSupport &&
+        (booking.status === 'accepted' ||
+          booking.status === 'in_progress' ||
+          booking.status === 'payment_pending') && (
+          <div className="pt-1">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => onOpenSupport(booking.id)}
+              className="min-h-[44px] w-full text-xs font-semibold border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-300 dark:hover:border-rose-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 flex items-center justify-center gap-1.5"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>{isHindi ? 'शिकायत / सहायता (Care & Support)' : 'Report Issue / Care & Support'}</span>
+            </Button>
+          </div>
+        )}
     </>
   )
 }

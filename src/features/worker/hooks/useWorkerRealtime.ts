@@ -52,6 +52,18 @@ export function useWorkerRealtime({ onDataChange }: UseWorkerRealtimeProps) {
           void onDataChange()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'complaints',
+          filter: `opened_by=eq.${workerId}`,
+        },
+        () => {
+          void onDataChange()
+        }
+      )
       .subscribe()
 
     return () => {

@@ -313,6 +313,24 @@ export async function fetchAdminUserSupportHistory(userId: string): Promise<Admi
     .slice(0, 5)
 }
 
+/**
+ * Fetches complaints filed against a specific respondent (repeat-offender visibility for admins).
+ */
+export async function fetchAdminRespondentComplaints(
+  respondentId: string
+): Promise<Array<{ id: string; status: AdminComplaint['status']; reason: string; created_at: string }>> {
+  if (!respondentId) return []
+  const supabase = getSupabaseClient()
+  const { data, error } = await (supabase.from('complaints') as any)
+    .select('id, status, reason, created_at')
+    .eq('against_user', respondentId)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if (error) throw error
+  return (data ?? []) as Array<{ id: string; status: AdminComplaint['status']; reason: string; created_at: string }>
+}
+
 export async function fetchAdminComplaintAttachments(bookingId: string): Promise<AdminComplaintAttachment[]> {
   const supabase = getSupabaseClient()
   const { data: quotes, error: quotesError } = await (supabase.from('booking_quotes') as any)

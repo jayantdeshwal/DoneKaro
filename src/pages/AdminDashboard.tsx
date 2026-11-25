@@ -46,6 +46,11 @@ export default function AdminDashboard() {
           user={user}
           isSuperAdmin={isSuperAdmin}
           activeTab={admin.activeTab}
+          openSupportAlertCount={admin.openSupportAlertCount}
+          onOpenSupportManagement={() => {
+            admin.setActiveTab('management')
+            admin.setSearchParams({ tab: 'management' })
+          }}
           supportAlertsError={admin.supportAlertsError}
           workerError={admin.workerError}
           setWorkerError={admin.setWorkerError}

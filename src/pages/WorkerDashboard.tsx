@@ -334,6 +334,8 @@ export default function WorkerDashboard() {
                     isRepeatCustomer={(completedCountsByCustomer.get(booking.customer_id) ?? 0) > 1}
                     onViewDetails={setDetailsModalBooking}
                     onViewReceipt={setReceiptModalBooking}
+                    onViewReviews={() => navigate('/worker/reviews')}
+                    onOpenSupport={openSupport}
                   />
                 )
               }
@@ -351,6 +353,7 @@ export default function WorkerDashboard() {
                   onViewReceipt={setReceiptModalBooking}
                   onUpdateStatus={handleUpdateStatus}
                   onWithdrawChangeRequest={handleWithdrawChangeRequest}
+                  onOpenSupport={bId => openSupport({ bookingId: bId, defaultTab: 'complaint' })}
                 />
               )
             })

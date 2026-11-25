@@ -4,6 +4,8 @@ import {
   MapPin,
   AlertCircle,
   CheckCircle,
+  ShieldAlert,
+  ChevronRight,
 } from 'lucide-react'
 import type { AdminTabType } from '../types'
 
@@ -11,6 +13,8 @@ interface AdminHeaderBannerProps {
   user: { name?: string | null; email?: string | null } | null
   isSuperAdmin?: boolean
   activeTab: AdminTabType
+  openSupportAlertCount?: number | null
+  onOpenSupportManagement?: () => void
   supportAlertsError: string
   workerError: string
   setWorkerError: (err: string) => void
@@ -28,6 +32,8 @@ export function AdminHeaderBanner({
   user,
   isSuperAdmin,
   activeTab,
+  openSupportAlertCount,
+  onOpenSupportManagement,
   supportAlertsError,
   workerError,
   setWorkerError,
@@ -94,6 +100,46 @@ export function AdminHeaderBanner({
             </div>
           </div>
 
+          {/* Direct Action Pill: Open Support & Complaints Queue */}
+          {onOpenSupportManagement && (
+            <button
+              type="button"
+              onClick={onOpenSupportManagement}
+              className={`min-h-[48px] flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border transition-all cursor-pointer active:scale-95 shadow-xs ${
+                activeTab === 'management'
+                  ? 'bg-rose-500/15 border-rose-500 text-rose-700 dark:text-rose-300'
+                  : (openSupportAlertCount ?? 0) > 0
+                  ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800/70 hover:border-rose-500 text-rose-700 dark:text-rose-300'
+                  : 'bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 hover:border-amber-500 text-slate-700 dark:text-zinc-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <span className="text-xs font-bold block leading-tight">
+                    Complaints & Support
+                  </span>
+                  <span className="text-[11px] opacity-80">
+                    {openSupportAlertCount === null || openSupportAlertCount === undefined
+                      ? 'Open queue'
+                      : openSupportAlertCount > 0
+                      ? `${openSupportAlertCount} open ticket${openSupportAlertCount === 1 ? '' : 's'}`
+                      : 'All caught up'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {(openSupportAlertCount ?? 0) > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-500 text-white">
+                    {openSupportAlertCount}
+                  </span>
+                )}
+                <ChevronRight className="w-4 h-4 opacity-70" />
+              </div>
+            </button>
+          )}
         </div>
       </div>
 

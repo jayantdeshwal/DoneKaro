@@ -62,6 +62,14 @@ function resolveSafeDestinationUrl(notificationType: string, bookingId?: string 
     return '/worker/reviews'
   }
 
+  if (notificationType === 'complaint_created') {
+    return '/admin?tab=management'
+  }
+
+  if (notificationType === 'complaint_updated' || notificationType === 'complaint_resolved') {
+    return '/profile?openSupport=history'
+  }
+
   if (bookingId && typeof bookingId === 'string') {
     const cleanId = encodeURIComponent(bookingId)
     if (notificationType === 'booking_created' || isWorkerRecipient) {

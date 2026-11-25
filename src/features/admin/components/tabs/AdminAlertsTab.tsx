@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Card, Badge, Button } from '@kaamgar/ui'
 import { useLanguage } from '@/context/LanguageContext'
@@ -12,6 +13,7 @@ import {
   AlertCircle,
   Eye,
   Check,
+  ShieldAlert,
 } from 'lucide-react'
 import type { AdminNotificationItem } from '../../types'
 
@@ -42,6 +44,7 @@ export function AdminAlertsTab({
 }: AdminAlertsTabProps) {
   const { t } = useTranslation()
   const { language } = useLanguage()
+  const navigate = useNavigate()
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -212,6 +215,7 @@ export function AdminAlertsTab({
               const isWorkerEvent =
                 notif.notification_type === 'worker_registration_submitted' ||
                 notif.notification_type === 'worker_document_uploaded'
+              const isComplaintEvent = notif.notification_type === 'complaint_created'
               const localized = localizeNotification(notif, t, language)
 
               return (
@@ -233,6 +237,8 @@ export function AdminAlertsTab({
                           ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                           : notif.notification_type === 'worker_document_uploaded'
                           ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                          : isComplaintEvent
+                          ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                           : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       }`}
                     >
@@ -242,7 +248,10 @@ export function AdminAlertsTab({
                       {notif.notification_type === 'worker_document_uploaded' && (
                         <FileText className="w-5 h-5" />
                       )}
-                      {!isWorkerEvent && (
+                      {isComplaintEvent && (
+                        <ShieldAlert className="w-5 h-5" />
+                      )}
+                      {!isWorkerEvent && !isComplaintEvent && (
                         <Bell className="w-5 h-5" />
                       )}
                     </div>
@@ -282,6 +291,21 @@ export function AdminAlertsTab({
                       >
                         <Eye className="w-3.5 h-3.5" />
                         {t('admin.reviewWorker', 'Review Worker')}
+                      </Button>
+                    )}
+
+                    {isComplaintEvent && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          if (isUnread) void markNotificationRead(notif.id)
+                          navigate('/admin?tab=management')
+                        }}
+                        className="text-xs flex items-center gap-1.5 shadow-sm font-semibold px-3 py-1.5 rounded-xl bg-rose-500 text-white hover:bg-rose-600"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        {t('admin.manageComplaints', 'Manage Complaints')}
                       </Button>
                     )}
 

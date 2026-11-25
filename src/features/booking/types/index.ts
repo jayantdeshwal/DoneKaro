@@ -1,5 +1,6 @@
 import type { JobId } from '@kaamgar/shared'
 import type { BookingChangeRequest, BookingPaymentSummary } from '@/services/changeRequests'
+import type { ComplaintStatus } from '@/features/support/types'
 
 export interface CustomerBookingReview {
   id: string
@@ -35,6 +36,7 @@ export interface BookingRow {
   review?: CustomerBookingReview
   changeRequests?: BookingChangeRequest[]
   paymentSummary?: BookingPaymentSummary
+  userComplaint?: { id: string; status: ComplaintStatus } | null
 }
 
 export interface WorkerDirectoryRow {

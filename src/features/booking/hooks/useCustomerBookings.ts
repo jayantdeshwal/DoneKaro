@@ -84,7 +84,7 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
       }
 
       const bookingIds = bookings.map(b => b.id)
-      const [reviewedIds, changeRequests, paymentSummaries, customerReviews] = await Promise.all([
+      const [reviewedIds, changeRequests, paymentSummaries, customerReviews, userComplaints] = await Promise.all([
         fetchCustomerReviewedBookingIds(customerId),
         fetchBookingChangeRequests(bookingIds),
         fetchBookingPaymentSummaries(bookingIds),
@@ -93,6 +93,14 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
               .from('reviews')
               .select('id, booking_id, rating, comment, created_at')
               .in('booking_id', bookingIds)
+              .then((res: any) => (res.data ?? []) as any[])
+          : Promise.resolve([]),
+        bookingIds.length > 0
+          ? (supabase.from('complaints') as any)
+              .select('id, booking_id, status, created_at')
+              .in('booking_id', bookingIds)
+              .eq('opened_by', customerId)
+              .order('created_at', { ascending: false })
               .then((res: any) => (res.data ?? []) as any[])
           : Promise.resolve([]),
       ])
@@ -121,6 +129,16 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
         }
       })
 
+      const complaintsByBooking = new Map<string, { id: string; status: any }>()
+      userComplaints.forEach((cmp: any) => {
+        if (cmp.booking_id && !complaintsByBooking.has(cmp.booking_id)) {
+          complaintsByBooking.set(cmp.booking_id, {
+            id: cmp.id,
+            status: cmp.status,
+          })
+        }
+      })
+
       setAllBookings(
         bookings.map(booking => ({
           ...booking,
@@ -129,6 +147,7 @@ export function useCustomerBookings({ userId }: UseCustomerBookingsProps) {
           review: reviewsByBooking.get(booking.id),
           changeRequests: requestsByBooking.get(booking.id) ?? [],
           paymentSummary: summaryByBooking.get(booking.id),
+          userComplaint: complaintsByBooking.get(booking.id) ?? null,
         }))
       )
 

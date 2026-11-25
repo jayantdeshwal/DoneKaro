@@ -146,17 +146,37 @@ export function useWorkerDashboardData() {
         }
       }
 
-      const [quoteData, workerReviews] = await Promise.all([
+      const rawBookingIds = rawBookings.map(b => b.id).filter(Boolean)
+      const [quoteData, workerReviews, workerComplaints] = await Promise.all([
         fetchWorkerQuoteData(workerId),
         fetchWorkerReviews(workerId).catch(err => {
           console.warn('Worker reviews load warning:', err)
           return [] as ReviewItem[]
         }),
+        rawBookingIds.length > 0
+          ? (supabase.from('complaints') as any)
+              .select('id, booking_id, status, created_at')
+              .in('booking_id', rawBookingIds)
+              .eq('opened_by', workerId)
+              .order('created_at', { ascending: false })
+              .then((res: any) => (res.data ?? []) as any[])
+              .catch(() => [] as any[])
+          : Promise.resolve([]),
       ])
 
       const reviewsByBooking = new Map<string, ReviewItem>(
         workerReviews.map(r => [r.booking_id, r])
       )
+
+      const complaintsByBooking = new Map<string, { id: string; status: any }>()
+      workerComplaints.forEach((cmp: any) => {
+        if (cmp.booking_id && !complaintsByBooking.has(cmp.booking_id)) {
+          complaintsByBooking.set(cmp.booking_id, {
+            id: cmp.id,
+            status: cmp.status,
+          })
+        }
+      })
 
       const completeBookings: WorkerBookingRow[] = rawBookings.map(b => ({
         ...b,
@@ -164,6 +184,7 @@ export function useWorkerDashboardData() {
         changeRequests: requestsByBooking.get(b.id) ?? [],
         paymentSummary: summaryByBooking.get(b.id),
         review: reviewsByBooking.get(b.id),
+        userComplaint: complaintsByBooking.get(b.id) ?? null,
       }))
 
       setBookings(completeBookings)

@@ -15,6 +15,7 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import { useSupport } from '../context/SupportContext'
 import {
+  fetchActiveComplaintForBooking,
   fetchBookingDetailsForSupport,
   fetchEligibleBookingsForSupport,
   submitSupportComplaint,
@@ -22,6 +23,29 @@ import {
 } from '../services/supportService'
 import { ComplaintItem, EligibleSupportBooking } from '../types'
 import { SupportStatusBadge } from './SupportStatusBadge'
+
+const QUICK_COMPLAINT_REASONS = [
+  {
+    id: 'overcharging',
+    en: 'Overcharging / Extra Cash Demand',
+    hi: 'अतिरिक्त पैसे / ओवरचार्जिंग',
+  },
+  {
+    id: 'incomplete',
+    en: 'Incomplete Work',
+    hi: 'अधूरा काम छोड़ा',
+  },
+  {
+    id: 'noshow',
+    en: 'Late / No-Show',
+    hi: 'देरी से आए / नहीं आए',
+  },
+  {
+    id: 'behaviour',
+    en: 'Behaviour Issue',
+    hi: 'अनुचित व्यवहार',
+  },
+]
 
 interface ComplaintTabProps {
   isHindi: boolean
@@ -46,6 +70,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
   const [submitting, setSubmitting] = useState(false)
   const [complaintError, setComplaintError] = useState<string | null>(null)
   const [createdComplaint, setCreatedComplaint] = useState<ComplaintItem | null>(null)
+  const [existingActiveComplaint, setExistingActiveComplaint] = useState<ComplaintItem | null>(null)
   const [copiedToken, setCopiedToken] = useState(false)
 
   const copyTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -76,9 +101,14 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
     if (selectedBookingId) {
       setLoadingContext(true)
       setComplaintError(null)
-      fetchBookingDetailsForSupport(selectedBookingId)
-        .then(ctx => {
+      setExistingActiveComplaint(null)
+      Promise.all([
+        fetchBookingDetailsForSupport(selectedBookingId),
+        fetchActiveComplaintForBooking(selectedBookingId),
+      ])
+        .then(([ctx, activeComplaint]) => {
           setBookingContext(ctx)
+          setExistingActiveComplaint(activeComplaint)
           if (!ctx) {
             setComplaintError(
               isHindi
@@ -97,6 +127,7 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
         .finally(() => setLoadingContext(false))
     } else {
       setBookingContext(null)
+      setExistingActiveComplaint(null)
       setLoadingEligible(true)
       fetchEligibleBookingsForSupport()
         .then(list => setEligibleBookings(list))
@@ -105,11 +136,24 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
     }
   }, [selectedBookingId, isAuthenticated, isHindi])
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedToken(true)
-    if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-    copyTimerRef.current = setTimeout(() => setCopiedToken(false), 2500)
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedToken(true)
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      copyTimerRef.current = setTimeout(() => setCopiedToken(false), 2500)
+    } catch {
+      // Clipboard API unavailable in restricted WebView context
+    }
+  }
+
+  const handleQuickReasonChip = (label: string) => {
+    setReason(prev => {
+      const current = prev.trim()
+      if (!current) return `${label}: `
+      if (current.includes(label)) return prev
+      return `${current} • ${label}`
+    })
   }
 
   const handleComplaintSubmit = async (e: React.FormEvent) => {
@@ -286,8 +330,9 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
                   onClick={() => {
                     setSelectedBookingId(null)
                     setBookingContext(null)
+                    setExistingActiveComplaint(null)
                   }}
-                  className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  className="min-h-[44px] px-2.5 inline-flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                 >
                   {isHindi ? 'बदलें' : 'Change'}
                 </button>
@@ -314,54 +359,119 @@ export const ComplaintTab: React.FC<ComplaintTabProps> = ({ isHindi }) => {
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
-            {isHindi ? 'समस्या का स्पष्ट विवरण दर्ज करें' : 'Describe the Issue in Detail'}
-            <span className="text-rose-500 ml-1">*</span>
-          </label>
-          <textarea
-            value={reason}
-            onChange={e => setReason(e.target.value)}
-            placeholder={
-              isHindi
-                ? 'समस्या का कारण लिखें (उदा. अतिरिक्त नकद माँगना, काम अधूरा छोड़ना, समय पर न पहुँचना या अनुचित व्यवहार)...'
-                : 'Please describe what happened (e.g. unapproved offline cash demands, incomplete repair, conduct issues, or no-show)...'
-            }
-            rows={4}
-            maxLength={1000}
-            disabled={submitting}
-            className="w-full text-xs rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 resize-none disabled:opacity-50"
-          />
-          <div className="flex justify-between items-center text-[10px] text-slate-400">
-            <span>{isHindi ? 'न्यूनतम 10 अक्षर आवश्यक' : 'Minimum 10 characters required'}</span>
-            <span>{reason.length}/1000</span>
+        {existingActiveComplaint ? (
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800/70 space-y-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono font-bold text-amber-800 dark:text-amber-300">
+                #CMP-{existingActiveComplaint.id.slice(0, 8).toUpperCase()}
+              </span>
+              <SupportStatusBadge status={existingActiveComplaint.status} isHindi={isHindi} />
+            </div>
+            <p className="text-amber-900 dark:text-amber-200 font-medium leading-relaxed">
+              {isHindi
+                ? 'इस बुकिंग के लिए एक सक्रिय शिकायत पहले से दर्ज है और हमारी टीम द्वारा समीक्षाधीन है।'
+                : 'An active complaint already exists for this booking and is currently being reviewed by our team.'}
+            </p>
+            <p className="p-2.5 rounded-xl bg-white/80 dark:bg-zinc-900/70 border border-amber-200/70 dark:border-zinc-800 text-slate-700 dark:text-zinc-300">
+              {existingActiveComplaint.reason}
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setSelectedBookingId(null)}
+                className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 cursor-pointer"
+              >
+                {isHindi ? 'पीछे' : 'Back'}
+              </button>
+              <button
+                type="button"
+                onClick={() => switchTab('history')}
+                className="min-h-[44px] flex-1 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-600 cursor-pointer shadow-xs"
+              >
+                {isHindi ? 'मेरे अनुरोध में देखें' : 'Track in My Requests'}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Quick-Tap Reason Chips */}
+            <div className="space-y-1.5">
+              <span className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400">
+                {isHindi ? 'सामान्य समस्या चुनें (त्वरित चयन)' : 'Quick Issue Tags (Tap to insert)'}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_COMPLAINT_REASONS.map(chip => {
+                  const chipLabel = isHindi ? chip.hi : chip.en
+                  const isActive = reason.includes(chipLabel)
+                  return (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      disabled={submitting}
+                      onClick={() => handleQuickReasonChip(chipLabel)}
+                      className={`min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95 cursor-pointer disabled:opacity-50 ${
+                        isActive
+                          ? 'bg-rose-500/15 border-rose-500 text-rose-700 dark:text-rose-300'
+                          : 'bg-slate-50 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:border-rose-300 dark:hover:border-rose-800'
+                      }`}
+                    >
+                      + {chipLabel}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
-        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
-          {isHindi
-            ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में दर्ज होगा और आपको एक आधिकारिक संदर्भ टोकन मिलेगा। AI सहायक स्वतः कोई शिकायत दर्ज नहीं करता।'
-            : '📌 This creates an authoritative record in the DoneKaro admin panel with a unique reference token. AI Support is read-only and cannot mutate complaints.'}
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                {isHindi ? 'समस्या का स्पष्ट विवरण दर्ज करें' : 'Describe the Issue in Detail'}
+                <span className="text-rose-500 ml-1">*</span>
+              </label>
+              <textarea
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                placeholder={
+                  isHindi
+                    ? 'समस्या का कारण लिखें (उदा. अतिरिक्त नकद माँगना, काम अधूरा छोड़ना, समय पर न पहुँचना या अनुचित व्यवहार)...'
+                    : 'Please describe what happened (e.g. unapproved offline cash demands, incomplete repair, conduct issues, or no-show)...'
+                }
+                rows={4}
+                maxLength={1000}
+                disabled={submitting}
+                className="w-full text-xs rounded-xl p-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 resize-none disabled:opacity-50"
+              />
+              <div className="flex justify-between items-center text-[10px] text-slate-400">
+                <span>{isHindi ? 'न्यूनतम 10 अक्षर आवश्यक' : 'Minimum 10 characters required'}</span>
+                <span>{reason.length}/1000</span>
+              </div>
+            </div>
 
-        <div className="flex items-center justify-end gap-2.5 pt-2">
-          <button
-            type="button"
-            onClick={() => setSelectedBookingId(null)}
-            disabled={submitting}
-            className="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
-          >
-            {isHindi ? 'पीछे' : 'Back'}
-          </button>
-          <button
-            type="submit"
-            disabled={submitting || reason.trim().length < 10 || !bookingContext}
-            className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-          >
-            {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            <span>{isHindi ? 'शिकायत दर्ज करें' : 'Submit Complaint'}</span>
-          </button>
-        </div>
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
+              {isHindi
+                ? '📌 यह अनुरोध DoneKaro व्यवस्थापक पैनल में दर्ज होगा और आपको एक आधिकारिक संदर्भ टोकन मिलेगा। AI सहायक स्वतः कोई शिकायत दर्ज नहीं करता।'
+                : '📌 This creates an authoritative record in the DoneKaro admin panel with a unique reference token. AI Support is read-only and cannot mutate complaints.'}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedBookingId(null)}
+                disabled={submitting}
+                className="min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isHindi ? 'पीछे' : 'Back'}
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || reason.trim().length < 10 || !bookingContext}
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 dark:bg-amber-400 dark:text-slate-950 hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              >
+                {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{isHindi ? 'शिकायत दर्ज करें' : 'Submit Complaint'}</span>
+              </button>
+            </div>
+          </>
+        )}
       </form>
     )
   }

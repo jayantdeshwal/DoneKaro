@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { getCategoryById, getCategoryName, getServiceById } from '@kaamgar/shared'
 import {
   X,
   User,
@@ -12,16 +14,26 @@ import {
   Save,
   Loader2,
   Shield,
+  ShieldAlert,
   MessageSquare,
   Image as ImageIcon,
 } from 'lucide-react'
 import { AdminComplaint, AdminComplaintAttachment, AdminSupportHistoryEntry, ComplaintStatus } from '../types'
 import {
   fetchAdminComplaintAttachments,
+  fetchAdminRespondentComplaints,
   fetchAdminUserSupportHistory,
   updateComplaintStatus,
 } from '../services/adminSupportService'
 import { SupportStatusBadge } from './SupportStatusBadge'
+
+function resolveReadableCategory(categoryId: string, lang: 'en' | 'hi'): string {
+  const service = getServiceById(categoryId)
+  if (service) return getCategoryName(service, lang)
+  const cat = getCategoryById(categoryId)
+  if (cat) return getCategoryName(cat, lang)
+  return categoryId
+}
 
 interface ComplaintDetailsProps {
   complaint: AdminComplaint | null
@@ -34,12 +46,17 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
   onClose,
   onUpdated,
 }) => {
+  const { i18n } = useTranslation()
+  const lang = i18n.language === 'hi' ? 'hi' : 'en'
   const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus>('open')
   const [resolutionNote, setResolutionNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [history, setHistory] = useState<AdminSupportHistoryEntry[]>([])
+  const [respondentHistory, setRespondentHistory] = useState<
+    Array<{ id: string; status: ComplaintStatus; reason: string; created_at: string }>
+  >([])
   const [attachments, setAttachments] = useState<AdminComplaintAttachment[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState<string | null>(null)
@@ -51,16 +68,19 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
       setErrorMsg(null)
       setSuccessMsg(null)
       setHistory([])
+      setRespondentHistory([])
       setAttachments([])
       setHistoryError(null)
       setHistoryLoading(true)
       Promise.all([
         fetchAdminUserSupportHistory(complaint.opened_by),
         fetchAdminComplaintAttachments(complaint.booking_id),
+        fetchAdminRespondentComplaints(complaint.against_user),
       ])
-        .then(([userHistory, complaintAttachments]) => {
+        .then(([userHistory, complaintAttachments, respondentComplaints]) => {
           setHistory(userHistory.filter(item => item.id !== complaint.id))
           setAttachments(complaintAttachments)
+          setRespondentHistory(respondentComplaints.filter(item => item.id !== complaint.id))
         })
         .catch(err => {
           setHistoryError(err instanceof Error ? err.message : 'Unable to load user history or attachments.')
@@ -165,9 +185,9 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
           {complaint.booking && (
             <div className="space-y-1 text-slate-600 dark:text-zinc-400 text-[11px]">
               <div className="flex justify-between">
-                <span>Category:</span>
+                <span>Service Category:</span>
                 <span className="font-medium text-slate-800 dark:text-zinc-200">
-                  {complaint.booking.category_id}
+                  {resolveReadableCategory(complaint.booking.category_id, lang)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -296,6 +316,42 @@ export const ComplaintDetails: React.FC<ComplaintDetailsProps> = ({
         ) : (
           <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-zinc-900 dark:text-zinc-400">
             No other support history found.
+          </p>
+        ))}
+      </section>
+
+      {/* Respondent Prior Complaints (Repeat-Offender Check) */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4 text-rose-500" />
+            Prior Complaints Against Respondent
+          </h4>
+          {!historyLoading && respondentHistory.length > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+              {respondentHistory.length} prior
+            </span>
+          )}
+        </div>
+        {!historyLoading && !historyError && (respondentHistory.length > 0 ? (
+          <ul className="divide-y divide-slate-200 rounded-xl border border-rose-200/70 bg-rose-50/20 dark:divide-zinc-800 dark:border-rose-900/40 dark:bg-rose-950/10">
+            {respondentHistory.map(item => (
+              <li key={`resp-${item.id}`} className="p-3 text-xs space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
+                    #CMP-{item.id.slice(0, 8).toUpperCase()}
+                  </span>
+                  <span className="capitalize text-slate-500 dark:text-zinc-400">
+                    {item.status} · {new Date(item.created_at).toLocaleDateString('en-IN')}
+                  </span>
+                </div>
+                <p className="text-slate-700 dark:text-zinc-300 line-clamp-2">{item.reason}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-zinc-900 dark:text-zinc-400">
+            No prior complaints filed against this respondent.
           </p>
         ))}
       </section>

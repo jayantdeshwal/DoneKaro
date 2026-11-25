@@ -10,6 +10,8 @@ import {
   AlertCircle,
   FileCheck,
 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { AdminSessionGuard } from '@/features/admin/components/AdminSessionGuard'
 import {
   AdminComplaint,
   AdminSuggestion,
@@ -32,6 +34,7 @@ export interface AdminSupportPageProps {
 
 export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = false }) => {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const [activeTab, setActiveTab] = useState<AdminSupportTab>('complaints')
   const [complaintFilter, setComplaintFilter] = useState<AdminComplaintFilter>('all')
@@ -53,8 +56,8 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
 
     try {
       const [complaintsData, suggestionsData] = await Promise.all([
-        fetchAdminComplaints(complaintFilter),
-        fetchAdminSuggestions(suggestionFilter),
+        fetchAdminComplaints('all'),
+        fetchAdminSuggestions('all'),
       ])
       setComplaints(complaintsData)
       setSuggestions(suggestionsData)
@@ -74,7 +77,7 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
       setLoading(false)
       setRefreshing(false)
     }
-  }, [complaintFilter, suggestionFilter, selectedComplaint?.id, selectedSuggestion?.id])
+  }, [selectedComplaint?.id, selectedSuggestion?.id])
 
   useEffect(() => {
     loadData()
@@ -241,6 +244,7 @@ export const AdminSupportPage: React.FC<AdminSupportPageProps> = ({ embedded = f
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-8">
+      <AdminSessionGuard phone={user?.phone ?? ''} />
       <div className="max-w-7xl mx-auto">
         {content}
       </div>

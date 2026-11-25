@@ -27,6 +27,7 @@ interface WorkerBookingCardProps {
   onViewReceipt: (booking: WorkerBookingRow) => void
   onUpdateStatus: (bookingId: string, status: WorkerBookingRow['status']) => void | Promise<void>
   onWithdrawChangeRequest: (requestId: string) => Promise<void>
+  onOpenSupport?: (bookingId: string) => void
 }
 
 export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
@@ -40,6 +41,7 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
   onViewReceipt,
   onUpdateStatus,
   onWithdrawChangeRequest,
+  onOpenSupport,
 }) => {
   const { t, i18n } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -180,6 +182,7 @@ export const WorkerBookingCard: React.FC<WorkerBookingCardProps> = ({
           onConfirmCash={onConfirmCash}
           onViewDetails={onViewDetails}
           onViewReceipt={onViewReceipt}
+          onOpenSupport={onOpenSupport}
         />
       </div>
 

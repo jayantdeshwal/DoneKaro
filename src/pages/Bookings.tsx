@@ -557,6 +557,11 @@ export default function Bookings() {
                       booking={b}
                       onOpenDetails={handleOpenDetailsModal}
                       onOpenReceipt={handleOpenReceiptModal}
+                      onOpenReviewModal={booking => {
+                        setSelectedBooking(booking)
+                        setShowReviewModal(true)
+                      }}
+                      onOpenSupport={openSupport}
                     />
                   ))}
                 </div>
@@ -628,6 +633,10 @@ export default function Bookings() {
         onBookAgain={target => {
           setDetailsModalBooking(null)
           handleOpenBookAgainModal(target)
+        }}
+        onOpenSupport={options => {
+          setDetailsModalBooking(null)
+          openSupport(options)
         }}
       />
 

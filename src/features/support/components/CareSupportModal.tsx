@@ -34,7 +34,7 @@ export const CareSupportModal: React.FC = () => {
       aria-modal="true"
       aria-labelledby="care-support-modal-title"
     >
-      <div className="w-full sm:max-w-xl h-[92vh] sm:h-[680px] max-h-[92vh] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-zinc-100">
+      <div className="w-full sm:max-w-xl h-[92dvh] sm:h-[680px] max-h-[92dvh] pb-[env(safe-area-inset-bottom)] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-zinc-100">
         {/* Top Drag Handle for mobile */}
         <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 sm:hidden shrink-0" />
 

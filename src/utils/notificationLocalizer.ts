@@ -267,6 +267,18 @@ export function localizeNotification(
     categoryLabel = isHi ? 'समीक्षा' : 'Review'
     localizedTitle = isHi ? 'नई ग्राहक समीक्षा प्राप्त हुई' : 'New Review Received'
     localizedBody = isHi ? 'एक ग्राहक ने आपकी सेवा के लिए रेटिंग और समीक्षा दी है।' : rawBody
+  } else if (type === 'complaint_created') {
+    categoryLabel = isHi ? 'नई शिकायत' : 'New Complaint'
+    localizedTitle = isHi ? 'नई शिकायत दर्ज की गई' : rawTitle || 'New Complaint Filed'
+    localizedBody = isHi ? rawBody.replace(/^(.+?)\s+filed a complaint/i, '$1 ने शिकायत दर्ज की है') : rawBody
+  } else if (type === 'complaint_updated') {
+    categoryLabel = isHi ? 'शिकायत अपडेट' : 'Complaint Update'
+    localizedTitle = isHi ? 'शिकायत की स्थिति अपडेट हुई' : rawTitle || 'Complaint Status Updated'
+    localizedBody = rawBody
+  } else if (type === 'complaint_resolved') {
+    categoryLabel = isHi ? 'शिकायत समाधान' : 'Complaint Resolved'
+    localizedTitle = isHi ? 'शिकायत का समाधान हो गया' : rawTitle || 'Complaint Resolved'
+    localizedBody = rawBody
   } else {
     // Fallback: If not translated, keep clean original text
     localizedTitle = rawTitle || (isHi ? 'सूचना' : 'Notification')
@@ -293,6 +305,8 @@ export function getLocalizedActionLabel(label: string, language: string): string
     'Review Quotes': 'कोटेशन देखें',
     'View Booking': 'बुकिंग देखें',
     'View Profile': 'प्रोफ़ाइल देखें',
+    'Manage Complaints': 'शिकायतें देखें',
+    'View My Requests': 'मेरे अनुरोध देखें',
     'Verify Worker': 'सत्यापित करें',
     'Review Registration': 'पंजीकरण जांचें',
     'Review Documents': 'दस्तावेज़ जांचें',

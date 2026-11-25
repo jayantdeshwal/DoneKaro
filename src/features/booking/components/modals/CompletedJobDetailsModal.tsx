@@ -8,11 +8,13 @@ import {
   MessageSquare,
   Phone,
   RefreshCw,
+  ShieldAlert,
   Star,
   UserCheck,
 } from 'lucide-react'
 import { Avatar, Button, Modal } from '@kaamgar/ui'
 import { formatJobReference } from '@kaamgar/shared'
+import type { SupportTab } from '@/features/support'
 import type { BookingRow } from '../../types'
 import { formatBookingDate, formatBookingTime, resolveServiceAndCategory } from '../../utils/bookingFormat'
 
@@ -23,6 +25,7 @@ interface CompletedJobDetailsModalProps {
   onOpenReceipt: (booking: BookingRow) => void
   onRateWorker: (booking: BookingRow) => void
   onBookAgain: (booking: BookingRow) => void
+  onOpenSupport?: (options: { bookingId?: string; defaultTab?: SupportTab }) => void
 }
 
 export function CompletedJobDetailsModal({
@@ -32,6 +35,7 @@ export function CompletedJobDetailsModal({
   onOpenReceipt,
   onRateWorker,
   onBookAgain,
+  onOpenSupport,
 }: CompletedJobDetailsModalProps) {
   const { t, i18n } = useTranslation()
 
@@ -249,7 +253,31 @@ export function CompletedJobDetailsModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2.5 pt-2">
+        <div className="flex flex-wrap gap-2.5 pt-2">
+          {onOpenSupport && (
+            <Button
+              variant="danger-outline"
+              size="sm"
+              onClick={() =>
+                onOpenSupport({
+                  bookingId: booking.id,
+                  defaultTab: booking.userComplaint ? 'history' : 'complaint',
+                })
+              }
+              className="flex-1 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>
+                {booking.userComplaint
+                  ? i18n.language === 'hi'
+                    ? 'शिकायत स्थिति'
+                    : 'View Complaint'
+                  : i18n.language === 'hi'
+                  ? 'शिकायत / सहायता'
+                  : 'Care & Support'}
+              </span>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

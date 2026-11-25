@@ -20,6 +20,7 @@ import {
   UserCheck,
   FileText,
   ArrowLeft,
+  ShieldAlert,
 } from 'lucide-react'
 import { DbNotification } from '@/services/notifications'
 import {
@@ -92,6 +93,21 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
     icon: FileText,
     color: 'text-indigo-400',
     bg: 'bg-indigo-950/60 border border-indigo-800/40',
+  },
+  complaint_created: {
+    icon: ShieldAlert,
+    color: 'text-rose-400',
+    bg: 'bg-rose-950/60 border border-rose-800/40',
+  },
+  complaint_updated: {
+    icon: ShieldAlert,
+    color: 'text-amber-400',
+    bg: 'bg-amber-950/60 border border-amber-800/40',
+  },
+  complaint_resolved: {
+    icon: CheckCircle,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-950/60 border border-emerald-800/40',
   },
   system: {
     icon: Bell,
@@ -168,6 +184,27 @@ export default function Notifications() {
   const getTypeConfig = (type: string) => typeConfig[type] || typeConfig.system
 
   const getNotificationAction = (item: DbNotification) => {
+    if (item.notification_type === 'complaint_created') {
+      return {
+        label: t('admin.management', 'Manage Complaints'),
+        url: '/admin?tab=management',
+      }
+    }
+    if (
+      item.notification_type === 'complaint_updated' ||
+      item.notification_type === 'complaint_resolved'
+    ) {
+      return {
+        label: t('notifications.viewSupportHistory', 'View My Requests'),
+        url: '/profile?openSupport=history',
+      }
+    }
+    if (item.notification_type === 'review_received' && isWorker) {
+      return {
+        label: t('profile.reviewsRatings', 'My Ratings & Reviews'),
+        url: '/worker/reviews',
+      }
+    }
     if (
       item.notification_type === 'worker_registration_submitted' ||
       item.notification_type === 'worker_document_uploaded'

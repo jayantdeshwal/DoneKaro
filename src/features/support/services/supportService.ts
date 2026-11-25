@@ -96,6 +96,32 @@ export async function fetchBookingDetailsForSupport(
 }
 
 /**
+ * Checks if the signed-in user already has an active complaint ('open' or 'investigating')
+ * for the given booking, enabling instant UI feedback before typing.
+ */
+export async function fetchActiveComplaintForBooking(
+  bookingId: string
+): Promise<ComplaintItem | null> {
+  if (!bookingId || bookingId.length < 10) return null
+  const supabase = getSupabaseClient()
+  const { data: sessionData } = await supabase.auth.getSession()
+  const user = sessionData?.session?.user
+  if (!user) return null
+
+  const { data, error } = await (supabase.from('complaints') as any)
+    .select('id, booking_id, opened_by, against_user, status, reason, resolution_note, created_at, resolved_at')
+    .eq('booking_id', bookingId)
+    .eq('opened_by', user.id)
+    .in('status', ['open', 'investigating'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return data as ComplaintItem
+}
+
+/**
  * Explicitly creates a complaint record in public.complaints.
  * Validates caller identity, booking ownership, and prevents duplicate active complaints.
  */

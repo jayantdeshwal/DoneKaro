@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
@@ -19,10 +19,21 @@ import {
 
 export default function Profile() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user, updateUser, updateEmail, logout, isWorker, isAdmin, isLoading: authLoading } = useAuth()
   const { language, setLanguage, toggleLanguage } = useLanguage()
   const { openAssistant } = useAiAssistant()
   const { openSupport } = useSupport()
+
+  useEffect(() => {
+    const supportTarget = searchParams.get('openSupport')
+    if (supportTarget === 'history' || supportTarget === 'complaint' || supportTarget === 'suggestion') {
+      openSupport({ defaultTab: supportTarget })
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('openSupport')
+      setSearchParams(nextParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams, openSupport])
 
   // Modal open states
   const [editMode, setEditMode] = useState(false)

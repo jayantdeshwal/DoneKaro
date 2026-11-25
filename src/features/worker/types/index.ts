@@ -1,6 +1,7 @@
 import type { JobId } from '@kaamgar/shared'
 import type { BookingChangeRequest, BookingPaymentSummary } from '@/services/changeRequests'
 import type { ReviewItem } from '@/services/reviews'
+import type { ComplaintStatus } from '@/features/support/types'
 
 export interface WorkerProfileRow {
   bio: string
@@ -30,6 +31,7 @@ export interface WorkerBookingRow {
   changeRequests?: BookingChangeRequest[]
   paymentSummary?: BookingPaymentSummary
   review?: ReviewItem
+  userComplaint?: { id: string; status: ComplaintStatus } | null
 }
 
 export type TabFilter = 'all' | 'pending' | 'active' | 'completed'

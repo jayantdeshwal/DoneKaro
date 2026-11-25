@@ -20,6 +20,7 @@ export const SuggestionList: React.FC<SuggestionListProps> = ({
 
   const filtered = useMemo(() => {
     return suggestions.filter(s => {
+      if (currentFilter !== 'all' && s.status !== currentFilter) return false
       if (!searchTerm.trim()) return true
       const term = searchTerm.toLowerCase()
       const refToken = `sug-${s.id.slice(0, 8)}`.toLowerCase()
@@ -34,7 +35,7 @@ export const SuggestionList: React.FC<SuggestionListProps> = ({
         category.includes(term)
       )
     })
-  }, [suggestions, searchTerm])
+  }, [suggestions, currentFilter, searchTerm])
 
   const counts = useMemo(() => {
     return {

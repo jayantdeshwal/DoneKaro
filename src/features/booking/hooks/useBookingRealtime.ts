@@ -48,6 +48,18 @@ export function useBookingRealtime({ customerId, onUpdate }: UseBookingRealtimeP
           void onUpdate()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'complaints',
+          filter: `opened_by=eq.${customerId}`,
+        },
+        () => {
+          void onUpdate()
+        }
+      )
       .subscribe()
 
     return () => {

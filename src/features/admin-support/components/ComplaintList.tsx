@@ -20,6 +20,7 @@ export const ComplaintList: React.FC<ComplaintListProps> = ({
 
   const filtered = useMemo(() => {
     return complaints.filter(c => {
+      if (currentFilter !== 'all' && c.status !== currentFilter) return false
       if (!searchTerm.trim()) return true
       const term = searchTerm.toLowerCase()
       const refToken = `cmp-${c.id.slice(0, 8)}`.toLowerCase()
@@ -36,7 +37,7 @@ export const ComplaintList: React.FC<ComplaintListProps> = ({
         reason.includes(term)
       )
     })
-  }, [complaints, searchTerm])
+  }, [complaints, currentFilter, searchTerm])
 
   const counts = useMemo(() => {
     return {
@@ -94,7 +95,7 @@ export const ComplaintList: React.FC<ComplaintListProps> = ({
           type="text"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          placeholder="Search by CMP/JUG ID, user name, or keyword..."
+          placeholder="Search by CMP/DK ID, user name, or keyword..."
           className="min-h-[48px] w-full text-sm pl-9 pr-3 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white placeholder-slate-400"
         />
       </div>
