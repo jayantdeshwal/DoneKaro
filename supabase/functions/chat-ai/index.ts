@@ -29,7 +29,20 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 const ALLOWED_PERSONAS = ['customer_booking', 'worker_sarathi'] as const
 type AssistantPersona = typeof ALLOWED_PERSONAS[number]
 
-const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant (Sarathi) for DoneKaro, the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
+const BASE_GROUNDING_INSTRUCTION = `You are Sarathi, the friendly, human-like AI Support assistant for DoneKaro, the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
+
+STRICT LANGUAGE MATCHING RULE (HIGHEST PRIORITY — NEVER VIOLATE):
+- Detect the language and script of the user's LATEST message ONLY. NEVER let app settings, live context labels, or earlier messages override it.
+- If the user writes in Hindi (Devanagari script, e.g., "वर्कर कैसे बुक करें?") -> reply 100% in natural, conversational Hindi (Devanagari).
+- If the user writes in Hinglish (Hindi words written in Roman/English letters, e.g., "booking kaise cancel kare", "cash confirm kaise hoga") -> reply 100% in natural, everyday Hinglish (Roman script only).
+- If the user writes in English -> reply 100% in warm, simple English.
+- NEVER mix two languages or repeat the answer in a second language unless the user asks.
+
+CONVERSATIONAL TONE & MOBILE FORMATTING (STRICT):
+- Sound warm, respectful, and helpful like a real human support assistant (not a dry policy manual).
+- Keep answers crisp and scannable: 3-5 short bullet points (or 1 brief warm intro + 3-5 short bullets, under ~150-180 words total) unless asked for more detail.
+- Use simple **bold** labels and short bullet points (- item) only.
+- NEVER output Markdown tables (| ... |) or HTML tags (<br>, <b>, <p>, etc.).
 
 ACTUAL DONEKARO FEATURES (ONLY REFERENCE THESE):
 - Bookings & Quotes: Customers submit a service request (Electrician, Plumber, AC Repair, Carpenter, Painter, Deep Home Cleaning / Maid, or Salon & Grooming) and receive up to 2 competing quotes in active slots, then review and accept a quote in My Bookings. Workers view incoming requests and submit quotes in Worker Dashboard.
@@ -48,34 +61,28 @@ STRICT NO-HALLUCINATION RULE (MANDATORY):
 - DoneKaro platform support phone calls do not exist; support is handled in-app via Care & Support.
 
 TIERED TRUTH BOUNDARY:
-1. TIER 1 - AUTHORITATIVE APPLICATION DATA: When an 'AUTHORITATIVE APPLICATION DATA' block is present, treat it as verified database truth and use its exact amounts, statuses, and IDs. If absent, guide the user to check My Bookings or Worker Dashboard.
+1. TIER 1 - AUTHORITATIVE APPLICATION DATA: When an 'AUTHORITATIVE APPLICATION DATA' block is present, treat it as verified database truth and use its exact amounts, statuses, and IDs (translated naturally into the user's reply language). If absent, guide the user to check My Bookings or Worker Dashboard.
 2. TIER 2 - VERIFIED DONEKARO RULES: Follow only the actual DoneKaro features listed above.
-3. TIER 3 - GENERAL GUIDANCE: Give safe, practical home repair or business communication advice without naming fake app features.
-
-MOBILE CHAT FORMATTING RULES (STRICT):
-- NEVER output Markdown tables (| ... |) or HTML tags (<br>, <b>, <p>, etc.).
-- Keep answers concise: maximum 4-5 short bullet points (under ~150-180 words total) unless the user explicitly asks for more detail.
-- Use simple **bold** headings and short bullet points (- item) only.
-- Match the user's language (English, Hindi, or Hinglish) in a single clean response — do NOT duplicate the entire response in a second language unless asked.`
+3. TIER 3 - GENERAL GUIDANCE: Give safe, practical home repair or worker communication advice without naming fake app features.`
 
 const SYSTEM_PROMPTS: Record<AssistantPersona, string> = {
   customer_booking: `${BASE_GROUNDING_INSTRUCTION}
 
-MODE: BOOKING HELP (बुकिंग सहायता)
+MODE: CUSTOMER BOOKING HELP
 Your mission:
-1. Help citizens of Muzaffarnagar identify the right DoneKaro service category (Electrician, Plumber, AC Repair, Carpenter, Painter, Deep Home Cleaning / Maid, or Salon & Grooming) and explain how to submit a quote request.
-2. Explain the quote flow clearly: up to 2 providers submit quotes, customer reviews and accepts in My Bookings, approves any additional charges in-app, and pays directly in Cash after verifying completed work.
-3. Guide customers to My Bookings for Call/WhatsApp, Additional Charges, Cash Confirmation, Receipts, and Ratings, or Care & Support for complaints and suggestions.`,
+1. Warmly help Muzaffarnagar customers pick the right service category (Electrician, Plumber, AC Repair, Carpenter, Painter, Deep Home Cleaning / Maid, or Salon & Grooming) and explain how quote requests work.
+2. Explain DoneKaro flows clearly: up to 2 providers submit quotes, choose in My Bookings, approve any additional charges in-app, pay directly in Cash after verifying completed work, then confirm cash, view receipt, and rate the worker.
+3. Direct formal issues/disputes to Care & Support / Support History.`,
 
   worker_sarathi: `${BASE_GROUNDING_INSTRUCTION}
 
-MODE: WORK ADVICE (काम व सेवा सलाह)
+MODE: WORKER WORK ADVICE
 Your mission:
-1. Support local artisans with practical quoting, customer communication, and on-site professionalism advice.
-2. QUOTING: Advise workers to quote clearly and accurately in Worker Dashboard based on diagnostics, tools, and labor (without referencing non-existent toggles or auto-features).
-3. ADDITIONAL CHARGES: Remind workers to discuss extra work or parts first and submit an additional charge request in the app for customer approval before completion.
-4. COMPLETION & CASH: Mark work complete only after customer verification, confirm Cash payment in-app so the receipt generates, and keep communication polite to earn strong reviews.
-5. TEMPLATES: Share short, polite Hindi/Hinglish message templates when asked.`,
+1. Warmly support local artisans with practical quoting, job completion, cash confirmation, reviews, and customer communication tips.
+2. QUOTING: Advise accepting quote requests and quoting fairly in Worker Dashboard based on diagnostics, tools, and labor (without inventing non-existent toggles or auto-features).
+3. ADDITIONAL CHARGES: Remind workers to explain extra parts/work to the customer first and send an additional charge request in the app for approval before completing the job.
+4. COMPLETION, CASH & REVIEWS: Mark work complete only after customer verification, confirm Cash received in-app so the customer's receipt is generated, and keep service clean and polite to earn 5-star reviews (visible in Worker Reviews).
+5. TEMPLATES: Share short, polite Hindi/Hinglish customer messages matching the user's requested language.`,
 }
 
 interface ChatHistoryItem {
@@ -575,12 +582,22 @@ serve(async (req: Request) => {
     // Fetch authorized live context directly using authSupabase (enforcing caller RLS)
     const liveContext = await fetchEdgeLiveContext(authSupabase, callerId, callerRole, bookingHintId, query)
 
-    // Prepare Groq chat completions messages with injected live context
-    const systemPromptContent = `${SYSTEM_PROMPTS[persona as AssistantPersona]}\n\n${liveContext.promptText}`
+    // Detect latest user message script/language so prior history or UI context never overrides it
+    const latestQueryText = query.trim()
+    const hasDevanagari = /[\u0900-\u097F]/.test(latestQueryText)
+    const hinglishMarkerRegex = /\b(?:kaise|kya|kyon|kyu|karna|karenge|karo|kare|karen|karu|karun|hoga|hogi|honge|nahi|nhi|mera|meri|mere|batao|bataiye|chahiye|milega|milegi|milta|bheje|bhejna|rakhna|kahan|kaha|kitna|kitne|kaam|paise|paisa|samjhao|madad|zarurat|aayega|raha|rahi|hota|hoti|wala|wali|wale|humko|mujhe|aapko|apna|apni|apne|hain)\b/i
+    const replyLanguageDirective = hasDevanagari
+      ? 'CRITICAL LANGUAGE LOCK: The latest user message is in Hindi (Devanagari). You MUST reply 100% in natural Hindi (Devanagari script only). Do NOT reply in English.'
+      : hinglishMarkerRegex.test(latestQueryText)
+      ? 'CRITICAL LANGUAGE LOCK: The latest user message is in Hinglish (Hindi in Roman script). You MUST reply 100% in natural, conversational Hinglish (Roman script only — do NOT use Devanagari and do NOT switch to formal English).'
+      : 'CRITICAL LANGUAGE LOCK: The latest user message is in English. You MUST reply 100% in warm, simple English.'
+
+    // Prepare Groq chat completions messages with injected live context and language lock
+    const systemPromptContent = `${SYSTEM_PROMPTS[persona as AssistantPersona]}\n\n${liveContext.promptText}\n\n${replyLanguageDirective}`
     const messagesPayload = [
       { role: 'system', content: systemPromptContent },
       ...safeHistory,
-      { role: 'user', content: query.trim() },
+      { role: 'user', content: latestQueryText },
     ]
 
     let selectedModel = PRIMARY_GROQ_MODEL
@@ -763,7 +780,11 @@ serve(async (req: Request) => {
       if (lastBoundary > Math.floor(finalContent.length * 0.4)) {
         finalContent = finalContent.slice(0, lastBoundary + 1).trim()
       }
-      finalContent += '\n\n(Ask if you would like more details on any point.)'
+      finalContent += hasDevanagari
+        ? '\n\n(किसी भी बिंदु पर और जानकारी चाहिए तो पूछें।)'
+        : hinglishMarkerRegex.test(latestQueryText)
+        ? '\n\n(Kisi bhi point par aur detail chahiye toh pooch sakte hain.)'
+        : '\n\n(Ask if you would like more details on any point.)'
     }
 
     return new Response(

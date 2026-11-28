@@ -55,7 +55,9 @@ export interface SuggestionChip {
   id: string
   labelEn: string
   labelHi: string
-  query: string
+  queryEn: string
+  queryHi: string
+  query?: string
   icon?: string
 }
 

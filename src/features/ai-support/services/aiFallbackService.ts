@@ -23,14 +23,15 @@ export function resolveLocalFallbackQuery(
 ): ChatMessage {
   const query = rawQuery.toLowerCase().trim()
   const result = matchLocalRule(query, persona, liveContext)
+  const queryHasDevanagari = /[\u0900-\u097F]/.test(rawQuery)
 
   return {
     id: 'fallback_' + Date.now(),
     sender: 'assistant',
     persona,
     timestamp: new Date(),
-    textEn: result.textEn,
-    textHi: result.textHi,
+    textEn: queryHasDevanagari ? result.textHi : result.textEn,
+    textHi: queryHasDevanagari ? result.textHi : result.textEn,
     sourceType: result.sourceType,
     actions: result.actions,
   }
@@ -49,6 +50,63 @@ function matchLocalRule(
 }
 
 function matchBookingRule(query: string): FallbackResult {
+  // 0. Receipts
+  if (query.includes('receipt') || query.includes('bill') || query.includes('रसीद')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `I can help you find your receipt:\n\n- Go to **My Bookings** and open your **Completed** booking.\n- Digital receipts are generated automatically once cash payment is confirmed in the app.\n- Tap the **Receipt** button on that booking card to view or save it.`,
+      textHi: `अपनी रसीद देखने के लिए ये आसान कदम अपनाएँ:\n\n- **My Bookings** में जाएँ और अपनी **Completed (पूरी हुई)** बुकिंग खोलें।\n- कैश पेमेंट कन्फर्म होने के बाद ही डिजिटल रसीद बनती है।\n- उस बुकिंग कार्ड पर **रसीद (Receipt)** बटन पर टैप करके आप इसे देख सकते हैं।`,
+      actions: [
+        {
+          id: 'act_go_bookings',
+          labelEn: 'Open My Bookings',
+          labelHi: 'मेरी बुकिंग्स खोलें',
+          type: 'navigate',
+          payload: '/bookings',
+          icon: 'Calendar',
+        },
+      ],
+    }
+  }
+
+  // 0.1 Cash Payment
+  if (query.includes('cash') || query.includes('payment') || query.includes('कैश') || query.includes('पेमेंट') || query.includes('भुगतान')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `Here is how cash payment works on DoneKaro:\n\n- **Inspect first:** Check the completed work before paying.\n- **Pay directly:** Pay 100% of the final approved amount directly in cash to the worker.\n- **Confirm & get receipt:** Once payment is confirmed in-app from **My Bookings**, your digital receipt becomes available.`,
+      textHi: `DoneKaro पर कैश पेमेंट की प्रक्रिया बहुत सरल है:\n\n- **पहले काम जाँचें:** भुगतान से पहले पूरा हुआ काम अच्छी तरह देख लें।\n- **सीधा नकद भुगतान:** तय और स्वीकृत अंतिम राशि सीधे कामगार को कैश में दें।\n- **कन्फर्म और रसीद:** **My Bookings** में पेमेंट कन्फर्म होते ही आपकी डिजिटल रसीद तैयार हो जाती है।`,
+      actions: [
+        {
+          id: 'act_go_bookings',
+          labelEn: 'Open My Bookings',
+          labelHi: 'मेरी बुकिंग्स खोलें',
+          type: 'navigate',
+          payload: '/bookings',
+          icon: 'Calendar',
+        },
+      ],
+    }
+  }
+
+  // 0.2 Complaints
+  if (query.includes('complaint') || query.includes('dispute') || query.includes('शिकायत') || query.includes('समस्या')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `You can easily report a booking issue in-app:\n\n- Open the **Care & Support** desk below (or use the complaint option on your booking card in **My Bookings**).\n- Select the booking, choose the reason, and describe your issue.\n- You can track the status and admin response anytime in **Support History**.`,
+      textHi: `आप अपनी बुकिंग की शिकायत ऐप के अंदर ही आसानी से दर्ज कर सकते हैं:\n\n- नीचे **केयर डेस्क (Care & Support)** खोलें या **My Bookings** में बुकिंग कार्ड से शिकायत विकल्प चुनें।\n- अपनी बुकिंग चुनकर समस्या का विवरण लिखें और सबमिट करें।\n- आप **शिकायत इतिहास (Support History)** में कभी भी स्टेटस और एडमिन का जवाब देख सकते हैं।`,
+      actions: [
+        {
+          id: 'act_support_req',
+          labelEn: 'Open Care & Support',
+          labelHi: 'केयर डेस्क खोलें',
+          type: 'create_support_request',
+          payload: '',
+          icon: 'AlertCircle',
+        },
+      ],
+    }
+  }
+
   // 1. Electrical Issues
   if (query.includes('electric') || query.includes('mcb') || query.includes('spark') || query.includes('fan') || query.includes('बिजली') || query.includes('पंखा')) {
     return {
@@ -246,6 +304,63 @@ function matchWorkerRule(query: string, liveContext?: AILiveContext | null): Fal
       textEn: `📝 **Additional Charges Workflow**\n\n- If you find that the repair requires extra work or replacement parts:\n  1. Discuss it clearly with the customer first.\n  2. Tap **Request Extra Charge** on your job card in the dashboard.\n  3. Enter the amount and reason.\n  4. The customer must approve it in their app before you finalize the job.\n- This protects you and ensures customer trust.`,
       textHi: `📝 **अतिरिक्त शुल्क प्रक्रिया**\n\n- यदि मरम्मत में अतिरिक्त कार्य या नए पार्ट्स की आवश्यकता हो:\n  1. पहले ग्राहक को स्पष्ट रूप से समझाएँ।\n  2. डैशबोर्ड में जॉब कार्ड पर **अतिरिक्त शुल्क अनुरोध** पर टैप करें।\n  3. राशि और कारण दर्ज करें।\n  4. काम पूरा करने से पहले ग्राहक को अपने ऐप में इसे स्वीकृत करना होगा।\n- इससे आपका और ग्राहक दोनों का भरोसा बना रहता है।`,
       actions: [],
+    }
+  }
+
+  // 2.1 Accept & complete booking
+  if (query.includes('accept') || query.includes('complete') || query.includes('स्वीकार') || query.includes('पूरी करें')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `Here is how to accept and complete a booking:\n\n- **Send a fair quote:** Check incoming customer requests in **Worker Dashboard** and submit an accurate quote.\n- **Do the job:** Once the customer accepts your quote, contact them via Call or WhatsApp and complete the repair cleanly.\n- **Mark complete:** Only mark the job complete after the customer inspects the work, then confirm cash received in-app.`,
+      textHi: `बुकिंग स्वीकार करने और पूरा करने की प्रक्रिया:\n\n- **कोटेशन भेजें:** **Worker Dashboard** में ग्राहक के अनुरोध देखें और सही व स्पष्ट कोटेशन भेजें।\n- **काम पूरा करें:** ग्राहक द्वारा कोटेशन चुनने के बाद Call या WhatsApp से संपर्क कर काम अच्छे से पूरा करें।\n- **कम्प्लीट मार्क करें:** ग्राहक को काम दिखाकर संतुष्ट करने के बाद ही बुकिंग को पूरा (Complete) मार्क करें और कैश कन्फर्म करें।`,
+      actions: [
+        {
+          id: 'act_worker_dash',
+          labelEn: 'Open Worker Dashboard',
+          labelHi: 'कामगार डैशबोर्ड खोलें',
+          type: 'navigate',
+          payload: '/worker/dashboard',
+          icon: 'Briefcase',
+        },
+      ],
+    }
+  }
+
+  // 2.2 Confirm cash received
+  if (query.includes('cash') || query.includes('कैश') || query.includes('भुगतान')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `Follow these steps to confirm cash received:\n\n- **Verify & collect:** Let the customer verify the completed work and collect 100% of the approved final amount in cash.\n- **Confirm in dashboard:** On your job card in **Worker Dashboard**, confirm cash payment receipt in the app.\n- **Receipt generated:** Confirming cash closes the payment step and generates the digital receipt cleanly.`,
+      textHi: `कैश प्राप्त होने की पुष्टि इस प्रकार करें:\n\n- **काम की जाँच व कैश लें:** ग्राहक को पूरा काम दिखाने के बाद तय अंतिम राशि नकद (Cash) लें।\n- **ऐप में कन्फर्म करें:** **Worker Dashboard** में जॉब कार्ड पर जाकर कैश पेमेंट कन्फर्म करें।\n- **रसीद बनेगी:** कन्फर्म होते ही भुगतान पूरा माना जाएगा और डिजिटल रसीद जनरेट हो जाएगी।`,
+      actions: [
+        {
+          id: 'act_worker_dash',
+          labelEn: 'Open Worker Dashboard',
+          labelHi: 'कामगार डैशबोर्ड खोलें',
+          type: 'navigate',
+          payload: '/worker/dashboard',
+          icon: 'Briefcase',
+        },
+      ],
+    }
+  }
+
+  // 2.3 5-star reviews
+  if (query.includes('review') || query.includes('5-star') || query.includes('star') || query.includes('रिव्यू') || query.includes('स्टार')) {
+    return {
+      sourceType: 'jugnu_rule',
+      textEn: `Practical ways to earn more 5-star reviews:\n\n- **Arrive on time:** Message or call the customer via the booking card if your arrival schedule shifts.\n- **Transparent pricing:** Always request extra charges in-app before doing additional work.\n- **Clean & polite finish:** Clean up the work area and politely invite the customer to rate their experience once cash is confirmed.`,
+      textHi: `ज़्यादा 5-स्टार रिव्यू पाने के आसान तरीके:\n\n- **समय की पाबंदी:** समय पर पहुँचें या देरी होने पर बुकिंग कार्ड से कॉल/मैसेज करके पहले बता दें।\n- **स्पष्ट दाम:** किसी भी अतिरिक्त काम या पार्ट के लिए पहले ग्राहक से बात कर ऐप में अतिरिक्त चार्ज रिक्वेस्ट भेजें।\n- **सफाई और व्यवहार:** काम के बाद जगह साफ रखें, विनम्र रहें और कैश कन्फर्म होने के बाद ग्राहक से रेटिंग देने का अनुरोध करें।`,
+      actions: [
+        {
+          id: 'act_worker_reviews',
+          labelEn: 'View Worker Reviews',
+          labelHi: 'मेरे रिव्यू देखें',
+          type: 'navigate',
+          payload: '/worker/reviews',
+          icon: 'FileText',
+        },
+      ],
     }
   }
 

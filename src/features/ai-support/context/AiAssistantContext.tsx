@@ -20,27 +20,21 @@ export interface AiAssistantContextType {
 
 const AiAssistantContext = createContext<AiAssistantContextType | undefined>(undefined)
 
+function createInitialMessage(persona: AssistantPersona): ChatMessage {
+  const config = ASSISTANT_CONFIGS[persona]
+  return {
+    id: `init_${persona}_${Date.now()}`,
+    sender: 'assistant',
+    persona,
+    timestamp: new Date(),
+    textEn: config.greetingEn,
+    textHi: config.greetingHi,
+  }
+}
+
 const INITIAL_MESSAGES: Record<AssistantPersona, ChatMessage[]> = {
-  customer_booking: [
-    {
-      id: 'init_cb',
-      sender: 'assistant',
-      persona: 'customer_booking',
-      timestamp: new Date(),
-      textEn: ASSISTANT_CONFIGS.customer_booking.greetingEn,
-      textHi: ASSISTANT_CONFIGS.customer_booking.greetingHi,
-    },
-  ],
-  worker_sarathi: [
-    {
-      id: 'init_ws',
-      sender: 'assistant',
-      persona: 'worker_sarathi',
-      timestamp: new Date(),
-      textEn: ASSISTANT_CONFIGS.worker_sarathi.greetingEn,
-      textHi: ASSISTANT_CONFIGS.worker_sarathi.greetingHi,
-    },
-  ],
+  customer_booking: [createInitialMessage('customer_booking')],
+  worker_sarathi: [createInitialMessage('worker_sarathi')],
 }
 
 export function AiAssistantProvider({ children }: { children: ReactNode }) {
@@ -134,10 +128,13 @@ export function AiAssistantProvider({ children }: { children: ReactNode }) {
     if (persona) {
       setMessages(prev => ({
         ...prev,
-        [persona]: INITIAL_MESSAGES[persona],
+        [persona]: [createInitialMessage(persona)],
       }))
     } else {
-      setMessages(INITIAL_MESSAGES)
+      setMessages({
+        customer_booking: [createInitialMessage('customer_booking')],
+        worker_sarathi: [createInitialMessage('worker_sarathi')],
+      })
     }
   }, [])
 

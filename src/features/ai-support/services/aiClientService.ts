@@ -138,7 +138,41 @@ function extractContextualActions(
   const actions: ChatAction[] = []
 
   if (persona === 'customer_booking') {
-    if (q.includes('electric') || q.includes('mcb') || q.includes('spark') || q.includes('fan') || q.includes('बिजली')) {
+    if (q.includes('complaint') || q.includes('dispute') || q.includes('शिकायत') || q.includes('विवाद')) {
+      actions.push({
+        id: 'act_support_req',
+        labelEn: 'Open Care & Support',
+        labelHi: 'केयर डेस्क खोलें',
+        type: 'create_support_request',
+        payload: liveContext?.primaryBooking?.id || '',
+        icon: 'AlertCircle',
+      })
+      actions.push({
+        id: 'act_go_bookings',
+        labelEn: 'View My Bookings',
+        labelHi: 'मेरी बुकिंग्स देखें',
+        type: 'navigate',
+        payload: '/bookings',
+        icon: 'Calendar',
+      })
+    } else if (
+      q.includes('receipt') ||
+      q.includes('cash') ||
+      q.includes('payment') ||
+      q.includes('रसीद') ||
+      q.includes('कैश') ||
+      q.includes('पेमेंट') ||
+      q.includes('भुगतान')
+    ) {
+      actions.push({
+        id: 'act_go_bookings',
+        labelEn: 'Open My Bookings',
+        labelHi: 'मेरी बुकिंग्स खोलें',
+        type: 'navigate',
+        payload: '/bookings',
+        icon: 'Calendar',
+      })
+    } else if (q.includes('electric') || q.includes('mcb') || q.includes('spark') || q.includes('fan') || q.includes('बिजली')) {
       actions.push({
         id: 'act_find_electrician',
         labelEn: 'Find Electricians in Muzaffarnagar',
@@ -193,6 +227,16 @@ function extractContextualActions(
       payload: '/worker/dashboard',
       icon: 'Briefcase',
     })
+    if (q.includes('review') || q.includes('rating') || q.includes('star') || q.includes('रिव्यू') || q.includes('स्टार')) {
+      actions.push({
+        id: 'act_worker_reviews',
+        labelEn: 'View Worker Reviews',
+        labelHi: 'मेरे रिव्यू देखें',
+        type: 'navigate',
+        payload: '/worker/reviews',
+        icon: 'FileText',
+      })
+    }
   }
 
   return actions
