@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { useAiAssistant } from '../context/AiAssistantContext'
 import { useAuth } from '@/context/AuthContext'
 import { ASSISTANT_CONFIGS } from '@/services/ai/domainKnowledge'
+import { ChatMessageContent } from './ChatMessageContent'
 import { AssistantPersona, ChatAction } from '../types'
 import {
   X,
@@ -267,14 +268,8 @@ export default function AiAssistantModal() {
                       : 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 rounded-tl-none border border-slate-200 dark:border-zinc-700 shadow-xs'
                   }`}
                 >
-                  {/* Message body with basic markdown line formatting */}
-                  <div className="whitespace-pre-line space-y-1.5">
-                    {messageText.split('\n\n').map((para, idx) => (
-                      <p key={idx} className="break-words">
-                        {para}
-                      </p>
-                    ))}
-                  </div>
+                  {/* Message body with mobile-safe markdown and sanitization */}
+                  <ChatMessageContent text={messageText} />
 
                   {/* Actions / Deep-Links */}
                   {msg.actions && msg.actions.length > 0 && (

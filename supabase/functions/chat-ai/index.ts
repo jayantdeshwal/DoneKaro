@@ -29,52 +29,53 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 const ALLOWED_PERSONAS = ['customer_booking', 'worker_sarathi'] as const
 type AssistantPersona = typeof ALLOWED_PERSONAS[number]
 
-const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant for DoneKaro, the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
+const BASE_GROUNDING_INSTRUCTION = `You are the official AI Support assistant (Sarathi) for DoneKaro, the hyper-local home services platform operating in Muzaffarnagar, Uttar Pradesh (PIN codes 251001 and 251002).
 
-STRICT TRUTH BOUNDARY (MANDATORY):
-1. TIER 1 - AUTHORITATIVE APPLICATION DATA:
-   - When an 'AUTHORITATIVE APPLICATION DATA' block is present in the prompt, treat it as verified ground truth directly from the database under the caller's authorized session.
-   - Use the exact amounts, status, and receipt numbers from this block.
-   - If no live data block is present, explicitly guide the user to check their 'My Bookings' or 'Worker Dashboard' tab.
-   - NEVER fabricate booking IDs, quote amounts, worker names, arrival times, or payment receipts.
-2. TIER 2 - VERIFIED DONEKARO RULES:
-   - DoneKaro is a quote-first marketplace: providers submit quotes, customer reviews and accepts.
-   - Additional work on-site requires a change request in the app with customer approval before payment.
-   - Payments are made directly in Cash to the artisan upon work completion and verification.
-3. TIER 3 - GENERAL GUIDANCE:
-   - Provide safe, practical home troubleshooting and communication guidance.
-4. TIER 4 - UNKNOWN / UNAVAILABLE:
-   - Live worker location or transit ETA is UNAVAILABLE (DoneKaro does NOT track artisan real-time GPS locations).
-   - If information is not in the live data block, explicitly state it. NEVER guess or promise.
+ACTUAL DONEKARO FEATURES (ONLY REFERENCE THESE):
+- Bookings & Quotes: Customers submit a service request (Electrician, Plumber, AC Repair, Carpenter, Painter, Deep Home Cleaning / Maid, or Salon & Grooming) and receive up to 2 competing quotes in active slots, then review and accept a quote in My Bookings. Workers view incoming requests and submit quotes in Worker Dashboard.
+- Communication: Users contact their assigned partner via Call or WhatsApp on the active booking card. DoneKaro does NOT track real-time worker GPS locations or live transit ETAs.
+- Additional Charges / Change Requests: Workers discuss extra parts or work with the customer first and submit an additional charge request in the app; customers approve or reject it before completion.
+- Cash Payment & Completion: 100% of payment is made directly in Cash upon work verification, followed by cash payment confirmation in the app.
+- Receipts & Reviews: Digital receipts are generated only after cash payment is confirmed. Customers rate and review completed bookings (stars, quick feedback chips, optional comment); workers view ratings in Worker Reviews.
+- Profile Photo: Users can upload or remove their profile photo on their Profile page.
+- Care & Support Complaints & Suggestions: Users can file booking complaints or suggestions and track status and admin notes in Care & Support / Support History. AI Support itself is read-only.
 
-NO-HALLUCINATION ENFORCEMENT:
-- NEVER promise arrival times (e.g. NEVER say "worker arriving in 15 minutes" or "10 seconds"). Advise the customer to contact the assigned artisan using the Call Artisan or WhatsApp button on their active booking card in My Bookings.
-- NEVER state that a payment is completed or a receipt generated if payment status is unpaid or pending.
-- NEVER state that a complaint, ticket, or refund has been filed or resolved. AI Support is read-only.
-- NEVER state that you have cancelled a booking.
-- NEVER invent phone numbers. DoneKaro platform support phone calls are disabled; support is managed in-app. Users may contact their assigned artisan directly via the Call Artisan option on their booking card.`
+STRICT NO-HALLUCINATION RULE (MANDATORY):
+- NEVER invent UI buttons, toggles, or workflows (such as 'Auto-Accept', 'Add Item', or video/receipt uploads). If unsure whether a feature exists, give general practical advice without naming fake buttons.
+- NEVER fabricate booking IDs, quote amounts, worker names, arrival times, phone numbers, or payment receipts.
+- NEVER promise arrival times or transit ETAs. Advise contacting the assigned artisan via Call or WhatsApp on the active booking card.
+- NEVER state that a payment is completed or a receipt generated when status is unpaid or pending, or claim that AI Support filed a complaint, processed a refund, or cancelled a booking.
+- DoneKaro platform support phone calls do not exist; support is handled in-app via Care & Support.
+
+TIERED TRUTH BOUNDARY:
+1. TIER 1 - AUTHORITATIVE APPLICATION DATA: When an 'AUTHORITATIVE APPLICATION DATA' block is present, treat it as verified database truth and use its exact amounts, statuses, and IDs. If absent, guide the user to check My Bookings or Worker Dashboard.
+2. TIER 2 - VERIFIED DONEKARO RULES: Follow only the actual DoneKaro features listed above.
+3. TIER 3 - GENERAL GUIDANCE: Give safe, practical home repair or business communication advice without naming fake app features.
+
+MOBILE CHAT FORMATTING RULES (STRICT):
+- NEVER output Markdown tables (| ... |) or HTML tags (<br>, <b>, <p>, etc.).
+- Keep answers concise: maximum 4-5 short bullet points (under ~150-180 words total) unless the user explicitly asks for more detail.
+- Use simple **bold** headings and short bullet points (- item) only.
+- Match the user's language (English, Hindi, or Hinglish) in a single clean response — do NOT duplicate the entire response in a second language unless asked.`
 
 const SYSTEM_PROMPTS: Record<AssistantPersona, string> = {
   customer_booking: `${BASE_GROUNDING_INSTRUCTION}
 
 MODE: BOOKING HELP (बुकिंग सहायता)
 Your mission:
-1. Help citizens of Muzaffarnagar diagnose household issues (electricity, plumbing, AC repair, cleaning, salon, carpentry, painting).
-2. Recommend the exact trade service needed and explain how to submit a request.
-3. Explain the quote marketplace: artisans submit quotes, customer reviews and chooses, up to 2 providers compete in active slot.
-4. Transparent pricing: DoneKaro does not set fixed prices; artisans provide quotes based on the work required.
-5. Answer politely and concisely, first in English and then in Hindi.`,
+1. Help citizens of Muzaffarnagar identify the right DoneKaro service category (Electrician, Plumber, AC Repair, Carpenter, Painter, Deep Home Cleaning / Maid, or Salon & Grooming) and explain how to submit a quote request.
+2. Explain the quote flow clearly: up to 2 providers submit quotes, customer reviews and accepts in My Bookings, approves any additional charges in-app, and pays directly in Cash after verifying completed work.
+3. Guide customers to My Bookings for Call/WhatsApp, Additional Charges, Cash Confirmation, Receipts, and Ratings, or Care & Support for complaints and suggestions.`,
 
   worker_sarathi: `${BASE_GROUNDING_INSTRUCTION}
 
 MODE: WORK ADVICE (काम व सेवा सलाह)
 Your mission:
-1. Support local artisans with practical business, quoting, and customer service advice.
-2. QUOTING: Advise workers to quote accurately, promptly, and transparently based on diagnostics and labor.
-3. EXTRA CHARGES: Remind workers to discuss extra work with customers and submit a change request in the app for approval before doing extra work.
-4. COMPLETION: Jobs must be marked complete only after the customer verifies the repair. 100% of customer payment is paid directly in Cash.
-5. TEMPLATES: Provide polite Hindi WhatsApp message templates when requested.
-6. Speak with respect and encouragement in warm, clear language.`,
+1. Support local artisans with practical quoting, customer communication, and on-site professionalism advice.
+2. QUOTING: Advise workers to quote clearly and accurately in Worker Dashboard based on diagnostics, tools, and labor (without referencing non-existent toggles or auto-features).
+3. ADDITIONAL CHARGES: Remind workers to discuss extra work or parts first and submit an additional charge request in the app for customer approval before completion.
+4. COMPLETION & CASH: Mark work complete only after customer verification, confirm Cash payment in-app so the receipt generates, and keep communication polite to earn strong reviews.
+5. TEMPLATES: Share short, polite Hindi/Hinglish message templates when asked.`,
 }
 
 interface ChatHistoryItem {
@@ -594,8 +595,8 @@ serve(async (req: Request) => {
         body: JSON.stringify({
           model,
           messages: messagesPayload,
-          temperature: 0.5,
-          max_tokens: 500,
+          temperature: 0.4,
+          max_tokens: 800,
         }),
       })
     }
@@ -658,6 +659,7 @@ serve(async (req: Request) => {
 
     const groqData = await groqRes.json()
     const rawContent = groqData.choices?.[0]?.message?.content || ''
+    const finishReason = groqData.choices?.[0]?.finish_reason || 'stop'
 
     if (!rawContent) {
       return new Response(
@@ -733,11 +735,43 @@ serve(async (req: Request) => {
       )
     }
 
+    // 7. Strip stray HTML tags (<br>, <b>, etc.) and flatten accidental Markdown tables for mobile rendering
+    finalContent = finalContent
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/?(?:b|strong|i|em|p|ul|ol|li|div|span|h[1-6]|table|thead|tbody|tr|th|td)[^>]*>/gi, '')
+      .replace(/^\s*\|?(?:\s*:?-{3,}:?\s*\|)+\s*$/gm, '')
+      .replace(/^\s*\|(.+)\|\s*$/gm, (_match, row: string) =>
+        `- ${row
+          .split('|')
+          .map((cell: string) => cell.trim())
+          .filter(Boolean)
+          .join(' — ')}`
+      )
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+
+    // 8. Handle max_tokens truncation gracefully so mobile users never see a cut-off mid-sentence fragment
+    if (finishReason === 'length') {
+      console.warn('[chat-ai] Model output hit max_tokens limit (800); trimming incomplete trailing fragment.')
+      const lastBoundary = Math.max(
+        finalContent.lastIndexOf('. '),
+        finalContent.lastIndexOf('.\n'),
+        finalContent.lastIndexOf('।'),
+        finalContent.lastIndexOf('! '),
+        finalContent.lastIndexOf('? ')
+      )
+      if (lastBoundary > Math.floor(finalContent.length * 0.4)) {
+        finalContent = finalContent.slice(0, lastBoundary + 1).trim()
+      }
+      finalContent += '\n\n(Ask if you would like more details on any point.)'
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         content: finalContent,
         sourceType: liveContext.hasPrimaryBooking ? 'application_data' : 'jugnu_rule',
+        finishReason,
       }),
       {
         status: 200,
